@@ -1,0 +1,10 @@
+.claude/
+website/
+tracker/
+README.MD
+LICENSE
+SECURITY.MD
+
+planning/
+*.bak
+__pycache__/

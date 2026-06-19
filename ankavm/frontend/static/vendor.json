@@ -1,0 +1,47 @@
+﻿{
+  "note": "Vendored JS libraries â€” all sourced from official npm packages via jsDelivr CDN. Source maps point to CDN for browser DevTools.",
+  "libraries": [
+    {
+      "file": "xterm.min.js",
+      "package": "xterm",
+      "version": "5.3.0",
+      "license": "MIT",
+      "npm": "https://www.npmjs.com/package/xterm/v/5.3.0",
+      "source": "https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js",
+      "sourcemap": "https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js.map"
+    },
+    {
+      "file": "addon-fit.min.js",
+      "package": "xterm-addon-fit",
+      "version": "0.8.0",
+      "license": "MIT",
+      "npm": "https://www.npmjs.com/package/xterm-addon-fit/v/0.8.0",
+      "source": "https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js",
+      "sourcemap": "https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js.map"
+    },
+    {
+      "file": "chart.umd.min.js",
+      "package": "chart.js",
+      "version": "4.4.4",
+      "license": "MIT",
+      "npm": "https://www.npmjs.com/package/chart.js/v/4.4.4",
+      "source": "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js",
+      "sourcemap": "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js.map"
+    },
+    {
+      "file": "socket.io.min.js",
+      "package": "socket.io-client",
+      "version": "4.7.5",
+      "license": "MIT",
+      "npm": "https://www.npmjs.com/package/socket.io-client/v/4.7.5",
+      "source": "https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js",
+      "sourcemap": "https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js.map"
+    }
+  ]
+}
+
+
+
+
+
+

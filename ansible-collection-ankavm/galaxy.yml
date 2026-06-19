@@ -1,0 +1,29 @@
+﻿---
+namespace: ankavm
+name: kvm
+version: 1.0.0
+readme: README.md
+authors:
+  - ANKAVM <root@ankavm.local>
+description: Ansible collection for ANKAVM Hypervisor â€” manage VMs, networks, storage via REST API
+license:
+  - MIT
+tags:
+  - virtualization
+  - kvm
+  - qemu
+  - libvirt
+  - hypervisor
+  - vm
+  - ankavm
+dependencies: {}
+repository: https://github.com/ShinnAsukha/ankavm-hypervisor
+documentation: https://ankavm.local/docs/
+homepage: https://ankavm.local
+issues: https://github.com/ShinnAsukha/ankavm-hypervisor/issues
+
+
+
+
+
+

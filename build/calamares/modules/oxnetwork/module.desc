@@ -1,0 +1,5 @@
+---
+type:      "viewmodule"
+name:      "oxnetwork"
+interface: "qml"
+load:      "oxnetwork.qml"

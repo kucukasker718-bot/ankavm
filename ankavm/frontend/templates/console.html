@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ankavm – VM Konsol</title>
+  <link rel="icon" type="image/png" href="/static/img/sadeceikon.png">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0e17;
+      --surface: #0f1521;
+      --panel: #141c2e;
+      --border: rgba(255,255,255,0.07);
+      --accent: #3d82f0;
+      --accent2: #00d4ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --text: #e6edf3;
+      --muted: #7d8590;
+      --radius: 8px;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP TOOLBAR ─────────────────────────────────────────────── */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .brand img {
+      width: 30px; height: 30px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(0,212,255,0.5));
+    }
+    .brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3d82f0, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.5px;
+    }
+
+    .divider-v {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+    }
+
+    .vm-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(63,185,80,0.12);
+      border: 1px solid rgba(63,185,80,0.25);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green);
+      transition: all 0.3s;
+    }
+    .status-badge.stopped {
+      background: rgba(110,118,129,0.12);
+      border-color: rgba(110,118,129,0.25);
+      color: var(--muted);
+    }
+    .status-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-badge.stopped .dot { animation: none; box-shadow: none; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .vm-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .vm-label strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .spacer { flex: 1; }
+
+    /* ── TOOLBAR ACTIONS ─────────────────────────────────────────── */
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tb-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tb-btn:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .tb-btn svg { width: 14px; height: 14px; opacity: 0.8; }
+
+    .tb-btn.accent {
+      background: rgba(61,130,240,0.12);
+      border-color: rgba(61,130,240,0.3);
+      color: var(--accent2);
+    }
+    .tb-btn.accent:hover {
+      background: rgba(61,130,240,0.2);
+      border-color: rgba(61,130,240,0.5);
+    }
+
+    .tb-btn.danger {
+      background: rgba(248,81,73,0.08);
+      border-color: rgba(248,81,73,0.2);
+      color: var(--red);
+    }
+    .tb-btn.danger:hover {
+      background: rgba(248,81,73,0.15);
+      border-color: rgba(248,81,73,0.4);
+    }
+
+    .tb-btn.ghost {
+      border-color: transparent;
+      color: var(--muted);
+      padding: 6px 8px;
+    }
+    .tb-btn.ghost:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      border-color: var(--border);
+    }
+
+    /* ── CONSOLE AREA ────────────────────────────────────────────── */
+    .console-wrap {
+      flex: 1;
+      position: relative;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #novnc-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+    }
+
+    /* ── LOADING OVERLAY ─────────────────────────────────────────── */
+    #loadingOverlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, #0f1521 0%, #0a0e17 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 10;
+      transition: opacity 0.4s ease;
+    }
+    #loadingOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ox-spinner {
+      position: relative;
+      width: 56px;
+      height: 56px;
+    }
+    .ox-spinner .ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+    }
+    .ox-spinner .ring-outer {
+      border-top-color: var(--accent2);
+      animation: spin 1.1s linear infinite;
+    }
+    .ox-spinner .ring-inner {
+      inset: 10px;
+      border-top-color: var(--accent);
+      border-right-color: var(--accent);
+      animation: spin 0.8s linear infinite reverse;
+    }
+    .ox-spinner .ring-dot {
+      inset: 22px;
+      background: var(--accent2);
+      border: none;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .load-text {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+    .load-text strong { color: var(--accent2); }
+
+    .load-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.4;
+      transition: opacity 0.4s;
+    }
+    .step-item.active { opacity: 1; color: var(--accent2); }
+    .step-item.done { opacity: 0.6; color: var(--green); }
+    .step-icon { width: 14px; text-align: center; }
+
+    /* ── STATUS BAR ──────────────────────────────────────────────── */
+    .statusbar {
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      height: 26px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .sb-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .sb-item svg { width: 11px; height: 11px; }
+    #sb-latency { transition: color 0.3s; }
+
+    /* ── KEYBOARD SHORTCUT HINT ──────────────────────────────────── */
+    .kbd-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+    kbd {
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      font-family: inherit;
+      font-size: 9px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── TOOLBAR ───────────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <a class="brand" href="/" target="_blank" title="Ankavm Panel">
+      <img src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a35c712&is=6a347592&hm=f8dc87cf2a64668757d78438072600f0ae493fca110b7545fc6ff69ab68c34fc&" alt="Ankavm" onerror="this.style.display='none'">
+      <span class="brand-name">Ankavm</span>
+    </a>
+
+    <div class="divider-v"></div>
+
+    <div class="vm-info">
+      <div class="status-badge" id="statusBadge">
+        <div class="dot"></div>
+        <span id="statusText">Çalışıyor</span>
+      </div>
+      <div class="vm-label">
+        Konsol › <strong id="vmNameLabel">Yükleniyor…</strong>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="toolbar-actions">
+      <span class="kbd-hint">
+        <kbd>Alt</kbd>+<kbd>F</kbd> Tam ekran
+      </span>
+
+      <div class="divider-v"></div>
+
+      <button class="tb-btn accent" onclick="toggleFullscreen()" title="Tam ekran (Alt+F)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1.5 1h4v1.5h-2.5v2.5h-1.5zm9 0h4v4h-1.5v-2.5h-2.5zm-9 9h1.5v2.5h2.5v1.5h-4zm10.5 2.5v-2.5h1.5v4h-4v-1.5z"/>
+        </svg>
+        Tam Ekran
+      </button>
+
+      <button class="tb-btn" onclick="openPasteModal()" title="Panoya yapıştır (izin gerekmez)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+          <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+        </svg>
+        Yapıştır
+      </button>
+
+      <button class="tb-btn danger" onclick="sendCtrlAltDel()" title="Ctrl+Alt+Del gönder">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm.75-8.25h-1.5v4.5l3.5 2.1.75-1.23-2.75-1.63z"/>
+        </svg>
+        Ctrl+Alt+Del
+      </button>
+
+      <button class="tb-btn" onclick="takeScreenshot()" title="Ekran görüntüsü al">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M6 1a1 1 0 0 0-.894.553L4.382 3H2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2.382l-.724-1.447A1 1 0 0 0 10 1H6zm4 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+        </svg>
+      </button>
+
+      <div class="divider-v"></div>
+
+      <button class="tb-btn ghost" onclick="window.close()" title="Konsolu kapat">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── CONSOLE AREA ──────────────────────────────────────────────── -->
+  <div class="console-wrap">
+    <div id="loadingOverlay">
+      <div class="ox-spinner">
+        <div class="ring ring-outer"></div>
+        <div class="ring ring-inner"></div>
+        <div class="ring ring-dot"></div>
+      </div>
+      <div class="load-text">Konsol bağlantısı kuruluyor…</div>
+      <div class="load-steps">
+        <div class="step-item active" id="step1">
+          <span class="step-icon"></span>
+          <span>Kimlik doğrulanıyor</span>
+        </div>
+        <div class="step-item" id="step2">
+          <span class="step-icon"></span>
+          <span>VNC sunucusuna bağlanılıyor</span>
+        </div>
+        <div class="step-item" id="step3">
+          <span class="step-icon"></span>
+          <span>Ekran akışı başlatılıyor</span>
+        </div>
+      </div>
+    </div>
+    <iframe id="novnc-iframe" allowfullscreen></iframe>
+  </div>
+
+  <!-- ── STATUS BAR ────────────────────────────────────────────────── -->
+  <div class="statusbar">
+    <div class="sb-item">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v1h14V4a1 1 0 0 0-1-1H2zm13 3H1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6z"/>
+      </svg>
+      <span id="sb-vmid">VM: —</span>
+    </div>
+    <div class="sb-item">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+        <path d="M7.5 5.5a.5.5 0 0 1 1 0v3.793l1.854 1.853a.5.5 0 0 1-.708.708l-2-2a.5.5 0 0 1-.146-.354V5.5z"/>
+      </svg>
+      <span id="sb-time">—</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="sb-item">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1H0V4zm0 3h16v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V7zm3 2a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1H3zm0 2a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H3z"/>
+      </svg>
+      <span>noVNC 1.4</span>
+    </div>
+    <div class="sb-item">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M14.763.075A.5.5 0 0 1 15 .5v15a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V14h-1v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V10a.5.5 0 0 1 .342-.474L6 7.64V4.5a.5.5 0 0 1 .276-.447l8-4a.5.5 0 0 1 .487.022zM6 8.694 1 10.36V15h5V8.694zM7 15h2v-1.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5V15h2V1.309l-7 3.5V15z"/>
+      </svg>
+      <span id="sb-protocol">—</span>
+    </div>
+  </div>
+
+  <script>
+    const vmId = {{ vm_id | tojson }}; /* OXW-2026-SEC-006: tojson = XSS-safe JS literal */
+
+    // ── Auth: vnc_token (WiseCP/WHMCS) veya JWT (native panel) ──────────────
+    const _urlParams = new URLSearchParams(window.location.search);
+    const _vncToken = _urlParams.get("vnc_token");
+    const _jwtToken = localStorage.getItem("ankavm_token") || localStorage.getItem("adaos_token");
+
+    if (!_vncToken && !_jwtToken) { window.location.href = "/login"; }
+
+    // ── Status bar clock ─────────────────────────────────────────────────────
+    document.getElementById("sb-vmid").textContent = "VM: " + vmId;
+    function _clockTick() {
+      document.getElementById("sb-time").textContent =
+        new Date().toLocaleTimeString("tr-TR", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+    }
+    _clockTick();
+    setInterval(_clockTick, 1000);
+
+    // ── Step progress helpers ─────────────────────────────────────────────────
+    function stepDone(id) {
+      const el = document.getElementById("step" + id);
+      if (el) { el.classList.remove("active"); el.classList.add("done"); el.querySelector(".step-icon").textContent = ""; }
+    }
+    function stepActive(id) {
+      const el = document.getElementById("step" + id);
+      if (el) el.classList.add("active");
+    }
+
+    // ── Hide loading overlay ──────────────────────────────────────────────────
+    function hideLoading() {
+      const ov = document.getElementById("loadingOverlay");
+      ov.classList.add("hidden");
+      setTimeout(() => { ov.style.display = "none"; }, 450);
+    }
+
+    // ── Status badge ─────────────────────────────────────────────────────────
+    function setStatus(state) {
+      const badge = document.getElementById("statusBadge");
+      const txt = document.getElementById("statusText");
+      if (state === "running") {
+        badge.className = "status-badge";
+        txt.textContent = "Çalışıyor";
+      } else {
+        badge.className = "status-badge stopped";
+        txt.textContent = "Durdurulmuş";
+      }
+    }
+
+    // ── Main ─────────────────────────────────────────────────────────────────
+    async function initConsole() {
+      const isHttps = location.protocol === "https:";
+      try {
+        stepDone(1);
+        stepActive(2);
+
+        if (_vncToken) {
+          let vmName = vmId, vmState = "unknown";
+          try {
+            const infoRes = await fetch(
+              "/api/provision/" + vmId + "/console-info?vnc_token=" + encodeURIComponent(_vncToken)
+            );
+            if (infoRes.ok) {
+              const info = await infoRes.json();
+              vmName = info.name || vmId;
+              vmState = info.state || "unknown";
+            }
+          } catch (_) {}
+
+          document.getElementById("vmNameLabel").textContent = vmName;
+          setStatus(vmState);
+
+          const wsPath = "ws/vnc/" + vmId + "?vnc_token=" + encodeURIComponent(_vncToken);
+          const port = location.port || (isHttps ? "443" : "80");
+          const novncUrl = "/novnc/vnc.html?" +
+            "host=" + encodeURIComponent(location.hostname) +
+            "&port=" + port +
+            "&path=" + encodeURIComponent(wsPath) +
+            "&encrypt=" + (isHttps ? "1" : "0") +
+            "&autoconnect=1&resize=scale&show_dot=1";
+
+          stepDone(2); stepActive(3);
+          document.getElementById("sb-protocol").textContent = isHttps ? "WSS" : "WS";
+
+          const iframe = document.getElementById("novnc-iframe");
+          iframe.src = novncUrl;
+          iframe.style.display = "block";
+          iframe.onload = () => { _injectVncKeyHelper(iframe); stepDone(3); setTimeout(hideLoading, 800); };
+          setTimeout(hideLoading, 6000);
+          return;
+        }
+
+        // JWT flow
+        const infoRes = await fetch("/api/vms/" + vmId + "/console", {
+          headers: { Authorization: "Bearer " + _jwtToken }
+        });
+        const info = await infoRes.json();
+
+        const vmRes = await fetch("/api/vms/" + vmId, {
+          headers: { Authorization: "Bearer " + _jwtToken }
+        });
+        const vmData = await vmRes.json();
+        const vm = vmData.vm || {};
+
+        document.getElementById("vmNameLabel").textContent = vm.name || vmId;
+        setStatus(vm.state);
+
+        await fetch("/api/vms/" + vmId + "/console/start", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + _jwtToken }
+        });
+
+        // OXW-2026-SEC-008: raw JWT'yi WS URL'sine koyma. Tek kullanımlık,
+        // 60sn ömürlü vnc_token al → URL'de o görünür (log/referer sızıntısı zararsız).
+        let _wsToken = "", _wsParam = "token";
+        try {
+          const tr = await fetch("/api/vms/" + vmId + "/vnc-token", {
+            method: "POST", headers: { Authorization: "Bearer " + _jwtToken }
+          });
+          if (tr.ok) {
+            const tj = await tr.json();
+            _wsToken = tj.token || (tj.data && tj.data.token) || "";
+            if (_wsToken) _wsParam = "vnc_token";
+          }
+        } catch (_) {}
+        if (!_wsToken) _wsToken = _jwtToken; // fallback (eski sunucu) — yine de çalışsın
+
+        // Flask WS proxy — same host:port as the page, no websockify needed
+        const wsPath = "ws/vnc/" + vmId + "?" + _wsParam + "=" + encodeURIComponent(_wsToken);
+        const wsPort = location.port || (isHttps ? "443" : "80");
+        const novncUrl = "/novnc/vnc.html?" +
+          "host=" + encodeURIComponent(location.hostname) +
+          "&port=" + wsPort +
+          "&path=" + encodeURIComponent(wsPath) +
+          "&encrypt=" + (isHttps ? "1" : "0") +
+          "&autoconnect=1&resize=scale&show_dot=1";
+
+        stepDone(2); stepActive(3);
+        document.getElementById("sb-protocol").textContent = isHttps ? "WSS" : "WS";
+
+        const iframe = document.getElementById("novnc-iframe");
+        iframe.src = novncUrl;
+        iframe.style.display = "block";
+        iframe.onload = () => { _injectVncKeyHelper(iframe); stepDone(3); setTimeout(hideLoading, 800); };
+        setTimeout(hideLoading, 6000);
+
+      } catch (e) {
+        document.querySelector(".load-text").textContent = "Bağlantı hatası: " + e.message;
+        document.querySelector(".load-steps").style.display = "none";
+      }
+    }
+
+    function toggleFullscreen() {
+      const el = document.getElementById("novnc-iframe");
+      if (!document.fullscreenElement) {
+        (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function sendCtrlAltDel() {
+      try {
+        document.getElementById("novnc-iframe").contentWindow
+          .postMessage({ type: "ctrlAltDel" }, location.origin); /* OXW-2026-SEC-007 */
+      } catch (_) {}
+    }
+
+    function takeScreenshot() {
+      try {
+        const iframe = document.getElementById("novnc-iframe");
+        iframe.contentWindow.postMessage({ type: "screenshot" }, location.origin); /* OXW-2026-SEC-007 */
+      } catch (_) {}
+    }
+
+    // Alt+F → fullscreen
+    document.addEventListener("keydown", e => {
+      if (e.altKey && e.key === "f") { e.preventDefault(); toggleFullscreen(); }
+    });
+
+    // ── Inject key-sender into noVNC iframe (same-origin) ───────────────────────
+    // Injects a script that listens for postMessage and calls rfb.sendKey()
+    // with proper X11 keysyms — synthetic KeyboardEvent dispatch doesn't work
+    // because noVNC checks isTrusted; rfb.sendKey() bypasses that entirely.
+    function _injectVncKeyHelper(iframe) {
+      try {
+        const doc = iframe.contentDocument;
+        if (!doc || !doc.head) return;
+        const s = doc.createElement("script");
+        s.textContent = [
+          "(function(){",
+          " function getRfb(){",
+          " return window.rfb||(window.UI&&window.UI.rfb)||null;",
+          " }",
+          " window.addEventListener('message',function(ev){",
+          " if(ev.origin!==location.origin)return;",
+          " if(!ev.data||ev.data.type!=='oxware_keys')return;",
+          " var txt=ev.data.text||'';",
+          " var i=0;",
+          " function next(){",
+          " if(i>=txt.length)return;",
+          " var rfb=getRfb();",
+          " if(!rfb||typeof rfb.sendKey!=='function'){setTimeout(next,300);return;}",
+          " var ch=txt[i++];",
+          " var ks;",
+          " if(ch==='\\n'||ch==='\\r'){ks=0xff0d;}",
+          " else if(ch==='\\t'){ks=0xff09;}",
+          " else{var c=ch.charCodeAt(0);ks=(c>=0x20&&c<=0x7e)?c:(0x1000000|c);}",
+          " rfb.sendKey(ks,'',true);",
+          " rfb.sendKey(ks,'',false);",
+          " setTimeout(next,30);",
+          " }",
+          " next();",
+          " });",
+          "})();"
+        ].join("\n");
+        doc.head.appendChild(s);
+      } catch(e) { console.warn("[OXware] VNC key inject failed:", e); }
+    }
+
+    // ── Paste Modal — no clipboard permission needed ──────────────────────────
+    function openPasteModal() {
+      const existing = document.getElementById("paste-modal");
+      if (existing) { existing.remove(); return; }
+
+      const overlay = document.createElement("div");
+      overlay.id = "paste-modal";
+      overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center";
+
+      const box = document.createElement("div");
+      box.style.cssText = "background:#141c2e;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:22px 24px;width:420px;max-width:90vw;box-shadow:0 16px 48px rgba(0,0,0,.7)";
+
+      const ttl = document.createElement("div");
+      ttl.textContent = " VM'ye Yapıştır";
+      ttl.style.cssText = "font-size:14px;font-weight:700;color:#e6edf3;margin-bottom:6px";
+
+      const hint = document.createElement("div");
+      hint.textContent = "Ctrl+V ile buraya yapıştırın → Gönder'e tıklayın. İzin gerekmez.";
+      hint.style.cssText = "font-size:11px;color:#7d8590;margin-bottom:10px";
+
+      const ta = document.createElement("textarea");
+      ta.placeholder = "Metni buraya yapıştırın…";
+      ta.style.cssText = "width:100%;height:90px;box-sizing:border-box;background:#0d1117;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:9px 12px;color:#e6edf3;font-size:13px;font-family:monospace;resize:vertical;outline:none";
+      ta.addEventListener("focus", () => { ta.style.borderColor = "rgba(61,130,240,.5)"; });
+      ta.addEventListener("blur", () => { ta.style.borderColor = "rgba(255,255,255,.15)"; });
+
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;gap:8px;justify-content:flex-end;margin-top:10px";
+
+      const cBtn = document.createElement("button");
+      cBtn.textContent = "İptal";
+      cBtn.style.cssText = "padding:7px 16px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#e6edf3;cursor:pointer;font-size:12px";
+      cBtn.onclick = () => overlay.remove();
+
+      const sBtn = document.createElement("button");
+      sBtn.textContent = "Gönder →";
+      sBtn.style.cssText = "padding:7px 18px;border-radius:7px;border:none;background:#3d82f0;color:#fff;cursor:pointer;font-size:12px;font-weight:600";
+      sBtn.onclick = () => {
+        const text = ta.value;
+        if (text) sendTextToVNC(text);
+        overlay.remove();
+      };
+
+      ta.addEventListener("keydown", e => {
+        if (e.ctrlKey && e.key === "Enter") sBtn.click();
+      });
+
+      row.append(cBtn, sBtn);
+      box.append(ttl, hint, ta, row);
+      overlay.append(box);
+      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+      document.body.appendChild(overlay);
+      setTimeout(() => ta.focus(), 30);
+    }
+
+    function sendTextToVNC(text) {
+      // postMessage → injected script in iframe calls rfb.sendKey() with X11 keysyms
+      document.getElementById("novnc-iframe").contentWindow
+        .postMessage({ type: "oxware_keys", text: text }, location.origin); /* OXW-2026-SEC-007 */
+    }
+
+    initConsole();
+  </script>
+</body>
+</html>

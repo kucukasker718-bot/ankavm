@@ -1,0 +1,158 @@
+# OXware Hypervisor AppArmor Profile
+# Install: sudo cp kernel/apparmor/oxware /etc/apparmor.d/opt.oxware.backend.app
+#          sudo apparmor_parser -r /etc/apparmor.d/opt.oxware.backend.app
+#          sudo aa-enforce /etc/apparmor.d/opt.oxware.backend.app
+#
+# Test (complain mode first): sudo aa-complain /etc/apparmor.d/opt.oxware.backend.app
+# Check logs: sudo journalctl -f | grep apparmor
+
+#include <tunables/global>
+
+profile oxware /opt/oxware/venv/bin/python3 flags=(attach_disconnected,mediate_deleted) {
+
+  #include <abstractions/base>
+  #include <abstractions/python>
+  #include <abstractions/nameservice>
+  #include <abstractions/openssl>
+
+  # ── Capabilities ──────────────────────────────────────────────────────────
+  # net_admin: libvirt network management, nftables, iptables
+  # sys_ptrace: virsh console / qemu guest-agent
+  # dac_override: read libvirt socket owned by root/libvirt
+  # setuid/setgid: NOT granted — oxware runs as root already
+  capability net_admin,
+  capability net_raw,
+  capability sys_ptrace,
+  capability dac_override,
+  capability dac_read_search,
+  capability sys_admin,         # libvirt XML inject, mount namespaces
+  capability kill,              # send signals to managed qemu processes
+  capability fowner,
+  capability fsetid,
+
+  # ── Network ───────────────────────────────────────────────────────────────
+  network inet  stream,
+  network inet6 stream,
+  network unix  stream,
+  network unix  dgram,
+  network netlink raw,          # nftables netlink
+  network packet raw,           # nftables packet processing
+
+  # ── OXware application files ──────────────────────────────────────────────
+  /opt/oxware/**                r,
+  /opt/oxware/venv/bin/**       ix,
+  /opt/oxware/venv/lib/**       r,
+  /opt/oxware/oxware/**         r,
+  /opt/oxware/oxware/backend/app.py r,
+
+  # ── Config & data ─────────────────────────────────────────────────────────
+  /etc/oxware/                  r,
+  /etc/oxware/**                rw,
+  /var/lib/oxware/              r,
+  /var/lib/oxware/**            rw,
+  /var/log/oxware/              r,
+  /var/log/oxware/**            rw,
+  /tmp/oxware*                  rw,
+  /tmp/                         r,
+
+  # ── libvirt / KVM ─────────────────────────────────────────────────────────
+  /run/libvirt/                 r,
+  /run/libvirt/**               rw,
+  /var/run/libvirt/             r,
+  /var/run/libvirt/**           rw,
+  /var/lib/libvirt/             r,
+  /var/lib/libvirt/**           rw,
+  /var/lib/libvirt/images/      rw,
+  /var/lib/libvirt/images/**    rw,
+  /var/lib/libvirt/boot/        r,
+  /var/lib/libvirt/boot/**      r,
+  /dev/kvm                      rw,
+  /dev/vhost-net                rw,
+  /dev/net/tun                  rw,
+  /dev/tap*                     rw,
+  /sys/devices/system/cpu/**    r,
+  /sys/class/net/**             r,
+  /sys/bus/pci/**               r,
+  /proc/sys/net/**              r,
+
+  # ── QEMU / swtpm binaries (execute, not confined by this profile) ─────────
+  /usr/bin/qemu-system-x86_64   ix,
+  /usr/bin/qemu-system-aarch64  ix,
+  /usr/bin/qemu-img             ix,
+  /usr/bin/qemu-nbd             ix,
+  /usr/sbin/swtpm               ix,
+  /usr/bin/virsh                ix,
+  /usr/sbin/libvirtd            ix,
+  /usr/bin/nft                  ix,
+  /usr/sbin/iptables            ix,
+  /usr/sbin/ip6tables           ix,
+  /usr/sbin/ip                  ix,
+  /usr/bin/rsync                ix,
+  /usr/bin/ssh                  ix,
+  /usr/bin/openssl              ix,
+  /usr/bin/python3*             ix,
+  /usr/bin/python3              ix,
+
+  # ── System reads ──────────────────────────────────────────────────────────
+  /proc/*/net/**                r,
+  /proc/meminfo                 r,
+  /proc/cpuinfo                 r,
+  /proc/loadavg                 r,
+  /proc/uptime                  r,
+  /proc/stat                    r,
+  /proc/*/stat                  r,
+  /proc/*/status                r,
+  /proc/*/cmdline               r,
+  /proc/*/exe                   r,
+  /proc/*/maps                  r,
+  /proc/*/fd/                   r,
+  /proc/*/cgroup                r,
+  /sys/kernel/mm/hugepages/**   rw,
+  /sys/devices/system/node/**   r,
+  /sys/block/**                 r,
+  /sys/class/block/**           r,
+
+  # ── SSL certs ─────────────────────────────────────────────────────────────
+  /etc/ssl/certs/**             r,
+  /etc/ssl/private/             r,
+  /etc/ssl/private/**           r,
+  /etc/ca-certificates/**       r,
+  /usr/share/ca-certificates/** r,
+
+  # ── Python stdlib & site-packages ─────────────────────────────────────────
+  /usr/lib/python3*/            r,
+  /usr/lib/python3/**           r,
+  /usr/local/lib/python3*/      r,
+  /usr/local/lib/python3/**     r,
+
+  # ── noVNC / static files ──────────────────────────────────────────────────
+  /opt/oxware/novnc/            r,
+  /opt/oxware/novnc/**          r,
+
+  # ── ISO / disk images ────────────────────────────────────────────────────
+  /var/lib/oxware/isos/         rw,
+  /var/lib/oxware/isos/**       rw,
+  /var/lib/oxware/disks/        rw,
+  /var/lib/oxware/disks/**      rw,
+  /var/lib/oxware/backups/      rw,
+  /var/lib/oxware/backups/**    rw,
+  /var/lib/oxware/templates/    rw,
+  /var/lib/oxware/templates/**  rw,
+  /var/lib/swtpm/               rw,
+  /var/lib/swtpm/**             rw,
+
+  # ── DENY sensitive paths (explicit deny) ──────────────────────────────────
+  deny /etc/shadow              rw,
+  deny /etc/gshadow             rw,
+  deny /root/.ssh/              rw,
+  deny /home/**/.ssh/           rw,
+  deny /proc/sysrq-trigger      w,
+  deny /proc/*/mem              w,
+  deny /sys/firmware/           w,
+  deny /sys/kernel/security/    w,
+
+  # ── Unix sockets ──────────────────────────────────────────────────────────
+  unix (send, receive, connect) peer=(label=unconfined),
+  /run/user/*/                  rw,
+  /run/user/**                  rw,
+}
