@@ -1,0 +1,193 @@
+# ─────────────────────────────────────────────
+#  AnkaVM Hypervisor — .gitignore
+# ─────────────────────────────────────────────
+
+# ── Python ────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.env/
+.env.local
+.env.*.local
+
+# ── Node / Frontend ───────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+*.lock
+dist/
+.cache/
+.parcel-cache/
+
+# ── Logs ──────────────────────────────────────
+*.log
+logs/
+/var/log/
+log/
+*.out
+*.err
+nohup.out
+
+# ── Sistem / Runtime verileri ─────────────────
+/var/lib/ankavm/
+/etc/ankavm/
+/opt/ankavm/
+*.pid
+*.sock
+*.socket
+
+# ── SSL / TLS sertifikaları ───────────────────
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.cer
+ssl/
+certs/
+
+# ── Secrets / Konfigürasyon ───────────────────
+*.conf
+*.secret
+.passwd
+.auth
+*.passwd_reset
+config.local.*
+secrets/
+.secrets/
+auth_token*
+ankavm_token*
+
+# ── Disk / ISO / Yedek dosyaları ──────────────
+*.iso
+*.img
+*.qcow2
+*.vmdk
+*.vdi
+*.vhd
+*.vhdx
+*.raw
+*.ova
+*.ovf
+isos/
+disks/
+backups/
+templates/vm/
+
+# ── IDE / Editor ──────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ── OS dosyaları ──────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Test / Coverage ───────────────────────────
+.pytest_cache/
+.coverage
+coverage.xml
+*.cover
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+nosetests.xml
+test-results/
+junit.xml
+
+# ── Kernel / Build çıktıları ──────────────────
+kernel/modules/**/*.ko
+kernel/modules/**/*.o
+kernel/modules/**/*.mod
+kernel/modules/**/*.mod.c
+kernel/modules/**/*.order
+kernel/modules/**/*.symvers
+kernel/modules/**/modules.builtin
+kernel/modules/**/Module.symvers
+*.ko
+*.mod.c
+
+# ── Go (Terraform provider) ───────────────────
+terraform-provider-ankavm/bin/
+terraform-provider-ankavm/vendor/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ── Docker ────────────────────────────────────
+.docker/
+docker-compose.override.yml
+
+# ── Geçici dosyalar ───────────────────────────
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.rej
+
+# ── Telemetri / Analytics ─────────────────────
+telemetry/data/
+telemetry/*.db
+telemetry/*.sqlite
+
+# ── Veritabanları ─────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── AnkaVM özel ───────────────────────────────
+ankavm/backend/__pycache__/
+ankavm/backend/*.pyc
+ankavm/frontend/static/uploads/
+ankavm/frontend/static/generated/
+*.ankavm_backup
+.antigravityignore

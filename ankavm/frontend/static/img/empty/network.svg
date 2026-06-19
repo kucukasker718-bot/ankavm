@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <defs>
+    <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3fb950" stop-opacity=".15"/>
+      <stop offset="100%" stop-color="#3fb950" stop-opacity=".02"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="60" r="14" fill="url(#netGrad)" stroke="#3fb950" stroke-width="1.5"/>
+  <circle cx="100" cy="60" r="5" fill="#3fb950"/>
+  <circle cx="50" cy="105" r="10" fill="#0d1117" stroke="#30363d"/>
+  <circle cx="100" cy="105" r="10" fill="#0d1117" stroke="#30363d"/>
+  <circle cx="150" cy="105" r="10" fill="#0d1117" stroke="#30363d"/>
+  <path d="M100 74 L50 95" stroke="#30363d" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <path d="M100 74 L100 95" stroke="#30363d" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <path d="M100 74 L150 95" stroke="#30363d" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <text x="100" y="145" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e" font-weight="600">AĞ TANIMI YOK</text>
+</svg>

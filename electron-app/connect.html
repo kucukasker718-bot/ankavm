@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AnkaVM â€” Connect</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    -webkit-app-region: drag;
+  }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    width: 420px;
+    max-width: 94vw;
+    -webkit-app-region: no-drag;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 1.75rem;
+  }
+  .logo svg { width: 28px; height: 28px; flex-shrink: 0; }
+  h2 { font-size: 1rem; color: #f0f6fc; margin-bottom: 0.4rem; }
+  p  { font-size: 0.85rem; color: #8b949e; margin-bottom: 1.5rem; line-height: 1.5; }
+  label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 0.35rem; }
+  input {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+    color: #c9d1d9;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .2s;
+    margin-bottom: 1rem;
+  }
+  input:focus { border-color: #58a6ff; }
+  .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+  .label-row label { margin: 0; }
+  .label-row span { font-size: 0.75rem; color: #8b949e; }
+  button {
+    width: 100%;
+    background: #58a6ff;
+    color: #0d1117;
+    border: none;
+    border-radius: 6px;
+    padding: 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+    font-family: inherit;
+  }
+  button:hover { opacity: .85; }
+  #err {
+    display: none;
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: #f85149;
+    background: rgba(248,81,73,.08);
+    border: 1px solid rgba(248,81,73,.25);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+  }
+  .saved { margin-top: 1.5rem; border-top: 1px solid #30363d; padding-top: 1.25rem; }
+  .saved-title { font-size: 0.75rem; color: #8b949e; margin-bottom: 0.65rem; text-transform: uppercase; letter-spacing: .5px; }
+  .saved-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .saved-item:hover { border-color: #58a6ff; }
+  .saved-item .si-name { font-size: 0.85rem; color: #c9d1d9; }
+  .saved-item .si-url  { font-size: 0.75rem; color: #8b949e; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="#58a6ff" fill-opacity=".12"/>
+      <path d="M16 6C10.477 6 6 10.477 6 16s4.477 10 10 10 10-4.477 10-10S21.523 6 16 6zm0 2.5a7.5 7.5 0 110 15 7.5 7.5 0 010-15zm0 2.5a5 5 0 100 10 5 5 0 000-10z" fill="#58a6ff"/>
+    </svg>
+    AnkaVM
+  </div>
+
+  <h2>Connect to your AnkaVM server</h2>
+  <p>Enter the address of your AnkaVM panel.<br>
+     Example: <code style="color:#58a6ff;font-size:.85em">https://192.168.1.100:8006</code></p>
+
+  <label for="url">Server URL</label>
+  <input id="url" type="text" placeholder="https://192.168.1.100:8006" autocomplete="off" spellcheck="false" />
+
+  <div class="label-row">
+    <label for="lbl">Label (optional)</label>
+    <span>Shown in tray menu</span>
+  </div>
+  <input id="lbl" type="text" placeholder="My AnkaVM Server" />
+
+  <button id="btn">Connect</button>
+  <div id="err"></div>
+
+  <div class="saved" id="saved-section" style="display:none">
+    <div class="saved-title">Saved servers</div>
+    <div id="saved-list"></div>
+  </div>
+</div>
+
+<script>
+  const urlIn  = document.getElementById('url');
+  const lblIn  = document.getElementById('lbl');
+  const btn    = document.getElementById('btn');
+  const errEl  = document.getElementById('err');
+
+  function showErr(msg) {
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  }
+  function hideErr() { errEl.style.display = 'none'; }
+
+  function normUrl(raw) {
+    raw = raw.trim();
+    if (!raw) return '';
+    if (!raw.startsWith('http://') && !raw.startsWith('https://')) {
+      raw = 'https://' + raw;
+    }
+    return raw;
+  }
+
+  async function connect(url, label) {
+    hideErr();
+    url = normUrl(url);
+    if (!url) { showErr('Enter a server URL.'); return; }
+
+    if (window.AnkaVMDesktop) {
+      const res = await window.AnkaVMDesktop.addServer(url, label || url);
+      if (!res.ok && res.reason !== 'duplicate') {
+        showErr('Could not save server: ' + (res.reason || 'unknown error'));
+      }
+      // addServer â†’ main process switch â†’ page navigates automatically
+    } else {
+      // dev-mode fallback
+      window.location.href = url;
+    }
+  }
+
+  btn.addEventListener('click', () => {
+    connect(urlIn.value, lblIn.value);
+  });
+
+  urlIn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') btn.click();
+  });
+
+  // Load saved servers
+  async function loadSaved() {
+    if (!window.AnkaVMDesktop) return;
+    const servers = await window.AnkaVMDesktop.getServers();
+    if (!servers.length) return;
+
+    const sec  = document.getElementById('saved-section');
+    const list = document.getElementById('saved-list');
+    sec.style.display = 'block';
+
+    servers.forEach(s => {
+      const row  = document.createElement('div');
+      row.className = 'saved-item';
+
+      const name = document.createElement('span');
+      name.className = 'si-name';
+      name.textContent = s.label || s.url;
+
+      const urlSpan = document.createElement('span');
+      urlSpan.className = 'si-url';
+      urlSpan.textContent = s.url;
+
+      row.appendChild(name);
+      row.appendChild(urlSpan);
+      row.addEventListener('click', () => connect(s.url, s.label));
+      list.appendChild(row);
+    });
+  }
+
+  loadSaved();
+</script>
+</body>
+</html>

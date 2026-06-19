@@ -1,0 +1,23 @@
+﻿blank_issues_enabled: false
+contact_links:
+  - name: ğŸ’¬ Discord â€” community chat
+    url: https://discord.gg/c6yHhKrQs5
+    about: Real-time help, plugin showcase, alpha-test announcements.
+  - name: ğŸ› Security vulnerability â€” private disclosure
+    url: https://github.com/ShinnAsukha/ankavm-hypervisor/security/advisories/new
+    about: Report vulnerabilities privately. Bounties up to $5000.
+  - name: ğŸ“š Documentation
+    url: https://ankavm.local/docs/
+    about: Installation, configuration, REST API reference, troubleshooting.
+  - name: ğŸ’° Buy a Pro / Lifetime plan
+    url: https://ankavm.local/pricing/
+    about: Pricing â€” Standard $35/mo Â· Pro $250/yr Â· Lifetime $2000.
+  - name: ğŸ¤ Partner program
+    url: https://ankavm.local/partners/
+    about: Reseller / MSP â€” 30% recurring commission.
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+﻿[Unit]
+Description=AnkaVM Hypervisor Management Service
+Documentation=https://github.com/ShinnAsukha/AnkaVM-hypervisor
+# network-online.target: aÄŸ gerÃ§ekten hazÄ±r (sadece yapÄ±landÄ±rÄ±ldÄ± deÄŸil)
+# libvirt-guests.service: libvirt hem baÅŸladÄ± hem de aÄŸlarÄ± otomatik aÃ§tÄ±
+After=network-online.target libvirtd.service libvirt-guests.service
+Wants=network-online.target libvirtd.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/AnkaVM/AnkaVM
+Environment=AnkaVM_CONFIG=/etc/AnkaVM/AnkaVM.conf
+Environment=PYTHONUNBUFFERED=1
+
+# Dizinleri oluÅŸtur
+ExecStartPre=/bin/bash -c 'mkdir -p /var/log/AnkaVM /etc/AnkaVM /var/lib/AnkaVM/{isos,disks,backups,templates}'
+# libvirtd soketini bekle (reboot sonrasÄ± geÃ§ hazÄ±r olabilir)
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 15); do virsh list >/dev/null 2>&1 && break; sleep 2; done; true'
+# default aÄŸÄ± baÅŸlat (autostart bazen reboot'ta Ã§alÄ±ÅŸmÄ±yor)
+ExecStartPre=/bin/bash -c 'virsh net-list --all 2>/dev/null | grep -q default && virsh net-start default 2>/dev/null || true'
+ExecStart=/opt/AnkaVM/venv/bin/python3 /opt/AnkaVM/AnkaVM/backend/app.py
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=120
+StartLimitBurst=5
+TimeoutStartSec=60
+TimeoutStopSec=30
+KillMode=mixed
+StandardOutput=append:/var/log/AnkaVM/AnkaVM.log
+StandardError=append:/var/log/AnkaVM/AnkaVM-error.log
+SyslogIdentifier=AnkaVM
+
+# GÃ¼venlik
+NoNewPrivileges=false
+PrivateTmp=false
+
+[Install]
+WantedBy=multi-user.target

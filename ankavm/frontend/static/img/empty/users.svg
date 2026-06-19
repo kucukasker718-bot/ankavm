@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <circle cx="75" cy="60" r="18" fill="none" stroke="#30363d" stroke-width="1.5"/>
+  <path d="M50 110 C50 90, 60 85, 75 85 C90 85, 100 90, 100 110" fill="none" stroke="#30363d" stroke-width="1.5"/>
+  <circle cx="125" cy="55" r="14" fill="none" stroke="#3fb950" stroke-width="1.5"/>
+  <path d="M105 110 C105 90, 115 87, 125 87 C135 87, 145 90, 145 110" fill="none" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="100" y="140" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#8b949e" font-weight="600">KULLANICI YOK</text>
+</svg>
