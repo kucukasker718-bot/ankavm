@@ -1,5 +1,0 @@
----
-type:      "viewmodule"
-name:      "oxdisk"
-interface: "qml"
-load:      "oxdisk.qml"

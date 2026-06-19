@@ -1,5 +1,0 @@
----
-type:      "job"
-name:      "oxware_install"
-interface: "python"
-script:    "main.py"
