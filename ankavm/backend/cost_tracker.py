@@ -1,4 +1,4 @@
-﻿"""ankavm Cost Tracker â€” resource usage â†’ estimated cost"""
+"""ankavm Cost Tracker — resource usage → estimated cost"""
 import json, os
 from pathlib import Path
 
@@ -46,9 +46,9 @@ def get_all_vm_costs(vms):
     total = sum(r["monthly"] for r in results)
     cfg = get_config()
     return {"vms": results, "total_monthly": round(total, 2), "currency": cfg["currency"]}
-
-
-
-
-
-
+
+
+
+
+
+

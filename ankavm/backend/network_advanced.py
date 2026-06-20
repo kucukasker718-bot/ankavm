@@ -1,6 +1,6 @@
-﻿"""
-ankavm Network Advanced â€” VXLAN, IPv6, BFD, DDoS mitigation
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Network Advanced — VXLAN, IPv6, BFD, DDoS mitigation
+─────────────────────────────────────────────────────────────
 SDN overlay + IPv6 dual-stack + failure detection + rate limit.
 
 API:
@@ -18,7 +18,7 @@ _VXLAN_STORE = Path("/var/lib/ankavm/vxlans.json")
 _DDOS_CFG    = Path("/var/lib/ankavm/ddos_config.json")
 
 
-# â”€â”€ VXLAN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── VXLAN ───────────────────────────────────────────────────────────────────
 def vxlan_list() -> list:
     if not _VXLAN_STORE.exists():
         return []
@@ -68,7 +68,7 @@ def vxlan_delete(name: str) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ IPv6 dual-stack â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── IPv6 dual-stack ─────────────────────────────────────────────────────────
 def ipv6_status() -> dict:
     try:
         r = subprocess.run(["ip", "-6", "addr"], capture_output=True, text=True, timeout=5)
@@ -100,7 +100,7 @@ def ipv6_configure(enable: bool) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ BFD (Bidirectional Forwarding Detection) - basic ping monitor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── BFD (Bidirectional Forwarding Detection) - basic ping monitor ──────────
 def bfd_status() -> dict:
     """OVS bfd: ovs-vsctl get interface ... bfd"""
     try:
@@ -131,7 +131,7 @@ def bfd_enable(iface: str, remote: str) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ DDoS Mitigation (iptables rate limit) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── DDoS Mitigation (iptables rate limit) ───────────────────────────────────
 def ddos_get_config() -> dict:
     if _DDOS_CFG.exists():
         try: return json.loads(_DDOS_CFG.read_text())
@@ -183,7 +183,7 @@ def ddos_apply(config: dict) -> dict:
 
 
 def ddos_clear() -> dict:
-    """ankavm DDoS kurallarÄ±nÄ± temizle."""
+    """ankavm DDoS kurallarını temizle."""
     try:
         subprocess.run(["iptables", "-F", "ankavm_SYN_FLOOD"],
                        capture_output=True, timeout=5)
@@ -192,9 +192,9 @@ def ddos_clear() -> dict:
         return {"ok": True}
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

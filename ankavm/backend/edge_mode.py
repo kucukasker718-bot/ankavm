@@ -1,13 +1,13 @@
-﻿"""
-edge_mode.py â€” Edge Deployment Manager for ankavm
+"""
+edge_mode.py — Edge Deployment Manager for ankavm
 ankavm v2.5.11 Modern Workloads
 
 Features:
-  - get_edge_status() â€” edge mode enabled, central URL, last heartbeat
-  - configure_edge(central_url, node_id, heartbeat_interval, low_resource) â€” save config
-  - send_heartbeat() â€” single manual heartbeat to central management URL
-  - get_resource_profile() â€” trimmed resource profile for edge (which services scaled back)
-  - apply_low_resource_mode(enabled) â€” set low_resource flag (config, no auto-loops)
+  - get_edge_status() — edge mode enabled, central URL, last heartbeat
+  - configure_edge(central_url, node_id, heartbeat_interval, low_resource) — save config
+  - send_heartbeat() — single manual heartbeat to central management URL
+  - get_resource_profile() — trimmed resource profile for edge (which services scaled back)
+  - apply_low_resource_mode(enabled) — set low_resource flag (config, no auto-loops)
 
 Config persisted to /var/lib/ankavm/edge_config.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -41,7 +41,7 @@ _DEFAULT_CONFIG = {
     "last_heartbeat_err":  None,
 }
 
-# Services considered "heavy" â€” these get a note in low-resource profile
+# Services considered "heavy" — these get a note in low-resource profile
 _HEAVY_SERVICES = [
     "otel_tracing",
     "grafana_embed",
@@ -52,7 +52,7 @@ _HEAVY_SERVICES = [
 ]
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -77,7 +77,7 @@ def _save(data: dict) -> None:
         log.warning("edge_mode save fail: %s", e)
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def get_edge_status() -> dict:
     """Return current edge mode status."""
@@ -120,7 +120,7 @@ def configure_edge(
 def send_heartbeat() -> dict:
     """
     Send a single heartbeat POST to the central management URL.
-    This is a manual/cron operation â€” no auto-loop.
+    This is a manual/cron operation — no auto-loop.
     Returns {sent, response, error}.
     """
     with _lock:
@@ -194,7 +194,7 @@ def get_resource_profile() -> dict:
 def apply_low_resource_mode(enabled: bool) -> dict:
     """
     Set the low_resource config flag.
-    This is a configuration flag only â€” actual service management is
+    This is a configuration flag only — actual service management is
     handled by each service module (no force-kills here).
     """
     with _lock:
@@ -208,7 +208,7 @@ def apply_low_resource_mode(enabled: bool) -> dict:
     }
 
 
-# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_local_node_id() -> str:
     """Derive a stable node ID from hostname + machine-id."""
@@ -229,7 +229,7 @@ def _get_local_node_id() -> str:
 
 
 def _read_proc_meminfo(key: str) -> Optional[int]:
-    """Read a value from /proc/meminfo, return kBâ†’MB integer or None."""
+    """Read a value from /proc/meminfo, return kB→MB integer or None."""
     try:
         content = Path("/proc/meminfo").read_text(encoding="utf-8")
         for line in content.splitlines():
@@ -239,9 +239,9 @@ def _read_proc_meminfo(key: str) -> Optional[int]:
     except Exception:
         pass
     return None
-
-
-
-
-
-
+
+
+
+
+
+

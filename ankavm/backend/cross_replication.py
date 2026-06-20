@@ -1,7 +1,7 @@
-﻿"""
-ankavm Cross-Site Replication â€” v2.5.7
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-VM disk'lerini uzak host'a rsync / qemu-img+ssh ile Ã§oÄŸalt.
+"""
+ankavm Cross-Site Replication — v2.5.7
+────────────────────────────────────────
+VM disk'lerini uzak host'a rsync / qemu-img+ssh ile çoğalt.
 Async mod: manuel-trigger thread (AUTO-START JOB YOK).
 
 API:
@@ -32,7 +32,7 @@ _DATA_FILE = Path("/var/lib/ankavm/cross_replication.json")
 _lock      = threading.Lock()
 
 
-# â”€â”€ I/O helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── I/O helpers ──────────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -53,7 +53,7 @@ def _save(data: dict):
         log.warning("save fail: %s", e)
 
 
-# â”€â”€ Replication engine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Replication engine ────────────────────────────────────────────────────────
 
 def _find_disk_images(vm_id: str, cfg: dict) -> list:
     """
@@ -75,7 +75,7 @@ def _find_disk_images(vm_id: str, cfg: dict) -> list:
                 if f.is_file() and vm_id in f.name and f.suffix == ext:
                     images.append(str(f))
     if not images:
-        log.warning("disk image bulunamadÄ± vm=%s", vm_id)
+        log.warning("disk image bulunamadı vm=%s", vm_id)
     return images
 
 
@@ -94,7 +94,7 @@ def _rsync_replicate(image: str, cfg: dict) -> dict:
     user    = cfg.get("target_user", "root")
     dst_dir = cfg.get("target_path", "/var/lib/libvirt/images")
     if not host:
-        return {"ok": False, "error": "target_host tanÄ±msÄ±z"}
+        return {"ok": False, "error": "target_host tanımsız"}
     ssh_opts = " ".join(_ssh_opts(cfg))
     cmd = [
         "rsync", "-az", "--inplace", "--partial",
@@ -116,7 +116,7 @@ def _rsync_replicate(image: str, cfg: dict) -> dict:
 def _qemu_img_replicate(image: str, cfg: dict) -> dict:
     """
     qemu-img convert + ssh copy (incremental not available without dirty bitmap).
-    Uses rsync as the transport for qcow2 â€” acts as incremental via --inplace.
+    Uses rsync as the transport for qcow2 — acts as incremental via --inplace.
     """
     return _rsync_replicate(image, cfg)
 
@@ -142,17 +142,17 @@ def _do_replicate(vm_id: str, cfg: dict) -> dict:
     }
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def configure_replication(vm_id: str, config: dict) -> dict:
     """
     config keys:
-      target_host   str   â€” remote host IP/FQDN
-      target_user   str   â€” SSH user (default root)
-      target_path   str   â€” remote destination directory
-      mode          str   â€” 'rsync' | 'qemu-img' (default rsync)
-      interval_min  int   â€” for manual-trigger reference only (NO auto-start)
-      ssh_key_path  str   â€” private key for SSH
+      target_host   str   — remote host IP/FQDN
+      target_user   str   — SSH user (default root)
+      target_path   str   — remote destination directory
+      mode          str   — 'rsync' | 'qemu-img' (default rsync)
+      interval_min  int   — for manual-trigger reference only (NO auto-start)
+      ssh_key_path  str   — private key for SSH
     """
     if not vm_id:
         return {"ok": False, "error": "vm_id zorunlu"}
@@ -248,7 +248,7 @@ def run_replication_async(vm_id: str) -> dict:
     t = threading.Thread(target=_worker, daemon=True, name=f"repl-{vm_id[:8]}")
     t.start()
     return {"ok": True, "run_id": run_id, "async": True,
-            "note": "Arka planda Ã§alÄ±ÅŸÄ±yor â€” /status ile kontrol et"}
+            "note": "Arka planda çalışıyor — /status ile kontrol et"}
 
 
 def get_replication_status(vm_id: str) -> dict:
@@ -288,31 +288,31 @@ def _fmt_lag(seconds: Optional[int]) -> Optional[str]:
 
 def promote_replica(vm_id: str) -> dict:
     """
-    STUB â€” Promote replica to primary.
+    STUB — Promote replica to primary.
     WARNING: This requires manual DNS/IP failover and VM reconfiguration.
     Returns a warning with required steps; does NOT perform promotion automatically.
     """
     cfg = get_replication(vm_id)
     if not cfg:
         return {"ok": False, "error": f"replication config yok: {vm_id}"}
-    log.warning("promote_replica STUB called vm=%s â€” manual steps required", vm_id)
+    log.warning("promote_replica STUB called vm=%s — manual steps required", vm_id)
     return {
         "ok":      False,
         "stub":    True,
         "warning": (
-            "promote_replica henÃ¼z otomatik uygulanmadÄ±. "
-            "Manuel adÄ±mlar: "
-            "1) Hedef VM'yi baÅŸlat, "
-            "2) DNS/VIP'i gÃ¼ncelle, "
+            "promote_replica henüz otomatik uygulanmadı. "
+            "Manuel adımlar: "
+            "1) Hedef VM'yi başlat, "
+            "2) DNS/VIP'i güncelle, "
             "3) Kaynak VM'yi kapat veya izole et, "
-            "4) Replikasyonu ters yÃ¶nde yeniden yapÄ±landÄ±r."
+            "4) Replikasyonu ters yönde yeniden yapılandır."
         ),
         "vm_id":       vm_id,
         "target_host": cfg.get("target_host"),
     }
-
-
-
-
-
-
+
+
+
+
+
+

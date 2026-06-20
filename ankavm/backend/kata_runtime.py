@@ -1,12 +1,12 @@
-﻿"""
-kata_runtime.py â€” Kata Containers Runtime Manager for ankavm
+"""
+kata_runtime.py — Kata Containers Runtime Manager for ankavm
 ankavm v2.5.11 Modern Workloads
 
 Features:
-  - detect_kata() â€” kata-runtime binary + containerd config {available, version}
-  - list_kata_containers() â€” kata pod/container list via crictl or ctr
-  - generate_runtime_class() â€” Kubernetes RuntimeClass YAML for kata
-  - get_kata_config() â€” summary of kata configuration.toml
+  - detect_kata() — kata-runtime binary + containerd config {available, version}
+  - list_kata_containers() — kata pod/container list via crictl or ctr
+  - generate_runtime_class() — Kubernetes RuntimeClass YAML for kata
+  - get_kata_config() — summary of kata configuration.toml
 
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
 """
@@ -37,7 +37,7 @@ _KATA_BINARIES = [
 ]
 
 
-# â”€â”€ Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Detection ─────────────────────────────────────────────────────────────────
 
 def detect_kata() -> dict:
     """Check if kata-runtime is installed and containerd is configured for it."""
@@ -94,7 +94,7 @@ def detect_kata() -> dict:
     return result
 
 
-# â”€â”€ Container listing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Container listing ─────────────────────────────────────────────────────────
 
 def list_kata_containers() -> list:
     """
@@ -152,7 +152,7 @@ def list_kata_containers() -> list:
     return containers
 
 
-# â”€â”€ RuntimeClass YAML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── RuntimeClass YAML ─────────────────────────────────────────────────────────
 
 def generate_runtime_class() -> dict:
     """Generate a Kubernetes RuntimeClass YAML for Kata Containers."""
@@ -176,7 +176,7 @@ def generate_runtime_class() -> dict:
     return {"runtime_class_yaml": yaml_text, "handler": "kata", "overhead_memory_mi": 160}
 
 
-# â”€â”€ Config summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Config summary ────────────────────────────────────────────────────────────
 
 def get_kata_config() -> dict:
     """Return a summary of the Kata configuration.toml."""
@@ -217,9 +217,9 @@ def get_kata_config() -> dict:
     except Exception as e:
         result["error"] = str(e)
     return result
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,12 +1,12 @@
-﻿"""
-grafana_embed.py â€” Grafana Panel Embed Config
+"""
+grafana_embed.py — Grafana Panel Embed Config
 ankavm v2.5.8 Observability
 
 Features:
   - set_config / get_config (api_key redacted in output)
   - list_dashboards()
-  - get_embed_url(dashboard_uid, panel_id, from_, to_) â†’ kiosk iframe src
-  - test_connection() â†’ GET grafana /api/health
+  - get_embed_url(dashboard_uid, panel_id, from_, to_) → kiosk iframe src
+  - test_connection() → GET grafana /api/health
   - Persisted to /var/lib/ankavm/grafana_config.json
 """
 
@@ -33,7 +33,7 @@ _DEFAULT_CONFIG: dict = {
 }
 
 
-# â”€â”€ Persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistence ───────────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -60,7 +60,7 @@ def _save(cfg: dict) -> None:
 _config: dict = _load()
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def set_config(
     grafana_url: str,
@@ -170,9 +170,9 @@ def test_connection() -> dict:
     except Exception as e:
         latency = round((time.monotonic() - t0) * 1000, 1)
         return {"ok": False, "status": str(e)[:120], "version": "", "latency_ms": latency}
-
-
-
-
-
-
+
+
+
+
+
+

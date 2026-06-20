@@ -1,7 +1,7 @@
-﻿"""
-ankavm App-Consistent Snapshot â€” v2.5.7
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-guest-agent fsfreeze ile DB-tutarlÄ± (quiesced) snapshot yÃ¶netimi.
+"""
+ankavm App-Consistent Snapshot — v2.5.7
+────────────────────────────────────────
+guest-agent fsfreeze ile DB-tutarlı (quiesced) snapshot yönetimi.
 
 API:
     create_consistent_snapshot(vm_id, name, freeze_fs=True) -> dict
@@ -39,7 +39,7 @@ except ImportError:
     _LIBVIRT_OK = False
 
 
-# â”€â”€ I/O helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── I/O helpers ──────────────────────────────────────────────────────────────
 
 def _load(path: Path) -> dict:
     try:
@@ -60,7 +60,7 @@ def _save(path: Path, data: dict):
         log.warning("save fail %s: %s", path, e)
 
 
-# â”€â”€ libvirt helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── libvirt helpers ───────────────────────────────────────────────────────────
 
 def _get_domain(conn, vm_id: str):
     try:
@@ -101,7 +101,7 @@ def _fsthaw(domain) -> bool:
         return False
 
 
-# â”€â”€ App hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── App hooks ─────────────────────────────────────────────────────────────────
 
 def _run_hook_cmd(domain, cmd: str) -> bool:
     """Run a command inside the guest via QEMU agent (exec)."""
@@ -137,15 +137,15 @@ def _run_hook_cmd(domain, cmd: str) -> bool:
         return False
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def create_consistent_snapshot(vm_id: str, name: str, freeze_fs: bool = True) -> dict:
     """
-    guest-agent fsfreeze â†’ libvirt snapshot â†’ fsthaw.
-    Agent yoksa normal snapshot alÄ±nÄ±r + uyarÄ± eklenir.
+    guest-agent fsfreeze → libvirt snapshot → fsthaw.
+    Agent yoksa normal snapshot alınır + uyarı eklenir.
     """
     if not _LIBVIRT_OK:
-        return {"ok": False, "error": "libvirt kurulu deÄŸil"}
+        return {"ok": False, "error": "libvirt kurulu değil"}
 
     ts = int(time.time())
     snap_id = str(uuid.uuid4())[:8]
@@ -154,12 +154,12 @@ def create_consistent_snapshot(vm_id: str, name: str, freeze_fs: bool = True) ->
     try:
         conn = _libvirt.open("qemu:///system")
     except Exception as e:
-        return {"ok": False, "error": f"libvirt baÄŸlantÄ± hatasÄ±: {e}"}
+        return {"ok": False, "error": f"libvirt bağlantı hatası: {e}"}
 
     try:
         domain = _get_domain(conn, vm_id)
         if domain is None:
-            return {"ok": False, "error": f"VM bulunamadÄ±: {vm_id}"}
+            return {"ok": False, "error": f"VM bulunamadı: {vm_id}"}
 
         agent_ok = _agent_available(domain)
         frozen   = False
@@ -171,16 +171,16 @@ def create_consistent_snapshot(vm_id: str, name: str, freeze_fs: bool = True) ->
                 if agent_ok:
                     _run_hook_cmd(domain, h["pre_cmd"])
                 else:
-                    warnings.append(f"pre-hook atlandÄ± (agent yok): {h['app']}")
+                    warnings.append(f"pre-hook atlandı (agent yok): {h['app']}")
 
         # fsfreeze
         if freeze_fs:
             if agent_ok:
                 frozen = _fsfreeze(domain)
                 if not frozen:
-                    warnings.append("fsfreeze baÅŸarÄ±sÄ±z â€” normal snapshot alÄ±nÄ±yor")
+                    warnings.append("fsfreeze başarısız — normal snapshot alınıyor")
             else:
-                warnings.append("guest-agent bulunamadÄ± â€” quiesced olmayan snapshot")
+                warnings.append("guest-agent bulunamadı — quiesced olmayan snapshot")
 
         # libvirt snapshot XML
         xml = (
@@ -196,7 +196,7 @@ def create_consistent_snapshot(vm_id: str, name: str, freeze_fs: bool = True) ->
             # thaw before returning
             if frozen:
                 _fsthaw(domain)
-            return {"ok": False, "error": f"snapshot oluÅŸturulamadÄ±: {e}"}
+            return {"ok": False, "error": f"snapshot oluşturulamadı: {e}"}
         finally:
             if frozen:
                 _fsthaw(domain)
@@ -207,7 +207,7 @@ def create_consistent_snapshot(vm_id: str, name: str, freeze_fs: bool = True) ->
                 if agent_ok:
                     _run_hook_cmd(domain, h["post_cmd"])
                 else:
-                    warnings.append(f"post-hook atlandÄ± (agent yok): {h['app']}")
+                    warnings.append(f"post-hook atlandı (agent yok): {h['app']}")
 
         # Persist record
         with _lock:
@@ -252,13 +252,13 @@ def get_quiesce_support(vm_id: str) -> dict:
     """Probe agent + fsfreeze capability."""
     result = {"agent": False, "fsfreeze": False, "vm_id": vm_id}
     if not _LIBVIRT_OK:
-        result["error"] = "libvirt kurulu deÄŸil"
+        result["error"] = "libvirt kurulu değil"
         return result
     try:
         conn = _libvirt.open("qemu:///system")
         domain = _get_domain(conn, vm_id)
         if domain is None:
-            result["error"] = f"VM bulunamadÄ±: {vm_id}"
+            result["error"] = f"VM bulunamadı: {vm_id}"
             conn.close()
             return result
         agent_ok = _agent_available(domain)
@@ -284,7 +284,7 @@ def get_quiesce_support(vm_id: str) -> dict:
     return result
 
 
-# â”€â”€ App Hooks (MySQL FLUSH TABLES, etc.) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── App Hooks (MySQL FLUSH TABLES, etc.) ─────────────────────────────────────
 
 def register_app_hook(vm_id: str, app: str, pre_cmd: str, post_cmd: str) -> dict:
     """
@@ -292,7 +292,7 @@ def register_app_hook(vm_id: str, app: str, pre_cmd: str, post_cmd: str) -> dict
     Example: app='mysql', pre_cmd='mysql -e "FLUSH TABLES WITH READ LOCK"'
     """
     if not app or not app.strip():
-        return {"ok": False, "error": "app adÄ± zorunlu"}
+        return {"ok": False, "error": "app adı zorunlu"}
     with _lock:
         data = _load(_HOOKS_FILE)
         hooks = data.setdefault(vm_id, [])
@@ -318,9 +318,9 @@ def list_app_hooks(vm_id: str) -> list:
     with _lock:
         data = _load(_HOOKS_FILE)
     return data.get(vm_id, [])
-
-
-
-
-
-
+
+
+
+
+
+

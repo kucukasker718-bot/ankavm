@@ -1,5 +1,5 @@
-﻿"""
-HashiCorp Vault integration â€” KV v2 secret read/write/list via HTTP API.
+"""
+HashiCorp Vault integration — KV v2 secret read/write/list via HTTP API.
 Pure stdlib, no hvac dependency.
 """
 import json
@@ -133,9 +133,9 @@ def test_connection() -> dict:
                 "sealed": r.get("sealed"), "version": r.get("version")}
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

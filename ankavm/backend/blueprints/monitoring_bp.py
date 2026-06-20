@@ -1,15 +1,15 @@
-﻿"""monitoring_bp â€” v2 monitoring + metrics endpoints.
+"""monitoring_bp — v2 monitoring + metrics endpoints.
 
 Mounted at /api/v2/monitoring. Trims the verbose legacy payloads down
 to what the dashboard widgets actually consume, so panel rendering
 doesn't spend time parsing fields it discards.
 
 Endpoints:
-    GET /api/v2/monitoring/host                      â€” host vitals snapshot
-    GET /api/v2/monitoring/top                       â€” top 5 VMs by CPU/RAM
-    GET /api/v2/monitoring/alerts/recent             â€” last 50 alerts
-    GET /api/v2/monitoring/anomalies/recent          â€” last 50 anomalies
-    GET /api/v2/monitoring/system-health             â€” composite health score
+    GET /api/v2/monitoring/host                      — host vitals snapshot
+    GET /api/v2/monitoring/top                       — top 5 VMs by CPU/RAM
+    GET /api/v2/monitoring/alerts/recent             — last 50 alerts
+    GET /api/v2/monitoring/anomalies/recent          — last 50 anomalies
+    GET /api/v2/monitoring/system-health             — composite health score
 """
 from __future__ import annotations
 import time
@@ -169,9 +169,9 @@ def _register_routes():
                    else "degraded" if score >= 50
                    else "critical")
         return _ok(score=score, verdict=verdict, issues=issues, ts=time.time())
-
-
-
-
-
-
+
+
+
+
+
+

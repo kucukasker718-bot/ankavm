@@ -1,6 +1,6 @@
-﻿"""
+"""
 ankavm Managed Cluster Federation
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+──────────────────────────────────
 Federate multiple ankavm nodes into a single control plane.
 
 State:
@@ -234,7 +234,7 @@ def inventory_vms() -> dict:
 def forward(member_id: str, path: str, method: str = "GET",
             payload: dict | None = None) -> dict:
     """Forward an API call to a single member. The member's own RBAC and
-    audit log enforce the action â€” this node only proxies.
+    audit log enforce the action — this node only proxies.
 
     SEC-020: path is restricted to the federation forward allowlist.
     """
@@ -293,9 +293,9 @@ def get_cache() -> dict:
         return json.loads(_CACHE.read_text(encoding="utf-8"))
     except Exception:
         return {}
-
-
-
-
-
-
+
+
+
+
+
+

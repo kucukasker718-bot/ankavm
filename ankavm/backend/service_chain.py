@@ -1,11 +1,11 @@
-﻿"""
-service_chain.py â€” Service Chaining (IDS â†’ WAF â†’ LB â†’ VM traffic steering)
+"""
+service_chain.py — Service Chaining (IDS → WAF → LB → VM traffic steering)
 ankavm v2.5.9 Network Advanced 2
 
 Features:
-  - create_chain(name, hops, ingress, egress) â€” iptables/nftables mark+route chain
+  - create_chain(name, hops, ingress, egress) — iptables/nftables mark+route chain
   - list_chains(), get_chain(name), delete_chain(name)
-  - get_chain_stats(name) â€” packet count per hop (iptables -L -v)
+  - get_chain_stats(name) — packet count per hop (iptables -L -v)
 
 Config persisted to /var/lib/ankavm/service_chains.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -27,11 +27,11 @@ from typing import Optional
 log = logging.getLogger("service_chain")
 
 _CHAIN_FILE   = Path("/var/lib/ankavm/service_chains.json")
-_MARK_BASE    = 0x0C00   # 0x0C00â€“0x0CFF reserved for service chains (256 chains max)
+_MARK_BASE    = 0x0C00   # 0x0C00–0x0CFF reserved for service chains (256 chains max)
 _lock         = threading.Lock()
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -52,7 +52,7 @@ def _save(data: dict) -> None:
         log.warning("svcchain save fail: %s", e)
 
 
-# â”€â”€ iptables helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── iptables helpers ──────────────────────────────────────────────────────────
 
 def _ipt_available() -> bool:
     try:
@@ -123,7 +123,7 @@ def _create_iptables_chain(ipt_chain: str, mark: int,
         if r.returncode != 0:
             errors.append(f"hop {i} ({hop_type}): {r.stderr.strip()}")
 
-    # 4. Policy-based route for marked traffic â†’ egress
+    # 4. Policy-based route for marked traffic → egress
     try:
         subprocess.run(
             ["ip", "rule", "add", "fwmark", hex(mark), "table", str(100 + (mark & 0xFF))],
@@ -162,7 +162,7 @@ def _delete_iptables_chain(ipt_chain: str, mark: int,
         log.warning("svcchain delete cleanup error: %s", e)
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def create_chain(name: str, hops: list, ingress: str, egress: str) -> dict:
     """
@@ -183,7 +183,7 @@ def create_chain(name: str, hops: list, ingress: str, egress: str) -> dict:
             result = _create_iptables_chain(ipt_chain, mark, ingress, egress, hops)
             errors = result.get("errors", [])
         else:
-            log.warning("svcchain: iptables not available â€” storing chain config only")
+            log.warning("svcchain: iptables not available — storing chain config only")
 
         data[name] = {
             "name":       name,
@@ -293,9 +293,9 @@ def get_chain_stats(name: str) -> dict:
             "mark":      hex(mark),
             "hops":      hop_stats,
         }
-
-
-
-
-
-
+
+
+
+
+
+

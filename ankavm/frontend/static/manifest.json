@@ -1,7 +1,7 @@
-﻿{
+{
   "name": "ankavm Hypervisor",
   "short_name": "ankavm",
-  "description": "Open source KVM/QEMU hypervisor management â€” enterprise features, zero lock-in",
+  "description": "Open source KVM/QEMU hypervisor management — enterprise features, zero lock-in",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -11,19 +11,19 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/static/img/sadeceikon.png",
+      "src": "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/static/img/sadeceikon.png",
+      "src": "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/static/img/sadeceikon.png",
+      "src": "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
@@ -35,19 +35,19 @@
       "short_name": "VMs",
       "description": "Sanal Makineler",
       "url": "/?page=vms",
-      "icons": [{ "src": "/static/img/sadeceikon.png", "sizes": "192x192" }]
+      "icons": [{ "src": "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&", "sizes": "192x192" }]
     },
     {
       "name": "Storage",
       "short_name": "Depolama",
       "url": "/?page=storage",
-      "icons": [{ "src": "/static/img/sadeceikon.png", "sizes": "192x192" }]
+      "icons": [{ "src": "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&", "sizes": "192x192" }]
     },
     {
       "name": "Networks",
-      "short_name": "AÄŸ",
+      "short_name": "Ağ",
       "url": "/?page=networks",
-      "icons": [{ "src": "/static/img/sadeceikon.png", "sizes": "192x192" }]
+      "icons": [{ "src": "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&", "sizes": "192x192" }]
     }
   ],
   "categories": ["productivity", "utilities", "developer"],
@@ -55,6 +55,12 @@
   "dir": "ltr",
   "prefer_related_applications": false
 }
+
+
+
+
+
+
 
 
 

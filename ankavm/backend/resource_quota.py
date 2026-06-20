@@ -1,5 +1,5 @@
-﻿"""
-resource_quota.py â€” VM baÅŸÄ±na kaynak limitleri (ankavm Hypervisor)
+"""
+resource_quota.py — VM başına kaynak limitleri (ankavm Hypervisor)
 """
 
 import subprocess
@@ -16,11 +16,11 @@ GLOBAL_QUOTA_KEY = "__global__"
 _lock = threading.Lock()
 
 # ---------------------------------------------------------------------------
-# Ä°Ã§ yardÄ±mcÄ±lar
+# İç yardımcılar
 # ---------------------------------------------------------------------------
 
 def _run(*cmd):
-    """subprocess.run Ã§alÄ±ÅŸtÄ±rÄ±r; hata fÄ±rlatmaz."""
+    """subprocess.run çalıştırır; hata fırlatmaz."""
     try:
         result = subprocess.run(
             list(cmd),
@@ -30,19 +30,19 @@ def _run(*cmd):
             check=False,
         )
         if result.returncode != 0:
-            log.warning("Komut baÅŸarÄ±sÄ±z [%d]: %s | stderr: %s",
+            log.warning("Komut başarısız [%d]: %s | stderr: %s",
                         result.returncode, " ".join(cmd), result.stderr.strip())
         return result
     except FileNotFoundError:
-        log.error("Komut bulunamadÄ±: %s", cmd[0])
+        log.error("Komut bulunamadı: %s", cmd[0])
         return None
     except Exception as exc:
-        log.exception("_run hatasÄ±: %s", exc)
+        log.exception("_run hatası: %s", exc)
         return None
 
 
 def _load():
-    """QUOTAS_FILE'dan kota verilerini yÃ¼kler."""
+    """QUOTAS_FILE'dan kota verilerini yükler."""
     try:
         os.makedirs(os.path.dirname(QUOTAS_FILE), exist_ok=True)
         if not os.path.exists(QUOTAS_FILE):
@@ -50,7 +50,7 @@ def _load():
         with open(QUOTAS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except (OSError, json.JSONDecodeError) as exc:
-        log.error("QUOTAS_FILE okunamadÄ±: %s", exc)
+        log.error("QUOTAS_FILE okunamadı: %s", exc)
         return {}
 
 
@@ -61,7 +61,7 @@ def _save(data):
         with open(QUOTAS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
     except OSError as exc:
-        log.error("QUOTAS_FILE yazÄ±lamadÄ±: %s", exc)
+        log.error("QUOTAS_FILE yazılamadı: %s", exc)
         raise
 
 # ---------------------------------------------------------------------------
@@ -70,22 +70,22 @@ def _save(data):
 
 def get_quota(vm_id):
     """
-    VM'in kota bilgisini dÃ¶ner.
+    VM'in kota bilgisini döner.
     {"max_vcpus": int, "max_memory_mb": int, "cpu_shares": int, "io_weight": int}
-    veya {} (kota tanÄ±mlÄ± deÄŸilse)
+    veya {} (kota tanımlı değilse)
     """
     try:
         data = _load()
         return data.get(str(vm_id), {})
     except Exception as exc:
-        log.exception("get_quota hatasÄ±: %s", exc)
+        log.exception("get_quota hatası: %s", exc)
         return {}
 
 
 def set_quota(vm_id, vm_name=None, max_vcpus=None, max_memory_mb=None,
               cpu_shares=1024, io_weight=100):
     """
-    VM iÃ§in kota ayarlar ve virsh ile uygular.
+    VM için kota ayarlar ve virsh ile uygular.
     """
     with _lock:
         try:
@@ -107,14 +107,14 @@ def set_quota(vm_id, vm_name=None, max_vcpus=None, max_memory_mb=None,
                 r = _run("virsh", "setvcpus", str(vm_id),
                          str(quota["max_vcpus"]), "--maximum", "--config")
                 if r and r.returncode == 0:
-                    log.info("vCPU limiti ayarlandÄ±: vm=%s vcpus=%d", vm_id, quota["max_vcpus"])
+                    log.info("vCPU limiti ayarlandı: vm=%s vcpus=%d", vm_id, quota["max_vcpus"])
 
             # virsh setmaxmem
             if quota["max_memory_mb"] is not None:
                 r = _run("virsh", "setmaxmem", str(vm_id),
                          f"{quota['max_memory_mb']}M", "--config")
                 if r and r.returncode == 0:
-                    log.info("Maksimum bellek ayarlandÄ±: vm=%s mem=%dM", vm_id, quota["max_memory_mb"])
+                    log.info("Maksimum bellek ayarlandı: vm=%s mem=%dM", vm_id, quota["max_memory_mb"])
 
             # cgroups cpu.shares (opsiyonel)
             try:
@@ -122,9 +122,9 @@ def set_quota(vm_id, vm_name=None, max_vcpus=None, max_memory_mb=None,
                 if os.path.exists(cgroup_path):
                     with open(cgroup_path, "w", encoding="utf-8") as f:
                         f.write(str(cpu_shares))
-                    log.info("cgroup cpu.shares ayarlandÄ±: vm=%s shares=%d", vm_id, cpu_shares)
+                    log.info("cgroup cpu.shares ayarlandı: vm=%s shares=%d", vm_id, cpu_shares)
             except (OSError, PermissionError) as exc:
-                log.warning("cgroup cpu.shares ayarlanamadÄ±: %s", exc)
+                log.warning("cgroup cpu.shares ayarlanamadı: %s", exc)
 
             # io_weight (blkio)
             try:
@@ -133,7 +133,7 @@ def set_quota(vm_id, vm_name=None, max_vcpus=None, max_memory_mb=None,
                     with open(blkio_path, "w", encoding="utf-8") as f:
                         f.write(str(io_weight))
             except (OSError, PermissionError) as exc:
-                log.warning("blkio weight ayarlanamadÄ±: %s", exc)
+                log.warning("blkio weight ayarlanamadı: %s", exc)
 
             data[vm_id_str] = quota
             _save(data)
@@ -141,40 +141,40 @@ def set_quota(vm_id, vm_name=None, max_vcpus=None, max_memory_mb=None,
             log.info("Kota kaydedildi: vm=%s", vm_id)
             return {"success": True, "quota": quota}
         except Exception as exc:
-            log.exception("set_quota hatasÄ±: %s", exc)
+            log.exception("set_quota hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def delete_quota(vm_id):
-    """VM kotasÄ±nÄ± siler."""
+    """VM kotasını siler."""
     with _lock:
         try:
             data = _load()
             vm_id_str = str(vm_id)
             if vm_id_str not in data:
-                return {"success": False, "error": "Kota bulunamadÄ±"}
+                return {"success": False, "error": "Kota bulunamadı"}
             data.pop(vm_id_str)
             _save(data)
             log.info("Kota silindi: vm=%s", vm_id)
             return {"success": True}
         except Exception as exc:
-            log.exception("delete_quota hatasÄ±: %s", exc)
+            log.exception("delete_quota hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def list_quotas():
-    """TÃ¼m VM kotalarÄ±nÄ± listeler (global kota hariÃ§)."""
+    """Tüm VM kotalarını listeler (global kota hariç)."""
     try:
         data = _load()
         return [v for k, v in data.items() if k != GLOBAL_QUOTA_KEY]
     except Exception as exc:
-        log.exception("list_quotas hatasÄ±: %s", exc)
+        log.exception("list_quotas hatası: %s", exc)
         return []
 
 
 def get_global_quota():
     """
-    Global kota ayarlarÄ±nÄ± dÃ¶ner.
+    Global kota ayarlarını döner.
     {"max_vms_per_user": int, "max_total_vcpus": int, "max_total_memory_gb": int}
     """
     try:
@@ -187,12 +187,12 @@ def get_global_quota():
             "max_total_memory_gb": 256,
         })
     except Exception as exc:
-        log.exception("get_global_quota hatasÄ±: %s", exc)
+        log.exception("get_global_quota hatası: %s", exc)
         return {}
 
 
 def set_global_quota(max_vms_per_user=None, max_total_vcpus=None, max_total_memory_gb=None):
-    """Global kota ayarlarÄ±nÄ± gÃ¼nceller."""
+    """Global kota ayarlarını günceller."""
     with _lock:
         try:
             data = _load()
@@ -208,17 +208,17 @@ def set_global_quota(max_vms_per_user=None, max_total_vcpus=None, max_total_memo
             data[GLOBAL_QUOTA_KEY] = current
             _save(data)
 
-            log.info("Global kota gÃ¼ncellendi: %s", current)
+            log.info("Global kota güncellendi: %s", current)
             return {"success": True, "global_quota": current}
         except Exception as exc:
-            log.exception("set_global_quota hatasÄ±: %s", exc)
+            log.exception("set_global_quota hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def check_quota(username, vcpus, memory_mb):
     """
-    rapor #25 fix: KullanÄ±cÄ± baÅŸÄ±na VM/vCPU/RAM kota kontrolÃ¼.
-    DÃ¶nÃ¼ÅŸ: (ok: bool, reason: str)
+    rapor #25 fix: Kullanıcı başına VM/vCPU/RAM kota kontrolü.
+    Dönüş: (ok: bool, reason: str)
     """
     try:
         global_quota = get_global_quota()
@@ -228,7 +228,7 @@ def check_quota(username, vcpus, memory_mb):
         max_memory_gb = global_quota.get("max_total_memory_gb", 256)
         max_vms = global_quota.get("max_vms_per_user", 10)
 
-        # rapor #25: KullanÄ±cÄ±ya atanmÄ±ÅŸ VM'ler Ã¼zerinden kota hesapla
+        # rapor #25: Kullanıcıya atanmış VM'ler üzerinden kota hesapla
         try:
             import user_manager as _um
             user_vm_ids = set(_um.get_user_vms(username))
@@ -245,43 +245,43 @@ def check_quota(username, vcpus, memory_mb):
         total_memory_gb = sum(q.get("max_memory_mb") or 0 for q in all_quotas) / 1024
 
         if total_vcpus + vcpus > max_vcpus:
-            return False, (f"Toplam vCPU limiti aÅŸÄ±lÄ±yor: "
+            return False, (f"Toplam vCPU limiti aşılıyor: "
                            f"mevcut={total_vcpus}, istenen={vcpus}, limit={max_vcpus}")
 
         if total_memory_gb + (memory_mb / 1024) > max_memory_gb:
-            return False, (f"Toplam bellek limiti aÅŸÄ±lÄ±yor: "
+            return False, (f"Toplam bellek limiti aşılıyor: "
                            f"mevcut={total_memory_gb:.1f}GB, "
                            f"istenen={memory_mb/1024:.1f}GB, limit={max_memory_gb}GB")
 
-        # rapor #25: KullanÄ±cÄ± baÅŸÄ±na VM sayÄ±sÄ± kontrolÃ¼
+        # rapor #25: Kullanıcı başına VM sayısı kontrolü
         if user_vm_count >= max_vms:
-            return False, (f"KullanÄ±cÄ± '{username}' VM limitine ulaÅŸtÄ±: "
+            return False, (f"Kullanıcı '{username}' VM limitine ulaştı: "
                            f"mevcut={user_vm_count}, limit={max_vms}")
 
-        # rapor #25: KullanÄ±cÄ± baÅŸÄ±na vCPU kontrolÃ¼
+        # rapor #25: Kullanıcı başına vCPU kontrolü
         user_max_vcpus = global_quota.get("max_vcpus_per_user", max_vcpus)
         if user_vcpus + vcpus > user_max_vcpus:
-            return False, (f"KullanÄ±cÄ± '{username}' vCPU limitini aÅŸÄ±yor: "
+            return False, (f"Kullanıcı '{username}' vCPU limitini aşıyor: "
                            f"mevcut={user_vcpus}, istenen={vcpus}, limit={user_max_vcpus}")
 
-        # rapor #25: KullanÄ±cÄ± baÅŸÄ±na RAM kontrolÃ¼ (MB)
+        # rapor #25: Kullanıcı başına RAM kontrolü (MB)
         user_max_mem_mb = global_quota.get("max_memory_mb_per_user", max_memory_gb * 1024)
         if user_mem_mb + memory_mb > user_max_mem_mb:
-            return False, (f"KullanÄ±cÄ± '{username}' bellek limitini aÅŸÄ±yor: "
+            return False, (f"Kullanıcı '{username}' bellek limitini aşıyor: "
                            f"mevcut={user_mem_mb}MB, istenen={memory_mb}MB, limit={user_max_mem_mb}MB")
 
         return True, "OK"
     except Exception as exc:
-        log.exception("check_quota hatasÄ±: %s", exc)
-        return False, f"Kota kontrolÃ¼ baÅŸarÄ±sÄ±z: {exc}"
+        log.exception("check_quota hatası: %s", exc)
+        return False, f"Kota kontrolü başarısız: {exc}"
 
 
 def apply_quota_to_vm(vm_id):
-    """Mevcut kotayÄ± virsh ile VM'e uygular."""
+    """Mevcut kotayı virsh ile VM'e uygular."""
     try:
         quota = get_quota(vm_id)
         if not quota:
-            return {"success": False, "error": "Kota bulunamadÄ±"}
+            return {"success": False, "error": "Kota bulunamadı"}
 
         return set_quota(
             vm_id=vm_id,
@@ -292,11 +292,11 @@ def apply_quota_to_vm(vm_id):
             io_weight=quota.get("io_weight", 100),
         )
     except Exception as exc:
-        log.exception("apply_quota_to_vm hatasÄ±: %s", exc)
+        log.exception("apply_quota_to_vm hatası: %s", exc)
         return {"success": False, "error": str(exc)}
-
-
-
-
-
-
+
+
+
+
+
+

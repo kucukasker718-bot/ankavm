@@ -1,4 +1,4 @@
-﻿"""ankavm Resource Pool Manager â€” CPU/RAM quotas per VM group.
+"""ankavm Resource Pool Manager — CPU/RAM quotas per VM group.
 Storage: /var/lib/ankavm/resource_pools.json
 """
 import json, uuid, threading
@@ -108,13 +108,13 @@ def get_vm_pool(vm_id):
     return None
 
 
-# â”€â”€ v2.5.6 â€” Reservations (minimum guaranteed resources per pool) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── v2.5.6 — Reservations (minimum guaranteed resources per pool) ─────────────
 def set_reservations(pool_id, vcpu_min=0, ram_mb_min=0):
     """
-    Pool iÃ§in minimum garantili kaynak rezervasyonu ayarla.
-    Placement / scheduler bu deÄŸerleri dikkate alarak VM yerleÅŸtirir.
+    Pool için minimum garantili kaynak rezervasyonu ayarla.
+    Placement / scheduler bu değerleri dikkate alarak VM yerleştirir.
 
-    Returns: gÃ¼ncellenmiÅŸ pool dict (None â€” pool yoksa).
+    Returns: güncellenmiş pool dict (None — pool yoksa).
     """
     try:
         vcpu_min   = max(0, int(vcpu_min or 0))
@@ -134,7 +134,7 @@ def set_reservations(pool_id, vcpu_min=0, ram_mb_min=0):
 
 
 def get_reservations(pool_id):
-    """Pool rezervasyonlarÄ±nÄ± dÃ¶ner â€” yoksa sÄ±fÄ±r."""
+    """Pool rezervasyonlarını döner — yoksa sıfır."""
     with _lock:
         for p in _load():
             if p["id"] == pool_id:
@@ -145,9 +145,9 @@ def get_reservations(pool_id):
                     "updated":            p.get("reservation_updated"),
                 }
     return None
-
-
-
-
-
-
+
+
+
+
+
+

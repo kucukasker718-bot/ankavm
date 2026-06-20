@@ -1,8 +1,8 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # ============================================================================
 # ankavm OS Rebrander
 # Converts Ubuntu/Debian identity into "ankavm Hypervisor" identity.
-# Idempotent â€” safe to re-run. Backs up originals to /etc/ankavm/.os-backup/
+# Idempotent — safe to re-run. Backs up originals to /etc/ankavm/.os-backup/
 # Usage: sudo bash scripts/rebrand-os.sh [--restore]
 # ============================================================================
 
@@ -118,7 +118,7 @@ rebrand_os_release() {
 
     # If /etc/os-release is a symlink to /usr/lib/os-release, replace symlink
     if [ -L /etc/os-release ]; then
-        info "/etc/os-release is a symlink â€” removing and writing real file."
+        info "/etc/os-release is a symlink — removing and writing real file."
         rm -f /etc/os-release
     fi
 
@@ -171,7 +171,7 @@ rebrand_issue() {
 
     local src="$SCRIPT_DIR/ankavm-issue"
     if [ ! -f "$src" ]; then
-        warn "Template $src not found â€” writing minimal banner."
+        warn "Template $src not found — writing minimal banner."
         cat > /etc/issue <<EOF
 ${BRAND_NAME} ${ankavm_VERSION}
 Kernel \\r on an \\m
@@ -216,7 +216,7 @@ rebrand_hostname() {
             log "Hostname set to 'ankavm' (was '$current')."
             ;;
         *)
-            info "Hostname '$current' is custom â€” leaving untouched."
+            info "Hostname '$current' is custom — leaving untouched."
             ;;
     esac
 }
@@ -247,7 +247,7 @@ rebrand_grub() {
         grub-mkconfig -o /boot/grub/grub.cfg >/dev/null 2>&1 \
             && log "GRUB regenerated." || warn "grub-mkconfig failed (non-fatal)."
     else
-        warn "No GRUB tooling found â€” skipping regeneration."
+        warn "No GRUB tooling found — skipping regeneration."
     fi
 }
 
@@ -305,7 +305,7 @@ install_version_helper() {
     step "Installing /usr/local/bin/ankavm-version"
     cat > /usr/local/bin/ankavm-version <<EOF
 #!/bin/sh
-# ankavm version helper â€” prints full identity string.
+# ankavm version helper — prints full identity string.
 . /etc/os-release 2>/dev/null || true
 KERNEL="\$(uname -r)"
 ARCH="\$(uname -m)"
@@ -333,7 +333,7 @@ install_profile_d() {
         install -m 0644 "$src" "$dst"
         log "Installed profile.d snippet from $src."
     else
-        warn "Template $src not found â€” writing inline minimal."
+        warn "Template $src not found — writing inline minimal."
         cat > "$dst" <<'EOF'
 export ankavm_HYPERVISOR=1
 EOF
@@ -373,7 +373,7 @@ EOF
 do_restore() {
     step "Restoring original OS identity from $BACKUP_DIR"
     if [ ! -d "$BACKUP_DIR" ]; then
-        err "No backup directory at $BACKUP_DIR â€” cannot restore."
+        err "No backup directory at $BACKUP_DIR — cannot restore."
         exit 1
     fi
     restore_file /etc/os-release
@@ -408,7 +408,7 @@ main() {
     ensure_backup_dir
 
     if is_rebranded; then
-        info "System already shows ankavm identity â€” re-running idempotently."
+        info "System already shows ankavm identity — re-running idempotently."
     fi
 
     rebrand_os_release
@@ -430,9 +430,9 @@ main() {
 }
 
 main "$@"
-
-
-
-
-
-
+
+
+
+
+
+

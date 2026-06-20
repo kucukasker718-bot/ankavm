@@ -1,12 +1,12 @@
-﻿"""
-otel_tracing.py â€” Distributed Tracing (OpenTelemetry-compatible, stdlib only)
+"""
+otel_tracing.py — Distributed Tracing (OpenTelemetry-compatible, stdlib only)
 ankavm v2.5.8 Observability
 
 Features:
   - In-memory ring buffer of last 1000 spans
   - start_span / end_span / record_request helpers
   - get_traces / get_trace(trace_id) / export_otlp()
-  - configure(otlp_endpoint, enabled) â€” persisted to /var/lib/ankavm/otel_config.json
+  - configure(otlp_endpoint, enabled) — persisted to /var/lib/ankavm/otel_config.json
   - No auto-push: export is on-demand only
 """
 
@@ -25,11 +25,11 @@ log = logging.getLogger("otel_tracing")
 _CONFIG_FILE = Path("/var/lib/ankavm/otel_config.json")
 _lock        = threading.Lock()
 
-# Ring buffer â€” deque with maxlen acts as ring buffer
+# Ring buffer — deque with maxlen acts as ring buffer
 _BUFFER_SIZE = 1000
 _spans: deque = deque(maxlen=_BUFFER_SIZE)
 
-# â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Config ────────────────────────────────────────────────────────────────────
 
 _DEFAULT_CONFIG = {"otlp_endpoint": "", "enabled": True}
 
@@ -59,7 +59,7 @@ def _save_config(cfg: dict) -> None:
 _config: dict = _load_config()
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def configure(otlp_endpoint: str = "", enabled: bool = True) -> dict:
     """Persist OTLP endpoint + enabled flag.  No auto-push side-effect."""
@@ -206,9 +206,9 @@ def export_otlp() -> dict:
         "exportedAt": int(time.time()),
         "spanCount":  len(all_spans),
     }
-
-
-
-
-
-
+
+
+
+
+
+

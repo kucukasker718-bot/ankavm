@@ -1,5 +1,5 @@
-﻿"""
-ldap_manager.py â€” LDAP / Active Directory integration
+"""
+ldap_manager.py — LDAP / Active Directory integration
 ankavm Hypervisor backend module
 
 Requires ldap3:  pip install ldap3
@@ -166,7 +166,7 @@ def test_connection():
     if not LDAP_AVAILABLE:
         return {
             "success":   False,
-            "message":   "ldap3 library not installed â€” run: pip install ldap3",
+            "message":   "ldap3 library not installed — run: pip install ldap3",
             "available": False,
         }
 
@@ -196,9 +196,9 @@ def authenticate(username, password):
     Authenticate a user against LDAP and determine their ankavm role.
 
     Role resolution:
-        admin_group   â†’ role "admin"
-        operator_group â†’ role "operator"
-        (any valid user) â†’ role "viewer"
+        admin_group   → role "admin"
+        operator_group → role "operator"
+        (any valid user) → role "viewer"
 
     Returns:
         dict: authenticated, username, role, display_name
@@ -226,7 +226,7 @@ def authenticate(username, password):
     try:
         base_dn     = cfg.get("base_dn", "")
         user_filter = cfg.get("user_filter", "(objectClass=person)")
-        # OXW-2026-018 fix: RFC 4515 LDAP filter escape â€” enjeksiyon Ã¶nleme
+        # OXW-2026-018 fix: RFC 4515 LDAP filter escape — enjeksiyon önleme
         def _ldap_escape(s: str) -> str:
             return (s.replace("\\", r"\5c").replace("*", r"\2a")
                      .replace("(", r"\28").replace(")", r"\29").replace("\x00", r"\00"))
@@ -293,7 +293,7 @@ def authenticate(username, password):
     else:
         role = "viewer"
 
-    log.info("LDAP auth success: %s â†’ role=%s", username, role)
+    log.info("LDAP auth success: %s → role=%s", username, role)
     return {
         "authenticated": True,
         "username":       username,
@@ -414,9 +414,9 @@ def is_enabled():
     """Return True if LDAP is configured and enabled."""
     cfg = get_config()
     return bool(cfg.get("enabled") and cfg.get("server"))
-
-
-
-
-
-
+
+
+
+
+
+

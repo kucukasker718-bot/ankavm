@@ -1,13 +1,13 @@
-﻿"""
-ankavm Backup Encryption â€” AES-256-GCM
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Backup tar.gz dosyalarÄ±nÄ± ÅŸifrele/Ã§Ã¶z.
-Passphrase â†’ PBKDF2 â†’ AES key. Authenticated encryption (GCM).
+"""
+ankavm Backup Encryption — AES-256-GCM
+──────────────────────────────────────
+Backup tar.gz dosyalarını şifrele/çöz.
+Passphrase → PBKDF2 → AES key. Authenticated encryption (GCM).
 
 API:
     encrypt_file(src, dst, passphrase) -> dict
     decrypt_file(src, dst, passphrase) -> dict
-    verify(src, passphrase) -> bool       (sadece header doÄŸrula)
+    verify(src, passphrase) -> bool       (sadece header doğrula)
     get_default_passphrase() -> str       (env'den)
 """
 
@@ -30,7 +30,7 @@ try:
     _HAVE_AESGCM = True
 except ImportError:
     _HAVE_AESGCM = False
-    log.warning("cryptography library yok â€” fallback CTR+HMAC kullanÄ±lacak")
+    log.warning("cryptography library yok — fallback CTR+HMAC kullanılacak")
 
 
 def get_default_passphrase() -> str:
@@ -120,7 +120,7 @@ def _decrypt_ctr_hmac(src_path: Path, dst_path: Path, key: bytes,
                       nonce: bytes, tag: bytes, ct: bytes) -> dict:
     expected = hmac.new(key, nonce + ct, hashlib.sha256).digest()[:_TAG_LEN]
     if not hmac.compare_digest(tag, expected):
-        raise ValueError("HMAC doÄŸrulama baÅŸarÄ±sÄ±z â€” yanlÄ±ÅŸ ÅŸifre veya bozuk dosya")
+        raise ValueError("HMAC doğrulama başarısız — yanlış şifre veya bozuk dosya")
     out = bytearray()
     counter = 0
     while counter * 64 < len(ct):
@@ -133,11 +133,11 @@ def _decrypt_ctr_hmac(src_path: Path, dst_path: Path, key: bytes,
 
 
 def encrypt_file(src: str, dst: str, passphrase: str = None) -> dict:
-    """src â†’ dst.enc"""
+    """src → dst.enc"""
     src_p = Path(src); dst_p = Path(dst)
     pp = passphrase or get_default_passphrase()
     if not pp:
-        raise ValueError("Passphrase yok â€” ankavm_BACKUP_PASSPHRASE ayarla")
+        raise ValueError("Passphrase yok — ankavm_BACKUP_PASSPHRASE ayarla")
     salt = secrets.token_bytes(_SALT_LEN)
     key  = _derive_key(pp, salt)
     if _HAVE_AESGCM:
@@ -153,7 +153,7 @@ def decrypt_file(src: str, dst: str, passphrase: str = None) -> dict:
     with open(src_p, "rb") as f:
         magic = f.read(len(_MAGIC))
         if magic != _MAGIC:
-            raise ValueError(f"Bu dosya ankavm encrypted backup deÄŸil: {src}")
+            raise ValueError(f"Bu dosya ankavm encrypted backup değil: {src}")
         ver   = f.read(1)
         salt  = f.read(_SALT_LEN)
         nonce = f.read(_NONCE_LEN)
@@ -167,11 +167,11 @@ def decrypt_file(src: str, dst: str, passphrase: str = None) -> dict:
             key = _derive_key(pp, salt)
             return _decrypt_ctr_hmac(src_p, dst_p, key, nonce, tag, ct)
         else:
-            raise ValueError(f"Bilinmeyen ÅŸifreleme versiyonu: {ver.hex()}")
+            raise ValueError(f"Bilinmeyen şifreleme versiyonu: {ver.hex()}")
 
 
 def verify(src: str, passphrase: str = None) -> bool:
-    """Sadece header oku + key derive et + ilk bloku decode et â€” dosyayÄ± yazmaz."""
+    """Sadece header oku + key derive et + ilk bloku decode et — dosyayı yazmaz."""
     src_p = Path(src)
     pp = passphrase or get_default_passphrase()
     if not pp:
@@ -185,12 +185,12 @@ def verify(src: str, passphrase: str = None) -> bool:
             nonce = f.read(_NONCE_LEN)
             key = _derive_key(pp, salt)
             if ver == b"\x01" and _HAVE_AESGCM:
-                # AESGCM tag son 16 byte â€” tÃ¼m dosya gerek
+                # AESGCM tag son 16 byte — tüm dosya gerek
                 ct = f.read()
                 try:
                     AESGCM(key).decrypt(nonce, ct[:_TAG_LEN + 64] or ct, None)
                 except Exception:
-                    # Tag check end-to-end zorunlu; sadece tag varlÄ±ÄŸÄ± kontrolÃ¼
+                    # Tag check end-to-end zorunlu; sadece tag varlığı kontrolü
                     pass
                 return True
             elif ver == b"\x02":
@@ -199,13 +199,13 @@ def verify(src: str, passphrase: str = None) -> bool:
                 return hmac.compare_digest(
                     tag,
                     hmac.new(key, nonce + ct, hashlib.sha256).digest()[:_TAG_LEN]
-                ) or True  # quick partial â€” full check would decrypt all
+                ) or True  # quick partial — full check would decrypt all
             return False
     except Exception:
         return False
-
-
-
-
-
-
+
+
+
+
+
+

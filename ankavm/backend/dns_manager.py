@@ -1,5 +1,5 @@
-﻿"""
-dns_manager.py â€” dnsmasq DNS/DHCP yÃ¶netimi (ankavm Hypervisor)
+"""
+dns_manager.py — dnsmasq DNS/DHCP yönetimi (ankavm Hypervisor)
 """
 
 import subprocess
@@ -19,11 +19,11 @@ DNSMASQ_CONF = "/etc/dnsmasq.d/ankavm.conf"
 _lock = threading.Lock()
 
 # ---------------------------------------------------------------------------
-# Ä°Ã§ yardÄ±mcÄ±lar
+# İç yardımcılar
 # ---------------------------------------------------------------------------
 
 def _run(*cmd):
-    """subprocess.run Ã§alÄ±ÅŸtÄ±rÄ±r; hata fÄ±rlatmaz."""
+    """subprocess.run çalıştırır; hata fırlatmaz."""
     try:
         result = subprocess.run(
             list(cmd),
@@ -33,32 +33,32 @@ def _run(*cmd):
             check=False,
         )
         if result.returncode != 0:
-            log.warning("Komut baÅŸarÄ±sÄ±z [%d]: %s | stderr: %s",
+            log.warning("Komut başarısız [%d]: %s | stderr: %s",
                         result.returncode, " ".join(cmd), result.stderr.strip())
         return result
     except FileNotFoundError:
-        log.error("Komut bulunamadÄ±: %s", cmd[0])
+        log.error("Komut bulunamadı: %s", cmd[0])
         return None
     except Exception as exc:
-        log.exception("_run hatasÄ±: %s", exc)
+        log.exception("_run hatası: %s", exc)
         return None
 
 
 def _ensure_hosts_file():
-    """HOSTS_FILE yoksa oluÅŸturur."""
+    """HOSTS_FILE yoksa oluşturur."""
     if not os.path.exists(HOSTS_FILE):
         try:
             with open(HOSTS_FILE, "w", encoding="utf-8") as f:
                 f.write("# ankavm DNS Hosts\n")
         except OSError as exc:
-            log.error("Hosts dosyasÄ± oluÅŸturulamadÄ±: %s", exc)
+            log.error("Hosts dosyası oluşturulamadı: %s", exc)
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
 def get_status():
-    """dnsmasq'Ä±n Ã§alÄ±ÅŸÄ±p Ã§alÄ±ÅŸmadÄ±ÄŸÄ±nÄ± ve temel bilgileri dÃ¶ner."""
+    """dnsmasq'ın çalışıp çalışmadığını ve temel bilgileri döner."""
     try:
         result = _run("systemctl", "is-active", "dnsmasq")
         active = result is not None and result.stdout.strip() == "active"
@@ -79,14 +79,14 @@ def get_status():
             "conf_file": DNSMASQ_CONF,
         }
     except Exception as exc:
-        log.exception("get_status hatasÄ±: %s", exc)
+        log.exception("get_status hatası: %s", exc)
         return {"active": False, "error": str(exc)}
 
 
 def list_hosts():
     """
     HOSTS_FILE parse eder.
-    DÃ¶nÃ¼ÅŸ: [{"ip": str, "hostname": str, "comment": str}, ...]
+    Dönüş: [{"ip": str, "hostname": str, "comment": str}, ...]
     """
     _ensure_hosts_file()
     hosts = []
@@ -95,9 +95,9 @@ def list_hosts():
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#"):
-                    # Yorum satÄ±rÄ±nÄ± bir sonraki host'a ata
+                    # Yorum satırını bir sonraki host'a ata
                     continue
-                # Inline comment varsa ayÄ±r
+                # Inline comment varsa ayır
                 comment = ""
                 if "#" in line:
                     parts = line.split("#", 1)
@@ -113,17 +113,17 @@ def list_hosts():
                         "comment": comment,
                     })
     except OSError as exc:
-        log.error("Hosts dosyasÄ± okunamadÄ±: %s", exc)
+        log.error("Hosts dosyası okunamadı: %s", exc)
     return hosts
 
 
 def add_host(ip, hostname, comment=""):
-    """HOSTS_FILE'a kayÄ±t ekler ve dnsmasq'Ä± yeniden yÃ¼kler."""
+    """HOSTS_FILE'a kayıt ekler ve dnsmasq'ı yeniden yükler."""
     with _lock:
         try:
             _ensure_hosts_file()
 
-            # AynÄ± hostname varsa gÃ¼ncelle
+            # Aynı hostname varsa güncelle
             hosts = list_hosts()
             existing = [h for h in hosts if h["hostname"] == hostname]
             if existing:
@@ -146,11 +146,11 @@ def add_host(ip, hostname, comment=""):
 
 
 def delete_host(hostname):
-    """HOSTS_FILE'dan hostname kaydÄ±nÄ± kaldÄ±rÄ±r ve dnsmasq'Ä± yeniden yÃ¼kler."""
+    """HOSTS_FILE'dan hostname kaydını kaldırır ve dnsmasq'ı yeniden yükler."""
     with _lock:
         try:
             if not os.path.exists(HOSTS_FILE):
-                return {"success": False, "error": "Hosts dosyasÄ± bulunamadÄ±"}
+                return {"success": False, "error": "Hosts dosyası bulunamadı"}
 
             with open(HOSTS_FILE, "r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -171,7 +171,7 @@ def delete_host(hostname):
             with open(HOSTS_FILE, "w", encoding="utf-8") as f:
                 f.writelines(new_lines)
 
-            log.info("Host silindi: %s (%d satÄ±r)", hostname, removed)
+            log.info("Host silindi: %s (%d satır)", hostname, removed)
             reload()
             return {"success": True, "removed_count": removed}
         except OSError as exc:
@@ -181,13 +181,13 @@ def delete_host(hostname):
 
 def list_leases():
     """
-    DHCP lease dosyasÄ±nÄ± parse eder.
-    DÃ¶nÃ¼ÅŸ: [{"mac": str, "ip": str, "hostname": str, "expires": int}, ...]
+    DHCP lease dosyasını parse eder.
+    Dönüş: [{"mac": str, "ip": str, "hostname": str, "expires": int}, ...]
     """
     leases = []
     try:
         if not os.path.exists(LEASES_FILE):
-            log.warning("Leases dosyasÄ± bulunamadÄ±: %s", LEASES_FILE)
+            log.warning("Leases dosyası bulunamadı: %s", LEASES_FILE)
             return []
 
         with open(LEASES_FILE, "r", encoding="utf-8") as f:
@@ -202,12 +202,12 @@ def list_leases():
                         "client_id": tokens[4] if len(tokens) > 4 else "",
                     })
     except OSError as exc:
-        log.error("Leases dosyasÄ± okunamadÄ±: %s", exc)
+        log.error("Leases dosyası okunamadı: %s", exc)
     return leases
 
 
 def get_config():
-    """DNSMASQ_CONF dosyasÄ±nÄ± okur ve parse eder."""
+    """DNSMASQ_CONF dosyasını okur ve parse eder."""
     try:
         if not os.path.exists(DNSMASQ_CONF):
             return {"exists": False, "path": DNSMASQ_CONF, "settings": {}}
@@ -226,14 +226,14 @@ def get_config():
 
         return {"exists": True, "path": DNSMASQ_CONF, "settings": settings}
     except OSError as exc:
-        log.error("Config okunamadÄ±: %s", exc)
+        log.error("Config okunamadı: %s", exc)
         return {"exists": False, "error": str(exc)}
 
 
 def update_config(upstream_dns=None, domain=None, dhcp_range=None, dhcp_enabled=None):
     """
-    DNSMASQ_CONF'u gÃ¼nceller.
-    Parametreler None ise mevcut deÄŸer korunur.
+    DNSMASQ_CONF'u günceller.
+    Parametreler None ise mevcut değer korunur.
     """
     with _lock:
         try:
@@ -252,7 +252,7 @@ def update_config(upstream_dns=None, domain=None, dhcp_range=None, dhcp_enabled=
                 if not dhcp_enabled:
                     settings.pop("dhcp-range", None)
 
-            lines = ["# ankavm dnsmasq config â€” auto-generated\n"]
+            lines = ["# ankavm dnsmasq config — auto-generated\n"]
             for key, val in settings.items():
                 if val is True:
                     lines.append(f"{key}\n")
@@ -262,9 +262,9 @@ def update_config(upstream_dns=None, domain=None, dhcp_range=None, dhcp_enabled=
             with open(DNSMASQ_CONF, "w", encoding="utf-8") as f:
                 f.writelines(lines)
 
-            log.info("dnsmasq config gÃ¼ncellendi")
+            log.info("dnsmasq config güncellendi")
 
-            # systemd-resolved kalÄ±cÄ± DNS â€” reboot'ta sÄ±fÄ±rlanmasÄ±n
+            # systemd-resolved kalıcı DNS — reboot'ta sıfırlanmasın
             if upstream_dns is not None:
                 try:
                     dns_list = upstream_dns if isinstance(upstream_dns, list) else [upstream_dns]
@@ -276,22 +276,22 @@ def update_config(upstream_dns=None, domain=None, dhcp_range=None, dhcp_enabled=
                     import subprocess as _sp
                     _sp.run(["systemctl", "restart", "systemd-resolved"],
                             capture_output=True, timeout=10)
-                    log.info("systemd-resolved DNS gÃ¼ncellendi: %s", dns_str)
+                    log.info("systemd-resolved DNS güncellendi: %s", dns_str)
                 except Exception as _re:
-                    log.warning("resolved.conf gÃ¼ncellenemedi: %s", _re)
+                    log.warning("resolved.conf güncellenemedi: %s", _re)
 
             return {"success": True, "settings": settings}
         except OSError as exc:
-            log.error("Config gÃ¼ncellenemedi: %s", exc)
+            log.error("Config güncellenemedi: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def reload():
-    """dnsmasq servisini yeniden yÃ¼kler."""
-    log.info("dnsmasq yeniden yÃ¼kleniyor")
+    """dnsmasq servisini yeniden yükler."""
+    log.info("dnsmasq yeniden yükleniyor")
     result = _run("systemctl", "reload", "dnsmasq")
     if result is None:
-        # systemctl yoksa SIGHUP gÃ¶nder
+        # systemctl yoksa SIGHUP gönder
         _run("killall", "-HUP", "dnsmasq")
         return {"success": True, "method": "SIGHUP"}
     return {
@@ -302,16 +302,16 @@ def reload():
 
 def get_stats():
     """
-    dnsmasq stats socket Ã¼zerinden istatistikleri alÄ±r.
-    EriÅŸim yoksa boÅŸ dict dÃ¶ner.
+    dnsmasq stats socket üzerinden istatistikleri alır.
+    Erişim yoksa boş dict döner.
     """
     try:
-        # dnsmasq log tabanlÄ± stats iÃ§in SIGUSR1 sinyali gÃ¶nder
+        # dnsmasq log tabanlı stats için SIGUSR1 sinyali gönder
         result = _run("killall", "-USR1", "dnsmasq")
         if result is None or result.returncode != 0:
             return {}
 
-        # Logdan son satÄ±rlarÄ± oku (journalctl veya /var/log/syslog)
+        # Logdan son satırları oku (journalctl veya /var/log/syslog)
         log_result = _run("journalctl", "-u", "dnsmasq", "--no-pager", "-n", "20")
         stats = {}
         if log_result and log_result.returncode == 0:
@@ -331,7 +331,7 @@ def get_stats():
 
         return stats
     except Exception as exc:
-        log.warning("get_stats hatasÄ±: %s", exc)
+        log.warning("get_stats hatası: %s", exc)
         return {}
 
 
@@ -344,9 +344,9 @@ def add_dns_record(hostname, ip):
 def delete_dns_record(hostname):
     """delete_host alias."""
     return delete_host(hostname)
-
-
-
-
-
-
+
+
+
+
+
+

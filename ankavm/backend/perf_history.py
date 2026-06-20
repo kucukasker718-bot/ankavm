@@ -1,5 +1,5 @@
-﻿"""
-perf_history.py - SQLite tabanlÄ± sistem ve VM metrik geÃ§miÅŸi.
+"""
+perf_history.py - SQLite tabanlı sistem ve VM metrik geçmişi.
 DB: /var/lib/ankavm/metrics.db
 """
 
@@ -40,7 +40,7 @@ _last_cleanup = 0
 # ---------------------------------------------------------------------------
 
 def init_db():
-    """system_metrics ve vm_metrics tablolarÄ±nÄ± oluÅŸturur."""
+    """system_metrics ve vm_metrics tablolarını oluşturur."""
     try:
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         with _lock:
@@ -74,17 +74,17 @@ def init_db():
             """)
             conn.commit()
             conn.close()
-        log.info("perf_history DB hazÄ±r: %s", DB_PATH)
+        log.info("perf_history DB hazır: %s", DB_PATH)
     except Exception as e:
-        log.error("init_db hatasÄ±: %s", e)
+        log.error("init_db hatası: %s", e)
 
 
 # ---------------------------------------------------------------------------
-# AnlÄ±k kayÄ±t
+# Anlık kayıt
 # ---------------------------------------------------------------------------
 
 def _parse_virsh_domstats():
-    """virsh domstats --all Ã§Ä±ktÄ±sÄ±nÄ± parse eder, list of dict dÃ¶ndÃ¼rÃ¼r."""
+    """virsh domstats --all çıktısını parse eder, list of dict döndürür."""
     vms = []
     try:
         out = subprocess.check_output(
@@ -120,14 +120,14 @@ def _parse_virsh_domstats():
         if current:
             vms.append(current)
     except FileNotFoundError:
-        log.debug("virsh bulunamadÄ±, VM metrikleri atlanÄ±yor.")
+        log.debug("virsh bulunamadı, VM metrikleri atlanıyor.")
     except Exception as e:
-        log.debug("virsh domstats hatasÄ±: %s", e)
+        log.debug("virsh domstats hatası: %s", e)
     return vms
 
 
 def record_snapshot():
-    """psutil ile sistem verisi, virsh ile VM verisi alÄ±r ve DB'ye kaydeder."""
+    """psutil ile sistem verisi, virsh ile VM verisi alır ve DB'ye kaydeder."""
     global _last_disk, _last_net, _last_ts
 
     try:
@@ -172,7 +172,7 @@ def record_snapshot():
                 conn.commit()
                 conn.close()
         else:
-            log.debug("psutil yok, sistem snapshot atlandÄ±.")
+            log.debug("psutil yok, sistem snapshot atlandı.")
 
         # --- VM metrikleri ---
         vms = _parse_virsh_domstats()
@@ -191,7 +191,7 @@ def record_snapshot():
                 conn.close()
 
     except Exception as e:
-        log.error("record_snapshot hatasÄ±: %s", e)
+        log.error("record_snapshot hatası: %s", e)
 
 
 # ---------------------------------------------------------------------------
@@ -200,7 +200,7 @@ def record_snapshot():
 
 def get_system_history(period="1h"):
     """
-    Belirtilen periyottaki sistem metriklerini dÃ¶ndÃ¼rÃ¼r.
+    Belirtilen periyottaki sistem metriklerini döndürür.
     period: "1h" | "6h" | "24h" | "7d" | "30d"
     """
     try:
@@ -215,12 +215,12 @@ def get_system_history(period="1h"):
             conn.close()
         return rows
     except Exception as e:
-        log.error("get_system_history hatasÄ±: %s", e)
+        log.error("get_system_history hatası: %s", e)
         return []
 
 
 def get_vm_history(vm_id, period="1h"):
-    """Belirtilen VM'nin geÃ§miÅŸ metriklerini dÃ¶ndÃ¼rÃ¼r."""
+    """Belirtilen VM'nin geçmiş metriklerini döndürür."""
     try:
         seconds = PERIODS.get(period, PERIODS["1h"])
         since   = int(time.time()) - seconds
@@ -234,7 +234,7 @@ def get_vm_history(vm_id, period="1h"):
             conn.close()
         return rows
     except Exception as e:
-        log.error("get_vm_history hatasÄ± (vm_id=%s): %s", vm_id, e)
+        log.error("get_vm_history hatası (vm_id=%s): %s", vm_id, e)
         return []
 
 
@@ -243,7 +243,7 @@ def get_vm_history(vm_id, period="1h"):
 # ---------------------------------------------------------------------------
 
 def cleanup_old_data():
-    """30 gÃ¼nden eski kayÄ±tlarÄ± siler."""
+    """30 günden eski kayıtları siler."""
     try:
         cutoff = int(time.time()) - 2592000  # 30d
         with _lock:
@@ -253,46 +253,46 @@ def cleanup_old_data():
             conn.commit()
             total = r1.rowcount + r2.rowcount
             conn.close()
-        log.info("cleanup_old_data: %d eski kayÄ±t silindi.", total)
+        log.info("cleanup_old_data: %d eski kayıt silindi.", total)
     except Exception as e:
-        log.error("cleanup_old_data hatasÄ±: %s", e)
+        log.error("cleanup_old_data hatası: %s", e)
 
 
 # ---------------------------------------------------------------------------
-# Arka plan toplayÄ±cÄ±
+# Arka plan toplayıcı
 # ---------------------------------------------------------------------------
 
 def start_collector(interval=60):
     """
-    Daemon thread baÅŸlatÄ±r. Her `interval` saniyede bir record_snapshot Ã§aÄŸÄ±rÄ±r.
-    Her 24 saatte bir cleanup_old_data Ã§alÄ±ÅŸtÄ±rÄ±r.
+    Daemon thread başlatır. Her `interval` saniyede bir record_snapshot çağırır.
+    Her 24 saatte bir cleanup_old_data çalıştırır.
     """
     init_db()
 
     def _loop():
         global _last_cleanup
-        log.info("perf_history toplayÄ±cÄ± baÅŸladÄ± (interval=%ds).", interval)
+        log.info("perf_history toplayıcı başladı (interval=%ds).", interval)
         while True:
             try:
                 record_snapshot()
             except Exception as e:
-                log.error("ToplayÄ±cÄ± snapshot hatasÄ±: %s", e)
+                log.error("Toplayıcı snapshot hatası: %s", e)
             try:
                 now = time.time()
                 if now - _last_cleanup >= 86400:
                     cleanup_old_data()
                     _last_cleanup = now
             except Exception as e:
-                log.error("ToplayÄ±cÄ± cleanup hatasÄ±: %s", e)
+                log.error("Toplayıcı cleanup hatası: %s", e)
             time.sleep(interval)
 
     t = threading.Thread(target=_loop, name="perf-history-collector", daemon=True)
     t.start()
-    log.info("perf_history collector thread baÅŸlatÄ±ldÄ±.")
+    log.info("perf_history collector thread başlatıldı.")
     return t
-
-
-
-
-
-
+
+
+
+
+
+

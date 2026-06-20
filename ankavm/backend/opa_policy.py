@@ -1,8 +1,8 @@
-﻿"""
-ankavm OPA Policy Engine â€” Policy-as-Code (OPA/Rego)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm OPA Policy Engine — Policy-as-Code (OPA/Rego)
+──────────────────────────────────────────────────────
 Stores Rego policy source files. Evaluation:
-  - If `opa` binary is available on PATH â†’ uses `opa eval` subprocess.
+  - If `opa` binary is available on PATH → uses `opa eval` subprocess.
   - Otherwise falls back to a safe built-in allow/deny rule engine.
 No external Python dependencies. No periodic jobs.
 """
@@ -26,7 +26,7 @@ _META_FILE   = Path("/var/lib/ankavm/opa_policy_meta.json")
 _lock        = threading.Lock()
 
 
-# â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── helpers ───────────────────────────────────────────────────────────────────
 
 def _load_meta() -> dict:
     try:
@@ -59,7 +59,7 @@ def _opa_available() -> bool:
     return shutil.which("opa") is not None
 
 
-# â”€â”€ built-in fallback evaluator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── built-in fallback evaluator ───────────────────────────────────────────────
 
 def _builtin_evaluate(rego_source: str, input_data: dict) -> dict:
     """
@@ -67,7 +67,7 @@ def _builtin_evaluate(rego_source: str, input_data: dict) -> dict:
       allow = true  if conditions
       deny  = true  if conditions
     Returns {allowed, reason, engine='builtin'}.
-    No code execution â€” string pattern matching only.
+    No code execution — string pattern matching only.
     """
     allow_found = False
     deny_found  = False
@@ -104,10 +104,10 @@ def _builtin_evaluate(rego_source: str, input_data: dict) -> dict:
                     if str(cur) == val:
                         if "deny" in line.lower():
                             deny_found = True
-                            reason = f"input.{key} == {val} â†’ deny"
+                            reason = f"input.{key} == {val} → deny"
                         elif "allow" in line.lower():
                             allow_found = True
-                            reason = f"input.{key} == {val} â†’ allow"
+                            reason = f"input.{key} == {val} → allow"
             except Exception:
                 pass
 
@@ -116,11 +116,11 @@ def _builtin_evaluate(rego_source: str, input_data: dict) -> dict:
         return {"allowed": False, "reason": reason, "engine": "builtin"}
     if allow_found:
         return {"allowed": True, "reason": reason, "engine": "builtin"}
-    # Default: if no explicit allow â†’ deny (fail-closed)
+    # Default: if no explicit allow → deny (fail-closed)
     return {"allowed": False, "reason": "no allow rule found (fail-closed)", "engine": "builtin"}
 
 
-# â”€â”€ public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── public API ────────────────────────────────────────────────────────────────
 
 def set_policy(name: str, rego_source: str, description: str = "") -> dict:
     """Create or overwrite a Rego policy."""
@@ -234,7 +234,7 @@ def evaluate(policy_name: str, input_json: dict) -> dict:
                 log.warning("opa eval error: %s", r.stderr.strip())
                 # fall through to builtin
         except Exception as ex:
-            log.warning("opa subprocess fail: %s â€” falling back to builtin", ex)
+            log.warning("opa subprocess fail: %s — falling back to builtin", ex)
 
     # Built-in fallback
     result = _builtin_evaluate(rego_source, input_json)
@@ -251,9 +251,9 @@ def test_policy(policy_name: str, test_input: dict) -> dict:
     result["test"] = True
     result["test_input"] = test_input
     return result
-
-
-
-
-
-
+
+
+
+
+
+

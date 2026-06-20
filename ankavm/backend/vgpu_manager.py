@@ -1,5 +1,5 @@
-﻿"""
-vGPU Manager â€” NVIDIA GRID / MIG mdev discovery + assignment.
+"""
+vGPU Manager — NVIDIA GRID / MIG mdev discovery + assignment.
 """
 import os
 import uuid as _uuid
@@ -157,9 +157,9 @@ def remove_mdev(mdev_uuid: str) -> dict:
     except Exception as e:
         log.error("remove_mdev: %s", e)
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

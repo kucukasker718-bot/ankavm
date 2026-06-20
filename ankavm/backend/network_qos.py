@@ -1,4 +1,4 @@
-﻿"""ankavm Network QoS â€” per-NIC bandwidth throttling via virsh domiftune."""
+"""ankavm Network QoS — per-NIC bandwidth throttling via virsh domiftune."""
 import subprocess
 import re
 
@@ -49,7 +49,7 @@ def set_nic_qos(vm_name, iface, inbound_kbps=0, outbound_kbps=0):
     inbound_kbps = max(0, int(inbound_kbps))
     outbound_kbps = max(0, int(outbound_kbps))
     if inbound_kbps > 10_000_000 or outbound_kbps > 10_000_000:
-        raise ValueError("Bant geniÅŸliÄŸi limiti 10 Gbps'i aÅŸamaz")
+        raise ValueError("Bant genişliği limiti 10 Gbps'i aşamaz")
     try:
         _run([
             "virsh", "domiftune", vm_name, iface,
@@ -84,9 +84,9 @@ def list_vm_nics(vm_name):
         return nics
     except Exception as e:
         return []
-
-
-
-
-
-
+
+
+
+
+
+

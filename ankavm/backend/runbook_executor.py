@@ -1,6 +1,6 @@
-﻿"""
-ankavm Runbook Executor â€” auto-remediation engine.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Runbook Executor — auto-remediation engine.
+───────────────────────────────────────────────────
 Pre-approved runbooks fire when the anomaly detector raises a high-confidence
 event. Each runbook has:
   - id, name, description
@@ -41,7 +41,7 @@ _LAST_RUN: dict = {}  # runbook_id -> [timestamps]
 _API_CALL_LOG: dict = {}  # runbook_id -> [timestamps] (per-step api_call quota)
 _API_CALL_MAX_PER_HOUR = 120  # global per-runbook ceiling on api_call steps
 
-# Shell step allowlist â€” only these absolute binaries may be invoked. Anything
+# Shell step allowlist — only these absolute binaries may be invoked. Anything
 # else is rejected. The runbook author may still pass arbitrary argv, but the
 # program itself is constrained.
 _SHELL_BIN_ALLOWLIST = (
@@ -61,7 +61,7 @@ _SHELL_BIN_ALLOWLIST = (
 DEFAULT_RUNBOOKS = [
     {
         "id": "rb-high-cpu-throttle",
-        "name": "High CPU â€” throttle hot VMs",
+        "name": "High CPU — throttle hot VMs",
         "description": "When host CPU sustains anomalous load, cap top consumer VMs to 60% via cgroups.",
         "trigger": {"metric_regex": r"^system\.cpu$", "min_z": 3.0, "cooldown_sec": 600},
         "steps": [
@@ -78,12 +78,12 @@ DEFAULT_RUNBOOKS = [
     },
     {
         "id": "rb-mem-pressure-balloon",
-        "name": "Memory pressure â€” balloon idle VMs",
+        "name": "Memory pressure — balloon idle VMs",
         "description": "If host memory > 90% sustained anomalous, inflate balloon driver on idle VMs.",
         "trigger": {"metric_regex": r"^system\.mem$", "min_z": 3.0, "cooldown_sec": 600},
         "steps": [
             {"type": "notify", "level": "WARNING",
-             "message": "Memory pressure â€” ballooning idle VMs"},
+             "message": "Memory pressure — ballooning idle VMs"},
             {"type": "api_call", "method": "POST",
              "url": "http://127.0.0.1:8080/api/internal/balloon_idle_vms",
              "allow_loopback": True, "allow_http": True,
@@ -95,7 +95,7 @@ DEFAULT_RUNBOOKS = [
     },
     {
         "id": "rb-disk-iops-spike",
-        "name": "Disk IOPS spike â€” quiesce non-critical I/O",
+        "name": "Disk IOPS spike — quiesce non-critical I/O",
         "description": "On per-VM IOPS anomaly, set blkio weight to lowest for tagged 'batch' VMs.",
         "trigger": {"metric_regex": r"^vm\..+\.iops$", "min_z": 3.5, "cooldown_sec": 300},
         "steps": [
@@ -110,7 +110,7 @@ DEFAULT_RUNBOOKS = [
     },
     {
         "id": "rb-vm-down-restart",
-        "name": "VM unexpectedly stopped â€” auto-restart",
+        "name": "VM unexpectedly stopped — auto-restart",
         "description": "If a VM with auto_restart=true stops outside a scheduled window, restart it.",
         "trigger": {"metric_regex": r"^vm\..+\.state_unexpected_stop$", "min_z": 0.0,
                     "cooldown_sec": 120},
@@ -266,7 +266,7 @@ def _run_step(step: dict, ctx: dict, rb_id: str = "") -> dict:
         except Exception as e:
             return {"ok": False, "type": t, "error": str(e)}
     if t == "api_call":
-        # SEC-017: SSRF guard â€” block private/loopback URLs.
+        # SEC-017: SSRF guard — block private/loopback URLs.
         # SEC-022: per-runbook hourly rate limit on api_call steps.
         url = step.get("url", "")
         try:
@@ -395,9 +395,9 @@ def history(limit: int = 100) -> list:
     except Exception as e:
         log.debug("history read: %s", e)
         return []
-
-
-
-
-
-
+
+
+
+
+
+

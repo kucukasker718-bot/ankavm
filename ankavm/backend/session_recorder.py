@@ -1,8 +1,8 @@
-﻿"""
+"""
 ankavm Session Recorder
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+───────────────────────
 SSH/VNC/console session recording (asciinema benzeri).
-TÃ¼m I/O kayÄ±t + audit + replay.
+Tüm I/O kayıt + audit + replay.
 
 API:
     start_recording(session_id, user, vm, type) -> dict
@@ -21,7 +21,7 @@ log = logging.getLogger("session_recorder")
 _REC_DIR  = Path("/var/lib/ankavm/recordings")
 _INDEX    = _REC_DIR / "index.json"
 _LOCK     = threading.Lock()
-_ACTIVE   = {}            # session_id â†’ {path, fp, start_ts, meta}
+_ACTIVE   = {}            # session_id → {path, fp, start_ts, meta}
 
 
 def _load_index() -> list:
@@ -80,7 +80,7 @@ def start_recording(session_id: str = None, user: str = "anonymous",
 
 def write(session_id: str, data: str, direction: str = "o") -> None:
     """
-    direction: 'o' (output, terminal'e yazÄ±lan) | 'i' (input, kullanÄ±cÄ±nÄ±n tuÅŸladÄ±ÄŸÄ±)
+    direction: 'o' (output, terminal'e yazılan) | 'i' (input, kullanıcının tuşladığı)
     """
     if not data:
         return
@@ -94,14 +94,14 @@ def write(session_id: str, data: str, direction: str = "o") -> None:
         sess["fp"].write(json.dumps(event) + "\n")
         sess["events"] += 1
     except Exception as e:
-        log.warning("session write hatasÄ±: %s", e)
+        log.warning("session write hatası: %s", e)
 
 
 def stop_recording(session_id: str) -> dict:
     with _LOCK:
         sess = _ACTIVE.pop(session_id, None)
     if not sess:
-        return {"ok": False, "error": "Session bulunamadÄ±"}
+        return {"ok": False, "error": "Session bulunamadı"}
     try:
         sess["fp"].flush()
         sess["fp"].close()
@@ -138,7 +138,7 @@ def list_recordings(filter_user: str = None, filter_vm: str = None,
 
 
 def get_recording(rec_id: str) -> bytes:
-    """Cast dosyasÄ±nÄ± byte olarak dÃ¶ndÃ¼r (download iÃ§in)."""
+    """Cast dosyasını byte olarak döndür (download için)."""
     recs = _load_index()
     rec  = next((r for r in recs if r["id"] == rec_id), None)
     if not rec:
@@ -162,7 +162,7 @@ def delete_recording(rec_id: str) -> bool:
 
 
 def cleanup_old(days: int = 90) -> int:
-    """Eski kayÄ±tlarÄ± temizle."""
+    """Eski kayıtları temizle."""
     cutoff = time.time() - (days * 86400)
     deleted = 0
     for r in list_recordings(limit=10000):
@@ -182,9 +182,9 @@ def stats() -> dict:
         "total_mb":    round(total_size / (1024 * 1024), 2),
         "directory":   str(_REC_DIR),
     }
-
-
-
-
-
-
+
+
+
+
+
+

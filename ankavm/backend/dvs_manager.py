@@ -1,5 +1,5 @@
-﻿"""
-ankavm DVS Manager â€” Distributed Virtual Switch.
+"""
+ankavm DVS Manager — Distributed Virtual Switch.
 Manages cluster-wide OVS bridge configs stored in /var/lib/ankavm/dvs_config.json.
 Each DVS spans multiple nodes via VXLAN tunnels.
 """
@@ -130,9 +130,9 @@ def create_vxlan_tunnel(bridge, remote_ip, vni=100):
         return {"ok": True, "interface": iface, "vni": vni, "remote": remote_ip}
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,15 +1,15 @@
-﻿"""
-ankavm DRS â€” Distributed Resource Scheduler (basic single-host + multi-host advisor)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm DRS — Distributed Resource Scheduler (basic single-host + multi-host advisor)
+─────────────────────────────────────────────────────────────────────────────────
 VM placement advisor + cross-node rebalance (DPM ile beraber).
 
-Tek host: VM auto-balance iÃ§inde CPU pinning / NUMA Ã¶nerisi.
-Multi host: cluster_manager mevcutsa â†’ migrate Ã¶nerisi.
+Tek host: VM auto-balance içinde CPU pinning / NUMA önerisi.
+Multi host: cluster_manager mevcutsa → migrate önerisi.
 
 API:
-    analyze() -> dict     (VM daÄŸÄ±lÄ±m analizi)
-    suggest_moves() -> list  (taÅŸÄ±ma Ã¶nerileri)
-    auto_balance(dry_run=True) -> dict  (Ã¶nerileri uygula)
+    analyze() -> dict     (VM dağılım analizi)
+    suggest_moves() -> list  (taşıma önerileri)
+    auto_balance(dry_run=True) -> dict  (önerileri uygula)
     get_policy() / set_policy(...)
 """
 
@@ -54,7 +54,7 @@ def set_policy(**kwargs) -> dict:
 
 
 def _get_vm_metrics() -> list:
-    """Ã‡alÄ±ÅŸan VM'lerin CPU/RAM yÃ¼zdesi."""
+    """Çalışan VM'lerin CPU/RAM yüzdesi."""
     out = []
     try:
         r = subprocess.run(["virsh", "list", "--state-running", "--name"],
@@ -63,7 +63,7 @@ def _get_vm_metrics() -> list:
             vm = vm.strip()
             if not vm:
                 continue
-            # virsh domstats â€” cpu time, balloon (memory)
+            # virsh domstats — cpu time, balloon (memory)
             r2 = subprocess.run(["virsh", "domstats", vm, "--vcpu", "--balloon"],
                                 capture_output=True, text=True, timeout=8)
             entry = {"vm": vm, "cpu_time_ns": 0, "vcpus": 1,
@@ -78,12 +78,12 @@ def _get_vm_metrics() -> list:
                     entry["mem_total_kb"] = int(line.split("=")[1])
             out.append(entry)
     except Exception as e:
-        log.warning("DRS metrics fetch hatasÄ±: %s", e)
+        log.warning("DRS metrics fetch hatası: %s", e)
     return out
 
 
 def analyze() -> dict:
-    """Mevcut yÃ¼k daÄŸÄ±lÄ±mÄ±nÄ± ve imbalance'Ä± analiz et."""
+    """Mevcut yük dağılımını ve imbalance'ı analiz et."""
     vms = _get_vm_metrics()
     if not vms:
         return {"vms": [], "imbalance_pct": 0, "needs_action": False}
@@ -109,8 +109,8 @@ def analyze() -> dict:
 
 def suggest_moves() -> list:
     """
-    Multi-node ortamÄ± iÃ§in: yÃ¼ksek yÃ¼klÃ¼ host'tan dÃ¼ÅŸÃ¼k yÃ¼klÃ¼ host'a VM taÅŸÄ±ma Ã¶nerileri.
-    Tek-node: Ã¶nerilen vCPU/RAM ayar deÄŸiÅŸiklikleri.
+    Multi-node ortamı için: yüksek yüklü host'tan düşük yüklü host'a VM taşıma önerileri.
+    Tek-node: önerilen vCPU/RAM ayar değişiklikleri.
     """
     analysis = analyze()
     if not analysis.get("needs_action"):
@@ -120,7 +120,7 @@ def suggest_moves() -> list:
     cpu_high = cfg["cpu_threshold_high"]
     suggestions = []
 
-    # Tek host modunda â€” RAM kullanÄ±mÄ±na gÃ¶re Ã¶neri
+    # Tek host modunda — RAM kullanımına göre öneri
     vms = analysis["vms"]
     avg = analysis["avg_mem_kb"]
     for v in vms:
@@ -131,7 +131,7 @@ def suggest_moves() -> list:
             suggestions.append({
                 "vm":         v["vm"],
                 "action":     "consider_migrate_or_resize",
-                "reason":     f"RAM kullanÄ±mÄ± ortalamadan %{int(deviation)} yÃ¼ksek",
+                "reason":     f"RAM kullanımı ortalamadan %{int(deviation)} yüksek",
                 "current_mb": v["mem_used_kb"] // 1024,
                 "avg_mb":     int(avg / 1024),
             })
@@ -140,7 +140,7 @@ def suggest_moves() -> list:
 
 
 def auto_balance(dry_run: bool = True) -> dict:
-    """Ã–nerileri uygula (tek-host â€” ÅŸu an sadece dry_run mantÄ±ÄŸÄ±nda)."""
+    """Önerileri uygula (tek-host — şu an sadece dry_run mantığında)."""
     suggestions = suggest_moves()
     if dry_run or not suggestions:
         return {
@@ -148,17 +148,17 @@ def auto_balance(dry_run: bool = True) -> dict:
             "suggestions": suggestions,
             "applied":     0,
         }
-    # GerÃ§ek uygulama: cluster_manager olmadÄ±ÄŸÄ± iÃ§in sadece log
-    log.info("DRS auto_balance: %d Ã¶neri uygulanmadÄ± (cluster_manager yok)", len(suggestions))
+    # Gerçek uygulama: cluster_manager olmadığı için sadece log
+    log.info("DRS auto_balance: %d öneri uygulanmadı (cluster_manager yok)", len(suggestions))
     return {
         "dry_run":     False,
         "suggestions": suggestions,
         "applied":     0,
-        "note":        "Multi-node cluster_manager olmadan auto-migrate devre dÄ±ÅŸÄ±",
+        "note":        "Multi-node cluster_manager olmadan auto-migrate devre dışı",
     }
-
-
-
-
-
-
+
+
+
+
+
+

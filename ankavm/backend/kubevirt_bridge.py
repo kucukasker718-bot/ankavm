@@ -1,4 +1,4 @@
-﻿"""ankavm â†” KubeVirt Bridge (v2.9).
+"""ankavm ↔ KubeVirt Bridge (v2.9).
 
 Translates KubeVirt VirtualMachine CRs into native ankavm VM definitions
 so a single ankavm cluster can serve as the hypervisor backing for a
@@ -44,7 +44,7 @@ def list_links() -> list:
 def register_cluster(name: str, kubeconfig_b64: str,
                      watch_namespace: str = "") -> dict:
     """Register a Kubernetes cluster whose KubeVirt CRs we should serve.
-    The kubeconfig is stored verbatim â€” operators must rotate it like any
+    The kubeconfig is stored verbatim — operators must rotate it like any
     other long-lived credential."""
     link = {
         "id": name,
@@ -109,9 +109,9 @@ def _parse_mem(s: str) -> int:
         return int(s) // (1024 * 1024)
     except Exception:
         return 1024
-
-
-
-
-
-
+
+
+
+
+
+

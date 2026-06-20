@@ -1,11 +1,11 @@
-﻿"""
-Container Manager â€” Docker and LXC container lifecycle management.
+"""
+Container Manager — Docker and LXC container lifecycle management.
 """
 import subprocess
 import json
 import os
 
-# â”€â”€â”€ Docker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Docker ───────────────────────────────────────────────────────────────────
 
 def docker_available() -> bool:
     r = subprocess.run(["docker", "info"], capture_output=True, timeout=5)
@@ -108,7 +108,7 @@ def pull_docker_image(image: str) -> dict:
     r = subprocess.run(["docker", "pull", image], capture_output=True, text=True, timeout=300)
     return {"ok": r.returncode == 0, "output": r.stdout[-2000:], "stderr": r.stderr[-500:]}
 
-# â”€â”€â”€ LXC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── LXC ─────────────────────────────────────────────────────────────────────
 
 def lxc_available() -> bool:
     r = subprocess.run(["which", "lxc-ls"], capture_output=True)
@@ -158,9 +158,9 @@ def destroy_lxc_container(name: str) -> dict:
     subprocess.run(["lxc-stop", "-n", name, "-k"], capture_output=True, timeout=15)
     r = subprocess.run(["lxc-destroy", "-n", name], capture_output=True, text=True, timeout=30)
     return {"ok": r.returncode == 0, "stderr": r.stderr.strip()}
-
-
-
-
-
-
+
+
+
+
+
+

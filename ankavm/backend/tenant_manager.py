@@ -1,13 +1,13 @@
-﻿"""
-ankavm Tenant Manager â€” Hard Multi-Tenancy Isolation
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Tenants, kotalar, userâ†’tenant ve vmâ†’tenant atamalarÄ±.
+"""
+ankavm Tenant Manager — Hard Multi-Tenancy Isolation
+─────────────────────────────────────────────────────
+Tenants, kotalar, user→tenant ve vm→tenant atamaları.
 
   - Persistent state: /var/lib/ankavm/tenants.json (atomic write)
   - Thread-safe (RLock)
-  - Network namespace: yalnÄ±zca config kaydÄ± â€” `ip netns add` Ã§aÄŸÄ±rmaz
-    (production'da host'a yÃ¼k yapar, ayrÄ± bir job ile uygulanmalÄ±)
-  - VM/user create flow'larÄ±na dokunmaz; sadece atama tablosu tutar
+  - Network namespace: yalnızca config kaydı — `ip netns add` çağırmaz
+    (production'da host'a yük yapar, ayrı bir job ile uygulanmalı)
+  - VM/user create flow'larına dokunmaz; sadece atama tablosu tutar
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ log = logging.getLogger("tenant_manager")
 _FILE = Path("/var/lib/ankavm/tenants.json")
 _lock = threading.RLock()
 
-# Default kotalar â€” operatÃ¶r tarafÄ±ndan override edilebilir
+# Default kotalar — operatör tarafından override edilebilir
 DEFAULT_QUOTA = {
     "vcpus":   16,
     "ram_mb":  32 * 1024,
@@ -35,7 +35,7 @@ DEFAULT_QUOTA = {
 }
 
 
-# â”€â”€ Persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistence ──────────────────────────────────────────────────────────────
 def _empty_state() -> dict:
     return {
         "tenants":      {},   # tenant_id -> tenant dict
@@ -58,7 +58,7 @@ def _load() -> dict:
 
 
 def _save(state: dict) -> None:
-    """Atomic write â€” tmp + rename."""
+    """Atomic write — tmp + rename."""
     try:
         _FILE.parent.mkdir(parents=True, exist_ok=True)
         tmp = _FILE.with_suffix(".json.tmp")
@@ -68,7 +68,7 @@ def _save(state: dict) -> None:
         log.warning("tenant state save fail: %s", e)
 
 
-# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Helpers ──────────────────────────────────────────────────────────────────
 def _merge_quota(custom: dict) -> dict:
     custom = custom or {}
     out = dict(DEFAULT_QUOTA)
@@ -89,11 +89,11 @@ def _tenant_netns(tenant_id: str) -> str:
     return f"oxw-t-{tenant_id[:8]}"
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ───────────────────────────────────────────────────────────────
 def create_tenant(name: str, quota: Optional[dict] = None) -> dict:
     name = (name or "").strip()
     if not name:
-        raise ValueError("tenant adÄ± boÅŸ olamaz")
+        raise ValueError("tenant adı boş olamaz")
     tid = str(uuid.uuid4())
     tenant = {
         "id":                tid,
@@ -105,14 +105,14 @@ def create_tenant(name: str, quota: Optional[dict] = None) -> dict:
     }
     with _lock:
         state = _load()
-        # Ä°sim Ã§akÄ±ÅŸmasÄ±nÄ± uyar â€” ama bloklamayÄ±z (UUID'ler benzersiz)
+        # İsim çakışmasını uyar — ama bloklamayız (UUID'ler benzersiz)
         for t in state["tenants"].values():
             if t.get("name", "").lower() == name.lower():
-                log.warning("tenant adÄ± zaten kullanÄ±mda: %s", name)
+                log.warning("tenant adı zaten kullanımda: %s", name)
                 break
         state["tenants"][tid] = tenant
         _save(state)
-    log.info("tenant oluÅŸturuldu: %s (%s)", name, tid)
+    log.info("tenant oluşturuldu: %s (%s)", name, tid)
     return tenant
 
 
@@ -120,16 +120,16 @@ def delete_tenant(tenant_id: str, force: bool = False) -> dict:
     with _lock:
         state = _load()
         if tenant_id not in state["tenants"]:
-            return {"ok": False, "error": "tenant bulunamadÄ±"}
-        # VM atamalarÄ± var mÄ±?
+            return {"ok": False, "error": "tenant bulunamadı"}
+        # VM atamaları var mı?
         assigned_vms = [v for v, t in state["vm_tenant"].items() if t == tenant_id]
         if assigned_vms and not force:
             return {
                 "ok":    False,
-                "error": f"tenant'a {len(assigned_vms)} VM atanmÄ±ÅŸ â€” Ã¶nce silin veya force=true kullanÄ±n",
+                "error": f"tenant'a {len(assigned_vms)} VM atanmış — önce silin veya force=true kullanın",
                 "vms":   assigned_vms,
             }
-        # User atamalarÄ±nÄ± da temizle
+        # User atamalarını da temizle
         users = [u for u, t in state["user_tenant"].items() if t == tenant_id]
         for u in users:
             state["user_tenant"].pop(u, None)
@@ -156,7 +156,7 @@ def update_quota(tenant_id: str, quota: dict) -> dict:
         state = _load()
         t = state["tenants"].get(tenant_id)
         if not t:
-            return {"ok": False, "error": "tenant bulunamadÄ±"}
+            return {"ok": False, "error": "tenant bulunamadı"}
         merged = dict(t.get("quota", {}))
         for k, v in (quota or {}).items():
             if k in DEFAULT_QUOTA:
@@ -172,14 +172,14 @@ def update_quota(tenant_id: str, quota: dict) -> dict:
 def assign_user_to_tenant(username: str, tenant_id: str) -> dict:
     username = (username or "").strip()
     if not username:
-        return {"ok": False, "error": "kullanÄ±cÄ± adÄ± boÅŸ"}
+        return {"ok": False, "error": "kullanıcı adı boş"}
     with _lock:
         state = _load()
         if tenant_id not in state["tenants"]:
-            return {"ok": False, "error": "tenant bulunamadÄ±"}
+            return {"ok": False, "error": "tenant bulunamadı"}
         state["user_tenant"][username] = tenant_id
         _save(state)
-    log.info("user %s â†’ tenant %s", username, tenant_id)
+    log.info("user %s → tenant %s", username, tenant_id)
     return {"ok": True}
 
 
@@ -197,10 +197,10 @@ def assign_vm_to_tenant(vm_id: str, tenant_id: str) -> dict:
     with _lock:
         state = _load()
         if tenant_id not in state["tenants"]:
-            return {"ok": False, "error": "tenant bulunamadÄ±"}
+            return {"ok": False, "error": "tenant bulunamadı"}
         state["vm_tenant"][vm_id] = tenant_id
         _save(state)
-    log.info("vm %s â†’ tenant %s", vm_id, tenant_id)
+    log.info("vm %s → tenant %s", vm_id, tenant_id)
     return {"ok": True}
 
 
@@ -228,7 +228,7 @@ def get_vm_tenant(vm_id: str) -> Optional[str]:
 
 
 def list_tenant_vms(tenant_id: str) -> list:
-    """tenant'a atanmÄ±ÅŸ VM ID'leri."""
+    """tenant'a atanmış VM ID'leri."""
     with _lock:
         state = _load()
         return [v for v, t in state["vm_tenant"].items() if t == tenant_id]
@@ -242,8 +242,8 @@ def list_tenant_users(tenant_id: str) -> list:
 
 def get_tenant_usage(tenant_id: str) -> dict:
     """
-    Tenant'Ä±n anlÄ±k kaynak kullanÄ±mÄ±nÄ± dÃ¶ner. vm_manager.list_vms() Ã¼zerinden
-    hesaplar â€” modÃ¼l yoksa sÄ±fÄ±r dÃ¶ner (defensive).
+    Tenant'ın anlık kaynak kullanımını döner. vm_manager.list_vms() üzerinden
+    hesaplar — modül yoksa sıfır döner (defensive).
     """
     usage = {
         "vcpus_used":   0,
@@ -258,7 +258,7 @@ def get_tenant_usage(tenant_id: str) -> dict:
             vm_ids = {v for v, t in state["vm_tenant"].items() if t == tenant_id}
         if not vm_ids:
             return usage
-        # vm_manager import â€” circular import'tan kaÃ§Ä±nmak iÃ§in lazy
+        # vm_manager import — circular import'tan kaçınmak için lazy
         try:
             import vm_manager  # type: ignore
         except Exception:
@@ -284,7 +284,7 @@ def get_tenant_usage(tenant_id: str) -> dict:
                 usage["disk_gb_used"] += int(vm.get("disk_gb", 0) or 0)
             except Exception:
                 pass
-            # IP atamalarÄ± â€” varsa say
+            # IP atamaları — varsa say
             ip_addrs = vm.get("ips") or vm.get("ip_addresses") or []
             if isinstance(ip_addrs, list):
                 usage["ips_count"] += len(ip_addrs)
@@ -297,14 +297,14 @@ def get_tenant_usage(tenant_id: str) -> dict:
 
 def check_quota(tenant_id: str, requested: Optional[dict] = None) -> dict:
     """
-    Yeni bir kaynak isteÄŸi kotaya sÄ±ÄŸar mÄ±? requested keys: vcpus, ram_mb,
-    disk_gb (hepsi opsiyonel, eksikler 0 sayÄ±lÄ±r). AyrÄ±ca vms_max ve ips_max
-    kontrolÃ¼ iÃ§in 'vms', 'ips' alanlarÄ± kabul edilir.
+    Yeni bir kaynak isteği kotaya sığar mı? requested keys: vcpus, ram_mb,
+    disk_gb (hepsi opsiyonel, eksikler 0 sayılır). Ayrıca vms_max ve ips_max
+    kontrolü için 'vms', 'ips' alanları kabul edilir.
     """
     requested = requested or {}
     t = get_tenant(tenant_id)
     if not t:
-        return {"allowed": False, "reason": "tenant bulunamadÄ±"}
+        return {"allowed": False, "reason": "tenant bulunamadı"}
     q = t.get("quota", DEFAULT_QUOTA)
     u = get_tenant_usage(tenant_id)
 
@@ -327,16 +327,16 @@ def check_quota(tenant_id: str, requested: Optional[dict] = None) -> dict:
         if used + need > int(limit or 0):
             return {
                 "allowed":   False,
-                "reason":    f"{req_key} kotasÄ± aÅŸÄ±lÄ±rdÄ± ({used}+{need} > {limit})",
+                "reason":    f"{req_key} kotası aşılırdı ({used}+{need} > {limit})",
                 "used":      used,
                 "limit":     limit,
                 "requested": need,
             }
-    # SayÄ±sal limitler
+    # Sayısal limitler
     if _need("vms") > 0 and u["vms_count"] + _need("vms") > int(q.get("vms_max", DEFAULT_QUOTA["vms_max"])):
-        return {"allowed": False, "reason": "vms_max kotasÄ± aÅŸÄ±lÄ±rdÄ±"}
+        return {"allowed": False, "reason": "vms_max kotası aşılırdı"}
     if _need("ips") > 0 and u["ips_count"] + _need("ips") > int(q.get("ips_max", DEFAULT_QUOTA["ips_max"])):
-        return {"allowed": False, "reason": "ips_max kotasÄ± aÅŸÄ±lÄ±rdÄ±"}
+        return {"allowed": False, "reason": "ips_max kotası aşılırdı"}
     return {"allowed": True, "reason": "ok"}
 
 
@@ -351,9 +351,9 @@ if __name__ == "__main__":
         print(create_tenant(sys.argv[2] if len(sys.argv) > 2 else "default"))
     else:
         print("Usage: tenant_manager.py [list|create <name>]")
-
-
-
-
-
-
+
+
+
+
+
+

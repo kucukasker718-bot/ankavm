@@ -1,7 +1,7 @@
-﻿"""
-ankavm IP Havuzu YÃ¶neticisi
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-IP aralÄ±ÄŸÄ± tanÄ±mlayÄ±n, VM'lere otomatik IP atayÄ±n.
+"""
+ankavm IP Havuzu Yöneticisi
+─────────────────────────
+IP aralığı tanımlayın, VM'lere otomatik IP atayın.
 Veri: /var/lib/ankavm/ip_pool.json
 """
 
@@ -35,19 +35,19 @@ def _save(data: dict):
 
 def create_pool(
     name: str,
-    network: str,                  # Ã¶rn: "192.168.100.0/24"
+    network: str,                  # örn: "192.168.100.0/24"
     gateway: str,
     dns: list = None,
-    start_ip: str = None,          # Havuz baÅŸlangÄ±cÄ± (None = network+10)
+    start_ip: str = None,          # Havuz başlangıcı (None = network+10)
     end_ip: str = None,            # Havuz sonu (None = broadcast-1)
-    reserved: list = None,         # Bu IP'leri dÄ±ÅŸarÄ±da bÄ±rak
-    libvirt_network: str = "default",  # Libvirt aÄŸ adÄ± (virsh net-update iÃ§in)
+    reserved: list = None,         # Bu IP'leri dışarıda bırak
+    libvirt_network: str = "default",  # Libvirt ağ adı (virsh net-update için)
 ) -> dict:
     net = ipaddress.IPv4Network(network, strict=False)
     hosts = list(net.hosts())
 
     if not hosts:
-        raise ValueError("GeÃ§ersiz aÄŸ aralÄ±ÄŸÄ±")
+        raise ValueError("Geçersiz ağ aralığı")
 
     if start_ip:
         start = ipaddress.IPv4Address(start_ip)
@@ -60,7 +60,7 @@ def create_pool(
         end = hosts[-1]
 
     if ipaddress.IPv4Address(gateway) not in net:
-        raise ValueError("Gateway aÄŸ dÄ±ÅŸÄ±nda")
+        raise ValueError("Gateway ağ dışında")
 
     pool_data = {
         "name": name,
@@ -86,7 +86,7 @@ def delete_pool(name: str):
     with _lock:
         data = _load()
         if name not in data["pools"]:
-            raise KeyError(f"Havuz bulunamadÄ±: {name}")
+            raise KeyError(f"Havuz bulunamadı: {name}")
         del data["pools"][name]
         _save(data)
 
@@ -137,18 +137,18 @@ def _pool_ips(pool: dict) -> list:
 
 
 def allocate_ip(pool_name: str, vm_id: str, vm_name: str, mac: str = None) -> dict:
-    """Havuzdan boÅŸ IP tahsis et."""
+    """Havuzdan boş IP tahsis et."""
     with _lock:
         data = _load()
         pool = data["pools"].get(pool_name)
         if not pool:
-            raise KeyError(f"Havuz bulunamadÄ±: {pool_name}")
+            raise KeyError(f"Havuz bulunamadı: {pool_name}")
 
         assigned_ips = {ip for ip, a in data["assignments"].items() if a.get("pool") == pool_name}
         available = [ip for ip in _pool_ips(pool) if ip not in assigned_ips]
 
         if not available:
-            raise RuntimeError(f"Havuzda boÅŸ IP yok: {pool_name}")
+            raise RuntimeError(f"Havuzda boş IP yok: {pool_name}")
 
         ip = available[0]
         data["assignments"][ip] = {
@@ -176,7 +176,7 @@ def allocate_ip(pool_name: str, vm_id: str, vm_name: str, mac: str = None) -> di
 
 
 def release_ip(vm_id: str):
-    """VM'in IP'sini serbest bÄ±rak."""
+    """VM'in IP'sini serbest bırak."""
     with _lock:
         data = _load()
         to_del = [ip for ip, a in data["assignments"].items() if a.get("vm_id") == vm_id]
@@ -195,7 +195,7 @@ def get_vm_ip(vm_id: str) -> str | None:
 
 
 def get_vm_assignment(vm_id: str) -> dict | None:
-    """VM'e ait tam IP atamasÄ±nÄ± dÃ¶ndÃ¼r (ip, mac, network, gateway dahil)."""
+    """VM'e ait tam IP atamasını döndür (ip, mac, network, gateway dahil)."""
     data = _load()
     for ip, a in data["assignments"].items():
         if a.get("vm_id") == vm_id:
@@ -214,7 +214,7 @@ def list_assignments(pool_name: str = None) -> list:
 
 
 def release_by_mac(mac: str) -> list:
-    """MAC adresine gÃ¶re IP'yi serbest bÄ±rak."""
+    """MAC adresine göre IP'yi serbest bırak."""
     with _lock:
         data = _load()
         to_del = [ip for ip, a in data["assignments"].items() if a.get("mac") == mac]
@@ -225,18 +225,18 @@ def release_by_mac(mac: str) -> list:
 
 
 def lock_ip(ip: str, locked: bool = True) -> bool:
-    """IP atamasÄ±nÄ± kilitle veya kilidi aÃ§."""
+    """IP atamasını kilitle veya kilidi aç."""
     with _lock:
         data = _load()
         if ip not in data["assignments"]:
-            raise KeyError(f"Atama bulunamadÄ±: {ip}")
+            raise KeyError(f"Atama bulunamadı: {ip}")
         data["assignments"][ip]["locked"] = locked
         _save(data)
     return locked
 
 
 def reassign_ip(mac: str, new_ip: str) -> dict:
-    """MAC adresine ait IP'yi yeni IP ile deÄŸiÅŸtir."""
+    """MAC adresine ait IP'yi yeni IP ile değiştir."""
     with _lock:
         data = _load()
         old_ip = None
@@ -245,10 +245,10 @@ def reassign_ip(mac: str, new_ip: str) -> dict:
                 old_ip = ip
                 break
         if not old_ip:
-            raise KeyError(f"MAC bulunamadÄ±: {mac}")
-        # Yeni IP zaten atanmÄ±ÅŸ mÄ±?
+            raise KeyError(f"MAC bulunamadı: {mac}")
+        # Yeni IP zaten atanmış mı?
         if new_ip in data["assignments"]:
-            raise ValueError(f"IP zaten kullanÄ±mda: {new_ip}")
+            raise ValueError(f"IP zaten kullanımda: {new_ip}")
         entry = data["assignments"].pop(old_ip)
         entry["ip"] = new_ip
         data["assignments"][new_ip] = entry
@@ -257,12 +257,12 @@ def reassign_ip(mac: str, new_ip: str) -> dict:
 
 
 def update_pool(name: str, gateway: str = None, start_ip: str = None, end_ip: str = None, dns: list = None) -> dict:
-    """Mevcut havuzu gÃ¼ncelle."""
+    """Mevcut havuzu güncelle."""
     with _lock:
         data = _load()
         pool = data["pools"].get(name)
         if not pool:
-            raise KeyError(f"Havuz bulunamadÄ±: {name}")
+            raise KeyError(f"Havuz bulunamadı: {name}")
         if gateway:
             pool["gateway"] = gateway
         if start_ip:
@@ -276,7 +276,7 @@ def update_pool(name: str, gateway: str = None, start_ip: str = None, end_ip: st
 
 
 def manual_assign(ip: str, mac: str, vm_name: str = "", pool_name: str = "", vm_id: str = "") -> dict:
-    """Manuel IP atamasÄ± ekle."""
+    """Manuel IP ataması ekle."""
     with _lock:
         data = _load()
         pool = data["pools"].get(pool_name, {})
@@ -297,7 +297,7 @@ def manual_assign(ip: str, mac: str, vm_name: str = "", pool_name: str = "", vm_
 
 
 def get_all_stats() -> dict:
-    """TÃ¼m havuzlar toplamÄ± istatistik."""
+    """Tüm havuzlar toplamı istatistik."""
     data = _load()
     total_cap = sum(_pool_capacity(p) for p in data["pools"].values())
     total_used = len(data["assignments"])
@@ -325,9 +325,9 @@ def get_pool_stats(pool_name: str) -> dict:
         "free":    total - used,
         "percent": round(used / total * 100, 1) if total else 0,
     }
-
-
-
-
-
-
+
+
+
+
+
+

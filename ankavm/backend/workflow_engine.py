@@ -1,9 +1,9 @@
-﻿"""
-ankavm Workflow Engine â€” Drag-drop multi-step automation
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Workflow Engine — Drag-drop multi-step automation
+──────────────────────────────────────────────────────────
 Workflows: named sequences of steps, each with action + params +
 on_success/on_fail routing. Steps may trigger VM actions, snapshots,
-webhooks, or delays. No auto-loop / periodic execution â€” only
+webhooks, or delays. No auto-loop / periodic execution — only
 explicit run_workflow() calls.
 """
 
@@ -23,7 +23,7 @@ _HISTORY_FILE = Path("/var/lib/ankavm/workflow_history.json")
 _lock         = threading.Lock()
 
 
-# â”€â”€ persistence helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── persistence helpers ───────────────────────────────────────────────────────
 
 def _load_workflows() -> list:
     try:
@@ -63,7 +63,7 @@ def _save_history(data: list) -> None:
         log.warning("workflow history save fail: %s", e)
 
 
-# â”€â”€ valid step actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── valid step actions ────────────────────────────────────────────────────────
 
 _VALID_ACTIONS = {
     "vm_action",     # virsh start/stop/reboot/suspend
@@ -87,7 +87,7 @@ def _validate_steps(steps: list) -> None:
             raise ValueError(f"Step {i}: params must be a dict")
 
 
-# â”€â”€ public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── public API ────────────────────────────────────────────────────────────────
 
 def create_workflow(name: str, steps: list,
                     description: str = "",
@@ -142,7 +142,7 @@ def run_workflow(workflow_id: str, dry_run: bool = False) -> dict:
     """
     Execute workflow steps sequentially.
     Returns per-step results. dry_run=True logs but does not act.
-    No background loop â€” caller-driven only.
+    No background loop — caller-driven only.
     """
     wf = get_workflow(workflow_id)
     if not wf:
@@ -325,9 +325,9 @@ def get_run_history(workflow_id: str, limit: int = 50) -> list:
         history = _load_history()
     runs = [r for r in history if r.get("workflow_id") == workflow_id]
     return sorted(runs, key=lambda x: x.get("started_at", 0), reverse=True)[:limit]
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,6 +1,6 @@
-﻿"""
-ankavm SSO Manager â€” SAML 2.0 + OpenID Connect
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm SSO Manager — SAML 2.0 + OpenID Connect
+────────────────────────────────────────────────
 Stores IdP configuration and processes authentication flows. Crypto
 verification is FAIL-CLOSED: when the required library is not installed,
 SAML/OIDC callbacks refuse the assertion instead of trusting an unsigned
@@ -22,7 +22,7 @@ from pathlib import Path
 log = logging.getLogger("sso_manager")
 _CFG = Path("/var/lib/ankavm/sso_config.json")
 
-# â”€â”€ Crypto capability probes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Crypto capability probes ─────────────────────────────────────────────────
 try:
     from jose import jwt as _jose_jwt  # type: ignore
     _OIDC_VERIFY_AVAILABLE = True
@@ -40,7 +40,7 @@ except Exception:
 
 def _allow_unverified() -> bool:
     if os.environ.get("ankavm_ALLOW_UNVERIFIED_SSO") == "1":
-        log.warning("SSO unverified override active â€” INSECURE, do not use in production")
+        log.warning("SSO unverified override active — INSECURE, do not use in production")
         return True
     return False
 
@@ -106,7 +106,7 @@ def update_config(saml: dict = None, oidc: dict = None, role_map: dict = None) -
     return {"ok": True}
 
 
-# â”€â”€ SAML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── SAML ──────────────────────────────────────────────────────────────────────
 def saml_authn_request() -> dict:
     """Build SAML AuthnRequest URL (redirect target)."""
     cfg = _load().get("saml", {})
@@ -120,7 +120,7 @@ def saml_authn_request() -> dict:
         "ok": True,
         "redirect_url": cfg["sso_url"],
         "relay_state":  relay,
-        "note":         "Production'da python3-saml ile imzalÄ± request Ã¼retin.",
+        "note":         "Production'da python3-saml ile imzalı request üretin.",
     }
 
 
@@ -130,14 +130,14 @@ def saml_process_acs(saml_response_b64: str, relay_state: str = "") -> dict:
     OR ankavm_ALLOW_UNVERIFIED_SSO=1 is set (dev only)."""
     if not _SAML_VERIFY_AVAILABLE and not _allow_unverified():
         return {"ok": False,
-                "error": "SAML signature verification unavailable â€” "
+                "error": "SAML signature verification unavailable — "
                          "install python3-saml or set ankavm_ALLOW_UNVERIFIED_SSO=1 (dev only)"}
     try:
         decoded = base64.b64decode(saml_response_b64)
     except Exception:
         return {"ok": False, "error": "invalid base64"}
     try:
-        # OXW-SEC-005: XXE prevention â€” defusedxml when available, fallback to stdlib
+        # OXW-SEC-005: XXE prevention — defusedxml when available, fallback to stdlib
         # Python's stdlib xml.etree does NOT expand external entities by default (safe for XXE),
         # but defusedxml provides additional protection (billion laughs, etc.)
         try:
@@ -145,7 +145,7 @@ def saml_process_acs(saml_response_b64: str, relay_state: str = "") -> dict:
         except ImportError:
             import xml.etree.ElementTree as ET
         root = ET.fromstring(decoded)
-        # Naive extraction â€” production must verify signature first
+        # Naive extraction — production must verify signature first
         ns = {"saml": "urn:oasis:names:tc:SAML:2.0:assertion"}
         nameid_el = root.find(".//saml:NameID", ns)
         attrs = {}
@@ -158,13 +158,13 @@ def saml_process_acs(saml_response_b64: str, relay_state: str = "") -> dict:
             "ok": True,
             "email": attrs.get(_load()["saml"].get("attr_email", "email")) or (nameid_el.text if nameid_el is not None else ""),
             "role":  attrs.get(_load()["saml"].get("attr_role", "role"), "vm-user"),
-            "warning": "Signature NOT verified â€” install python3-saml for production",
+            "warning": "Signature NOT verified — install python3-saml for production",
         }
     except Exception as e:
         return {"ok": False, "error": f"parse: {e}"}
 
 
-# â”€â”€ OIDC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── OIDC ──────────────────────────────────────────────────────────────────────
 def oidc_authorize_url(state: str = "") -> dict:
     """Build OIDC /authorize URL."""
     cfg = _load().get("oidc", {})
@@ -207,7 +207,7 @@ def oidc_exchange_code(code: str, state: str = "") -> dict:
         if not id_tok or id_tok.count(".") != 2:
             return {"ok": False, "error": "no id_token in response"}
 
-        # â”€â”€ Fail-closed signature verification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ── Fail-closed signature verification ────────────────────────────
         if _OIDC_VERIFY_AVAILABLE:
             try:
                 jwks_url = cfg.get("jwks_url") or f"{cfg['issuer'].rstrip('/')}/.well-known/jwks.json"
@@ -242,7 +242,7 @@ def oidc_exchange_code(code: str, state: str = "") -> dict:
                 "warning": "id_token signature NOT verified (dev override)",
             }
         return {"ok": False,
-                "error": "OIDC signature verification unavailable â€” "
+                "error": "OIDC signature verification unavailable — "
                          "install python-jose or set ankavm_ALLOW_UNVERIFIED_SSO=1 (dev only)"}
     except Exception as e:
         return {"ok": False, "error": str(e)}
@@ -257,9 +257,9 @@ def map_role(idp_role: str) -> str:
 def is_sso_enabled() -> bool:
     d = _load()
     return d.get("saml", {}).get("enabled") or d.get("oidc", {}).get("enabled")
-
-
-
-
-
-
+
+
+
+
+
+

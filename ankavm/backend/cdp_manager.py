@@ -1,5 +1,5 @@
-﻿"""
-Continuous Data Protection â€” periodic disk delta capture, point-in-time restore.
+"""
+Continuous Data Protection — periodic disk delta capture, point-in-time restore.
 
 Implementation note: we record per-VM CDP state in JSON, drive a snapshot/cycle
 loop in a background thread (no cron dependency), and use qemu-img/libvirt
@@ -233,9 +233,9 @@ def restore_to_point(vm_id: str, timestamp: int) -> dict:
     except Exception as e:
         log.error("restore_to_point: %s", e)
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-﻿"""SEC-017..028 regression tests for ankavm v2.7.1.
+"""SEC-017..028 regression tests for ankavm v2.7.1.
 
 These tests cover the hardenings introduced by the v2.7.1 security release
 without requiring a live libvirt/qemu host. Each test corresponds to one
@@ -29,7 +29,7 @@ _CP = "comp" + "ile"
 _IM = "__im" + "port__"
 
 
-# â”€â”€â”€ security_utils â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── security_utils ──────────────────────────────────────────────────────────
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def test_safe_subprocess_arg_blocks_meta(sec_utils):
     assert sec_utils.safe_subprocess_arg("vm-01.test_clone") == "vm-01.test_clone"
 
 
-# â”€â”€â”€ plugin_sdk AST hardening (SEC-024) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── plugin_sdk AST hardening (SEC-024) ──────────────────────────────────────
 
 
 VALID_META = (
@@ -129,7 +129,7 @@ def test_sec_024_ast_bypasses_are_rejected(plug, payload, reason):
     assert not r["valid"], f"{reason}: validator accepted {payload!r}"
 
 
-# â”€â”€â”€ plugin route namespace (SEC-027) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── plugin route namespace (SEC-027) ────────────────────────────────────────
 
 
 def test_sec_027_plugin_app_proxy_blocks_out_of_namespace_routes(plug):
@@ -156,7 +156,7 @@ def test_sec_027_plugin_app_proxy_blocks_out_of_namespace_routes(plug):
         proxy.add_url_rule("/api/admin/danger")
 
 
-# â”€â”€â”€ bulk_vm_ops confirm token (SEC-025) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── bulk_vm_ops confirm token (SEC-025) ─────────────────────────────────────
 
 
 def test_sec_025_bulk_delete_token_is_random_and_bound(tmp_path, monkeypatch):
@@ -187,7 +187,7 @@ def test_sec_025_tokens_are_unique_per_call(tmp_path, monkeypatch):
     assert t1 != t2, "confirm_token must include random nonce"
 
 
-# â”€â”€â”€ bp_v270 force confirm (SEC-023) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── bp_v270 force confirm (SEC-023) ─────────────────────────────────────────
 
 
 def test_sec_023_force_token_rotates_per_runbook(monkeypatch):
@@ -202,7 +202,7 @@ def test_sec_023_force_token_rotates_per_runbook(monkeypatch):
     assert bp_v270._force_token("rb-y") != a, "different runbook -> different token"
 
 
-# â”€â”€â”€ runbook_executor shell + URL guard (SEC-022, SEC-017) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── runbook_executor shell + URL guard (SEC-022, SEC-017) ───────────────────
 
 
 def test_sec_022_shell_step_rejects_unlisted_binary():
@@ -233,9 +233,9 @@ def test_sec_018_vm_action_rejects_injected_metric_key():
     assert not res["ok"]
     err = res["error"].lower()
     assert "vm_id" in err or "invalid" in err
-
-
-
-
-
-
+
+
+
+
+
+

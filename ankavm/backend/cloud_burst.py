@@ -1,9 +1,9 @@
-﻿"""
+"""
 ankavm Cloud Burst Manager
 When local cluster load exceeds threshold, provision burst VMs in AWS/GCP/Azure.
 Tracks burst nodes, costs, lifecycle. Auto-retire when local load drops.
 State: /var/lib/ankavm/cloud_burst.json
-NO periodic loop â€” caller (e.g. green_mode or DRS) triggers check_and_burst().
+NO periodic loop — caller (e.g. green_mode or DRS) triggers check_and_burst().
 """
 
 import json
@@ -288,9 +288,9 @@ def get_audit_log(limit: int = 100) -> list:
     except OSError:
         return []
     return lines[-limit:][::-1]
-
-
-
-
-
-
+
+
+
+
+
+

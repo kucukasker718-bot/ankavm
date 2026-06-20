@@ -1,8 +1,8 @@
-﻿"""
-ankavm Forensics â€” Memory dump + Packet capture per VM
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-- virsh dump <vm> <file>  â†’ full RAM dump (paused or live)
-- tcpdump on VM's tap interface â†’ pcap file
+"""
+ankavm Forensics — Memory dump + Packet capture per VM
+─────────────────────────────────────────────────────
+- virsh dump <vm> <file>  → full RAM dump (paused or live)
+- tcpdump on VM's tap interface → pcap file
 - All artifacts stored under /var/lib/ankavm/forensics/<vm_id>/<ts>/
 
 Captures are sized + checksummed. Pruning at /api/forensics/prune.
@@ -173,9 +173,9 @@ def prune(older_than_days: int = 30) -> dict:
     except Exception:
         pass
     return {"ok": True, "deleted": deleted}
-
-
-
-
-
-
+
+
+
+
+
+

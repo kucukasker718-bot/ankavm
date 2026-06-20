@@ -1,10 +1,10 @@
-﻿"""
-ankavm CloudEvents â€” CloudEvents v1.0 standard format
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm CloudEvents — CloudEvents v1.0 standard format
+──────────────────────────────────────────────────────
 Emits events in CloudEvents v1.0 JSON (structured content mode).
 Ring-buffer stores last N events in memory (no persistence flood).
 Optional sink: forwards events to a configured webhook endpoint.
-No external deps â€” stdlib + optional webhook_manager integration.
+No external deps — stdlib + optional webhook_manager integration.
 """
 
 import json
@@ -23,7 +23,7 @@ _lock          = threading.Lock()
 _RING_SIZE     = 1000
 _event_ring: deque = deque(maxlen=_RING_SIZE)
 
-# â”€â”€ Known ankavm event types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Known ankavm event types ──────────────────────────────────────────────────
 
 ankavm_EVENT_TYPES = [
     "ankavm.vm.created",
@@ -59,7 +59,7 @@ ankavm_EVENT_TYPES = [
 ]
 
 
-# â”€â”€ sink persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── sink persistence ──────────────────────────────────────────────────────────
 
 def _load_sink() -> dict:
     try:
@@ -80,7 +80,7 @@ def _save_sink(data: dict) -> None:
         log.warning("cloudevents sink save fail: %s", e)
 
 
-# â”€â”€ CloudEvents v1.0 envelope â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── CloudEvents v1.0 envelope ─────────────────────────────────────────────────
 
 def _build_event(event_type: str, source: str,
                  data: dict, subject: Optional[str] = None) -> dict:
@@ -104,7 +104,7 @@ def _iso_now() -> str:
             f"T{t.tm_hour:02d}:{t.tm_min:02d}:{t.tm_sec:02d}Z")
 
 
-# â”€â”€ sink forwarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── sink forwarding ───────────────────────────────────────────────────────────
 
 def _forward_to_sink(event: dict) -> None:
     """Try to forward event to configured sink. Non-fatal."""
@@ -131,12 +131,12 @@ def _forward_to_sink(event: dict) -> None:
             method="POST"
         )
         with urllib.request.urlopen(req, timeout=5) as resp:
-            log.debug("cloudevent forwarded to sink: %s â†’ %d", url, resp.status)
+            log.debug("cloudevent forwarded to sink: %s → %d", url, resp.status)
     except Exception as ex:
         log.debug("cloudevent sink forward fail: %s", ex)
 
 
-# â”€â”€ public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── public API ────────────────────────────────────────────────────────────────
 
 def emit_event(event_type: str, source: str, data: dict,
                subject: Optional[str] = None) -> dict:
@@ -194,9 +194,9 @@ def get_sink() -> dict:
 def get_event_types() -> list:
     """Return known ankavm event types."""
     return ankavm_EVENT_TYPES
-
-
-
-
-
-
+
+
+
+
+
+

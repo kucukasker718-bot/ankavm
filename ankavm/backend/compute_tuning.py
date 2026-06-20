@@ -1,7 +1,7 @@
-﻿"""
-ankavm Compute Tuning â€” HugePages, KSM, NUMA, PCIe Pool
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-DÃ¼ÅŸÃ¼k seviye performans tunings.
+"""
+ankavm Compute Tuning — HugePages, KSM, NUMA, PCIe Pool
+─────────────────────────────────────────────────────────
+Düşük seviye performans tunings.
 
 API: configure_*, get_*_status
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 log = logging.getLogger("compute_tuning")
 
 
-# â”€â”€ HugePages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── HugePages ────────────────────────────────────────────────────────────────
 def hugepages_status() -> dict:
     info = {}
     try:
@@ -34,7 +34,7 @@ def hugepages_status() -> dict:
 
 
 def hugepages_configure(count: int) -> dict:
-    """Sysctl ile hugepage sayÄ±sÄ± ayarla."""
+    """Sysctl ile hugepage sayısı ayarla."""
     try:
         r = subprocess.run(["sysctl", "-w", f"vm.nr_hugepages={count}"],
                            capture_output=True, text=True, timeout=10)
@@ -48,7 +48,7 @@ def hugepages_configure(count: int) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ KSM (Kernel Same-page Merging) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── KSM (Kernel Same-page Merging) ──────────────────────────────────────────
 def ksm_status() -> dict:
     out = {}
     base = Path("/sys/kernel/mm/ksm")
@@ -62,7 +62,7 @@ def ksm_status() -> dict:
             pass
     out["available"] = True
     out["enabled"]   = out.get("run", 0) == 1
-    # Tasarruf hesabÄ±
+    # Tasarruf hesabı
     try:
         page_size = 4096
         out["saved_mb"] = (out.get("pages_sharing", 0) * page_size) // (1024 * 1024)
@@ -75,13 +75,13 @@ def ksm_configure(enabled: bool, pages_to_scan: int = 100,
                    sleep_ms: int = 200) -> dict:
     base = Path("/sys/kernel/mm/ksm")
     if not base.exists():
-        return {"ok": False, "error": "KSM mevcut deÄŸil"}
+        return {"ok": False, "error": "KSM mevcut değil"}
     try:
         (base / "run").write_text("1" if enabled else "0")
         if enabled:
             (base / "pages_to_scan").write_text(str(pages_to_scan))
             (base / "sleep_millisecs").write_text(str(sleep_ms))
-        # systemd: ksmtuned varsa yÃ¶net
+        # systemd: ksmtuned varsa yönet
         if enabled:
             subprocess.run(["systemctl", "enable", "--now", "ksmtuned"],
                            capture_output=True, timeout=10)
@@ -91,7 +91,7 @@ def ksm_configure(enabled: bool, pages_to_scan: int = 100,
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ NUMA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── NUMA ────────────────────────────────────────────────────────────────────
 def numa_topology() -> dict:
     try:
         r = subprocess.run(["numactl", "--hardware"],
@@ -118,9 +118,9 @@ def numa_set_vm_pin(vm_id: str, numa_node: int) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ PCIe Device Pool â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── PCIe Device Pool ────────────────────────────────────────────────────────
 def list_pcie_devices() -> list:
-    """lspci -mm parse â†’ tÃ¼m PCIe device list."""
+    """lspci -mm parse → tüm PCIe device list."""
     out = []
     try:
         r = subprocess.run(["lspci", "-mm", "-nn"],
@@ -136,12 +136,12 @@ def list_pcie_devices() -> list:
                     "extra":    parts[4] if len(parts) > 4 else "",
                 })
     except Exception as e:
-        log.warning("lspci hatasÄ±: %s", e)
+        log.warning("lspci hatası: %s", e)
     return out
 
 
 def list_iommu_groups() -> dict:
-    """IOMMU group'larÄ± dÃ¶ndÃ¼r â€” VFIO passthrough iÃ§in."""
+    """IOMMU group'ları döndür — VFIO passthrough için."""
     groups = {}
     base = Path("/sys/kernel/iommu_groups")
     if not base.exists():
@@ -159,9 +159,9 @@ def list_iommu_groups() -> dict:
     except Exception as e:
         log.warning("IOMMU: %s", e)
     return {"available": True, "groups": groups, "count": len(groups)}
-
-
-
-
-
-
+
+
+
+
+
+

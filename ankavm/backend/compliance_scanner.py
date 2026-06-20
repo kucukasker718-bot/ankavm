@@ -1,6 +1,6 @@
-﻿"""
-ankavm Compliance Scanner â€” CIS / NIST / PCI-DSS / HIPAA / ISO27001
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Compliance Scanner — CIS / NIST / PCI-DSS / HIPAA / ISO27001
+────────────────────────────────────────────────────────────────────
 Rule-based host & VM configuration audit. Pluggable check definitions.
 Outputs Pass/Fail/Warn per control + remediation hints.
 
@@ -29,7 +29,7 @@ def _shell(cmd: list, timeout: int = 10) -> tuple:
         return False, "", str(e)
 
 
-# â”€â”€ Check primitives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Check primitives ─────────────────────────────────────────────────────────
 def _check_file_perm(path: str, max_octal: int) -> bool:
     try:
         m = os.stat(path).st_mode & 0o777
@@ -53,7 +53,7 @@ def _check_package_installed(name: str) -> bool:
     return ok
 
 
-# â”€â”€ Control definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Control definitions ─────────────────────────────────────────────────────
 CONTROLS = [
     # CIS Ubuntu 24.04
     {"id": "CIS-1.1.1.1", "framework": "CIS",   "title": "Disable cramfs filesystem",
@@ -68,7 +68,7 @@ CONTROLS = [
     {"id": "CIS-5.2.4",  "framework": "CIS",   "title": "SSH PermitRootLogin no",
      "fn": lambda: _shell(["grep", "-Ei", "^PermitRootLogin\\s+no", "/etc/ssh/sshd_config"])[0],
      "severity": "high", "remediation": "Set PermitRootLogin no in /etc/ssh/sshd_config"},
-    {"id": "CIS-5.2.20", "framework": "CIS",   "title": "SSH MaxAuthTries â‰¤ 4",
+    {"id": "CIS-5.2.20", "framework": "CIS",   "title": "SSH MaxAuthTries ≤ 4",
      "fn": lambda: _shell(["grep", "-Ei", "^MaxAuthTries\\s+[1-4]\\b", "/etc/ssh/sshd_config"])[0],
      "severity": "medium", "remediation": "Set MaxAuthTries 4 in /etc/ssh/sshd_config"},
 
@@ -79,12 +79,12 @@ CONTROLS = [
     {"id": "NIST-AU-9",  "framework": "NIST",  "title": "Audit log integrity (AU-9)",
      "fn": lambda: os.path.exists("/var/log/ankavm/feature_audit.jsonl") or _check_package_installed("auditd"),
      "severity": "high", "remediation": "Install auditd + protect /var/log perms"},
-    {"id": "NIST-SC-7",  "framework": "NIST",  "title": "Boundary protection â€” firewall enabled (SC-7)",
+    {"id": "NIST-SC-7",  "framework": "NIST",  "title": "Boundary protection — firewall enabled (SC-7)",
      "fn": lambda: _shell(["systemctl", "is-active", "ufw"])[1].strip() == "active"
                    or _shell(["systemctl", "is-active", "nftables"])[1].strip() == "active"
                    or _shell(["systemctl", "is-active", "iptables"])[1].strip() == "active",
      "severity": "high", "remediation": "Enable ufw, nftables, or iptables persistent rules"},
-    {"id": "NIST-SI-2",  "framework": "NIST",  "title": "Flaw remediation â€” unattended-upgrades",
+    {"id": "NIST-SI-2",  "framework": "NIST",  "title": "Flaw remediation — unattended-upgrades",
      "fn": lambda: _check_package_installed("unattended-upgrades"),
      "severity": "medium", "remediation": "apt install unattended-upgrades && dpkg-reconfigure unattended-upgrades"},
 
@@ -95,7 +95,7 @@ CONTROLS = [
     {"id": "PCI-6.2",    "framework": "PCI-DSS", "title": "Vendor patches applied (apt upgrade)",
      "fn": lambda: _shell(["apt-get", "-s", "upgrade"])[1].count("Inst ") < 10,
      "severity": "high", "remediation": "apt update && apt upgrade"},
-    {"id": "PCI-8.2.3",  "framework": "PCI-DSS", "title": "Minimum password length â‰¥ 12",
+    {"id": "PCI-8.2.3",  "framework": "PCI-DSS", "title": "Minimum password length ≥ 12",
      "fn": lambda: _shell(["grep", "-Ei", "minlen\\s*=\\s*(1[2-9]|[2-9][0-9])", "/etc/security/pwquality.conf"])[0],
      "severity": "medium", "remediation": "Set minlen=12 in /etc/security/pwquality.conf"},
     {"id": "PCI-10.5",   "framework": "PCI-DSS", "title": "Audit logs immutable / protected",
@@ -103,17 +103,17 @@ CONTROLS = [
      "severity": "high", "remediation": "chmod 640 /var/log/auth.log; chmod 750 /var/log/ankavm"},
 
     # HIPAA
-    {"id": "HIPAA-312a", "framework": "HIPAA",   "title": "Access control â€” unique user IDs",
+    {"id": "HIPAA-312a", "framework": "HIPAA",   "title": "Access control — unique user IDs",
      "fn": lambda: True,  # Always pass if ankavm RBAC in use
      "severity": "info",  "remediation": "ankavm RBAC enforces unique user IDs"},
-    {"id": "HIPAA-312e", "framework": "HIPAA",   "title": "Transmission security â€” TLS/SSL enabled",
+    {"id": "HIPAA-312e", "framework": "HIPAA",   "title": "Transmission security — TLS/SSL enabled",
      "fn": lambda: os.path.exists("/etc/ankavm/ankavm.crt"),
-     "severity": "high",  "remediation": "Generate or import TLS cert via Settings â†’ SSL"},
+     "severity": "high",  "remediation": "Generate or import TLS cert via Settings → SSL"},
 
     # ISO 27001
-    {"id": "ISO-A.5.15", "framework": "ISO27001","title": "Access control â€” RBAC enforced",
+    {"id": "ISO-A.5.15", "framework": "ISO27001","title": "Access control — RBAC enforced",
      "fn": lambda: True, "severity": "info", "remediation": "ankavm uses role-based access"},
-    {"id": "ISO-A.8.16", "framework": "ISO27001","title": "Monitoring activities â€” audit log present",
+    {"id": "ISO-A.8.16", "framework": "ISO27001","title": "Monitoring activities — audit log present",
      "fn": lambda: os.path.exists("/var/log/ankavm/audit.log") or os.path.exists("/var/log/ankavm/feature_audit.jsonl"),
      "severity": "medium", "remediation": "Enable audit_chain module + journald persistent storage"},
 ]
@@ -173,9 +173,9 @@ def last_scan() -> dict:
     except Exception:
         pass
     return {"scanned_at": 0, "results": []}
-
-
-
-
-
-
+
+
+
+
+
+

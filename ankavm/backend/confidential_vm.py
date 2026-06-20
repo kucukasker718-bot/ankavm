@@ -1,10 +1,10 @@
-﻿"""
-ankavm Confidential VM â€” AMD SEV / Intel TDX
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Confidential VM — AMD SEV / Intel TDX
+─────────────────────────────────────────────
 Memory-encrypted confidential VMs.
-- AMD SEV (Secure Encrypted Virtualization) â€” qemu launch-security type='sev'
-- AMD SEV-SNP (Secure Nested Paging) â€” sev-snp
-- Intel TDX (Trust Domain Extensions) â€” tdx
+- AMD SEV (Secure Encrypted Virtualization) — qemu launch-security type='sev'
+- AMD SEV-SNP (Secure Nested Paging) — sev-snp
+- Intel TDX (Trust Domain Extensions) — tdx
 - Detection via /sys/module/kvm_amd/parameters/sev + cpuid
 
 Persists policy at /var/lib/ankavm/confidential_vm.json
@@ -35,7 +35,7 @@ def detect_support() -> dict:
                 pass
     except Exception as e:
         log.warning("detect_support: %s", e)
-    # CPUID quick check â€” direct read (no subprocess) â€” SEC-028
+    # CPUID quick check — direct read (no subprocess) — SEC-028
     try:
         cpuinfo = Path("/proc/cpuinfo").read_text(encoding="utf-8", errors="replace").lower()
         if "sev" in cpuinfo: out["details"]["cpu_sev_flag"] = True
@@ -64,7 +64,7 @@ def list_protected_vms() -> list:
 
 
 def enable_for_vm(vm_id: str, mode: str = "sev") -> dict:
-    """Mark VM as confidential â€” actual libvirt XML injection
+    """Mark VM as confidential — actual libvirt XML injection
     must be performed at VM creation/edit time by vm_manager."""
     if mode not in ("sev", "sev-es", "sev-snp", "tdx"):
         return {"ok": False, "error": f"unsupported mode: {mode}"}
@@ -178,9 +178,9 @@ def capture_attestation(vm_id: str) -> dict:
 def get_attestation(vm_id: str) -> dict:
     rec = _load().get("vms", {}).get(vm_id, {})
     return rec.get("last_attestation", {"ok": False, "error": "no attestation yet"})
-
-
-
-
-
-
+
+
+
+
+
+

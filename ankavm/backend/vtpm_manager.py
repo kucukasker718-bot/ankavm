@@ -1,5 +1,5 @@
-﻿"""
-vTPM Manager â€” Libvirt TPM passthrough + emulated (swtpm) support.
+"""
+vTPM Manager — Libvirt TPM passthrough + emulated (swtpm) support.
 """
 import subprocess
 import logging
@@ -93,9 +93,9 @@ def check_swtpm() -> dict:
     }
 
 
-# â”€â”€ v2.5.4 spec API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── v2.5.4 spec API ─────────────────────────────────────────────────────────
 def enable_vtpm(vm_id: str, version: str = "2.0") -> dict:
-    """Add tpm-crb emulator (TPM 2.0) â€” Win11/BitLocker friendly."""
+    """Add tpm-crb emulator (TPM 2.0) — Win11/BitLocker friendly."""
     try:
         return add_vtpm(vm_id, model="tpm-crb", version=version)
     except Exception as e:
@@ -147,9 +147,9 @@ def list_vtpm_vms() -> list:
         log.error("list_vtpm_vms: %s", e)
         return []
 
-
-
-
-
-
-
+
+
+
+
+
+

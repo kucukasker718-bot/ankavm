@@ -1,9 +1,9 @@
-﻿"""
+"""
 ankavm Per-Tenant API Rate Limiting (Token Bucket)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-In-memory token-bucket â€” process-local.  Persistent deÄŸil; sadece varsayÄ±lan
-config persist edilir.  Yeniden baÅŸlatmada bucket'lar full doluya reset olur
-(operatÃ¶r iÃ§in kabul edilebilir trade-off).
+────────────────────────────────────────────────────
+In-memory token-bucket — process-local.  Persistent değil; sadece varsayılan
+config persist edilir.  Yeniden başlatmada bucket'lar full doluya reset olur
+(operatör için kabul edilebilir trade-off).
 
   - Default: 100 rpm, 200 burst per tenant
   - Thread-safe (threading.Lock)
@@ -33,7 +33,7 @@ _limits: dict = {}
 _state: dict = {}
 
 
-# â”€â”€ Persistence (yalnÄ±zca config defaults) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistence (yalnızca config defaults) ────────────────────────────────────
 def _load_cfg() -> None:
     global _limits
     try:
@@ -67,7 +67,7 @@ except Exception:
     pass
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ───────────────────────────────────────────────────────────────
 def get_limit(tenant_id: str) -> dict:
     with _lock:
         cfg = _limits.get(tenant_id) or {"rpm": DEFAULT_RPM, "burst": DEFAULT_BURST}
@@ -79,11 +79,11 @@ def set_limit(tenant_id: str, rpm: int = DEFAULT_RPM, burst: int = DEFAULT_BURST
         rpm   = max(1, int(rpm))
         burst = max(1, int(burst))
     except Exception:
-        return {"ok": False, "error": "rpm/burst geÃ§ersiz"}
+        return {"ok": False, "error": "rpm/burst geçersiz"}
     with _lock:
         _limits[str(tenant_id)] = {"rpm": rpm, "burst": burst}
         _save_cfg()
-        # State'i sÄ±fÄ±rla â€” yeni burst deÄŸeri ile baÅŸlasÄ±n
+        # State'i sıfırla — yeni burst değeri ile başlasın
         _state[str(tenant_id)] = {
             "tokens":  float(burst),
             "last":    time.time(),
@@ -93,7 +93,7 @@ def set_limit(tenant_id: str, rpm: int = DEFAULT_RPM, burst: int = DEFAULT_BURST
 
 
 def _bucket(tenant_id: str) -> tuple:
-    """Lock altÄ±nda Ã§aÄŸrÄ±lmalÄ±."""
+    """Lock altında çağrılmalı."""
     cfg = _limits.get(tenant_id) or {"rpm": DEFAULT_RPM, "burst": DEFAULT_BURST}
     st  = _state.get(tenant_id)
     if not st:
@@ -122,9 +122,9 @@ def _trim_history(st: dict, now: float) -> None:
 
 
 def check_rate_limit(tenant_id: str, endpoint: str = "") -> dict:
-    """1 token tÃ¼ketir. allowed=True ise geÃ§ti, False ise retry_after_sec dÃ¶ner."""
+    """1 token tüketir. allowed=True ise geçti, False ise retry_after_sec döner."""
     if not tenant_id:
-        # KimliÄŸi yok ise rate-limit'i atla â€” admin/auth katmanÄ± zaten reddeder
+        # Kimliği yok ise rate-limit'i atla — admin/auth katmanı zaten reddeder
         return {"allowed": True, "retry_after_sec": 0}
     tenant_id = str(tenant_id)
     now = time.time()
@@ -136,7 +136,7 @@ def check_rate_limit(tenant_id: str, endpoint: str = "") -> dict:
             st["history"].append(now)
             _trim_history(st, now)
             return {"allowed": True, "retry_after_sec": 0}
-        # Eksik token kadar bekleme sÃ¼resi
+        # Eksik token kadar bekleme süresi
         deficit = 1.0 - st["tokens"]
         retry   = max(1, int(deficit * 60.0 / cfg["rpm"]) + 1)
         log.debug("rate-limit deny tenant=%s endpoint=%s retry=%ds",
@@ -173,9 +173,9 @@ def reset(tenant_id: Optional[str] = None) -> dict:
 def list_limits() -> dict:
     with _lock:
         return {k: dict(v) for k, v in _limits.items()}
-
-
-
-
-
-
+
+
+
+
+
+

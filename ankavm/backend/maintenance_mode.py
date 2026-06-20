@@ -1,8 +1,8 @@
-﻿"""
+"""
 ankavm Maintenance Mode + Auto-Evacuation
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Host'u bakÄ±m moduna al â†’ VM'leri otomatik diÄŸer host'lara taÅŸÄ±.
-Tek host kurulumda VM'leri sadece pause + uyarÄ±.
+─────────────────────────────────────────
+Host'u bakım moduna al → VM'leri otomatik diğer host'lara taşı.
+Tek host kurulumda VM'leri sadece pause + uyarı.
 
 API:
     enter_maintenance(host=None, target_hosts=None) -> dict
@@ -27,7 +27,7 @@ def _load() -> dict:
             return json.loads(_STATE.read_text())
         except Exception:
             pass
-    return {"hosts": {}}   # host â†’ {since, reason, plan}
+    return {"hosts": {}}   # host → {since, reason, plan}
 
 
 def _save(data: dict):
@@ -58,7 +58,7 @@ def get_status(host: str = None) -> dict:
 
 
 def _list_running_vms() -> list:
-    """Bu host'taki Ã§alÄ±ÅŸan VM'leri al."""
+    """Bu host'taki çalışan VM'leri al."""
     try:
         r = subprocess.run(["virsh", "list", "--state-running", "--name"],
                            capture_output=True, text=True, timeout=10)
@@ -69,24 +69,24 @@ def _list_running_vms() -> list:
 
 def list_evacuation_plan(host: str = None, target_hosts: list = None) -> list:
     """
-    Ã‡alÄ±ÅŸan VM'leri target_hosts'a daÄŸÄ±t (round-robin).
-    target_hosts boÅŸsa tek host setup â†’ sadece "graceful_shutdown" plan.
+    Çalışan VM'leri target_hosts'a dağıt (round-robin).
+    target_hosts boşsa tek host setup → sadece "graceful_shutdown" plan.
     """
     vms = _list_running_vms()
     plan = []
     if not target_hosts:
-        # Tek host â†’ graceful shutdown Ã¶nerisi
+        # Tek host → graceful shutdown önerisi
         for vm in vms:
             plan.append({"vm": vm, "action": "graceful_shutdown",
                          "target": None,
-                         "reason": "Cluster yok â€” VM'i durdur, bakÄ±m sonra baÅŸlat"})
+                         "reason": "Cluster yok — VM'i durdur, bakım sonra başlat"})
     else:
         # Round-robin migrate
         for i, vm in enumerate(vms):
             target = target_hosts[i % len(target_hosts)]
             plan.append({"vm": vm, "action": "live_migrate",
                          "target": target,
-                         "reason": f"Live migrate â†’ {target}"})
+                         "reason": f"Live migrate → {target}"})
     return plan
 
 
@@ -96,9 +96,9 @@ def enter_maintenance(reason: str = "Planned maintenance",
                        graceful_timeout: int = 60) -> dict:
     """
     Host'u maintenance moduna sok.
-    1. Plan oluÅŸtur
-    2. dry_run deÄŸilse: VM'leri evacuate et
-    3. Host'u maintenance iÅŸaretle (yeni VM kabul etmez)
+    1. Plan oluştur
+    2. dry_run değilse: VM'leri evacuate et
+    3. Host'u maintenance işaretle (yeni VM kabul etmez)
     """
     import socket
     host = socket.gethostname()
@@ -177,8 +177,8 @@ def enter_maintenance(reason: str = "Planned maintenance",
 
 def exit_maintenance(host: str = None, auto_start: bool = False) -> dict:
     """
-    Maintenance modundan Ã§Ä±k. auto_start=True ise evacuated VM'leri geri baÅŸlat
-    (basic â€” graceful_shutdown'ler iÃ§in, migrate olanlar zaten karÅŸÄ± tarafta).
+    Maintenance modundan çık. auto_start=True ise evacuated VM'leri geri başlat
+    (basic — graceful_shutdown'ler için, migrate olanlar zaten karşı tarafta).
     """
     if not host:
         import socket
@@ -188,14 +188,14 @@ def exit_maintenance(host: str = None, auto_start: bool = False) -> dict:
         data = _load()
         entry = data["hosts"].pop(host, None)
         if entry is None:
-            return {"ok": False, "error": "Host maintenance modunda deÄŸil"}
+            return {"ok": False, "error": "Host maintenance modunda değil"}
         _save(data)
 
     started = []
     if auto_start:
         for vm in entry.get("evacuated_vms", []):
             try:
-                # Sadece bu host'ta tanÄ±mlÄ±ysa baÅŸlat (migrate edilenler artÄ±k burada yok)
+                # Sadece bu host'ta tanımlıysa başlat (migrate edilenler artık burada yok)
                 r = subprocess.run(["virsh", "domstate", vm],
                                    capture_output=True, text=True, timeout=5)
                 if "shut off" in r.stdout:
@@ -212,9 +212,9 @@ def exit_maintenance(host: str = None, auto_start: bool = False) -> dict:
         "duration_seconds": int(time.time() - entry.get("since", time.time())),
         "auto_started":    started,
     }
-
-
-
-
-
-
+
+
+
+
+
+

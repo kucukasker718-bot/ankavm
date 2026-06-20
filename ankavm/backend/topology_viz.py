@@ -1,12 +1,12 @@
-﻿"""
-topology_viz.py â€” Topology + Flow Visualization (LLDP / ARP / conntrack)
+"""
+topology_viz.py — Topology + Flow Visualization (LLDP / ARP / conntrack)
 ankavm v2.5.8 Observability
 
 Note: The existing topology.py provides basic node/network info.
       This module adds:
-        - get_topology()  â†’ {nodes, edges} graph from ARP + virsh + domiflist
-        - get_lldp_neighbors() â†’ lldpctl -f json parse (graceful empty if absent)
-        - get_flow_matrix()    â†’ conntrack -L parse (graceful empty if absent)
+        - get_topology()  → {nodes, edges} graph from ARP + virsh + domiflist
+        - get_lldp_neighbors() → lldpctl -f json parse (graceful empty if absent)
+        - get_flow_matrix()    → conntrack -L parse (graceful empty if absent)
 
       Paths: /api/topo-viz/*  (avoids clash with existing /api/topology endpoint)
 """
@@ -22,7 +22,7 @@ log = logging.getLogger("topology_viz")
 _lock = threading.Lock()
 
 
-# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _run(cmd: list, timeout: int = 8) -> str:
     try:
@@ -38,7 +38,7 @@ def _run(cmd: list, timeout: int = 8) -> str:
 
 
 def _parse_arp() -> list:
-    """Parse `arp -n` output â†’ list of {ip, mac, iface}."""
+    """Parse `arp -n` output → list of {ip, mac, iface}."""
     out = _run(["arp", "-n"])
     entries = []
     for line in out.splitlines():
@@ -88,7 +88,7 @@ def _virsh_domiflist(vm_name: str) -> list:
     return ifaces
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def get_topology() -> dict:
     """
@@ -224,9 +224,9 @@ def get_flow_matrix() -> list:
             break
 
     return flows
-
-
-
-
-
-
+
+
+
+
+
+

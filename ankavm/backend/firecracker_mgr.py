@@ -1,14 +1,14 @@
-﻿"""
-firecracker_mgr.py â€” Firecracker microVM Manager for ankavm
+"""
+firecracker_mgr.py — Firecracker microVM Manager for ankavm
 ankavm v2.5.11 Modern Workloads
 
 Features:
-  - detect_firecracker() â€” firecracker binary + KVM availability
-  - create_microvm(name, vcpus, mem_mb, kernel_path, rootfs_path) â€” spawn microVM via API socket
-  - list_microvms() â€” list tracked microVMs
-  - stop_microvm(id) â€” stop a running microVM
-  - get_microvm(id) â€” get details of a specific microVM
-  - generate_config(name, vcpus, mem_mb, kernel, rootfs) â€” produce Firecracker machine-config JSON
+  - detect_firecracker() — firecracker binary + KVM availability
+  - create_microvm(name, vcpus, mem_mb, kernel_path, rootfs_path) — spawn microVM via API socket
+  - list_microvms() — list tracked microVMs
+  - stop_microvm(id) — stop a running microVM
+  - get_microvm(id) — get details of a specific microVM
+  - generate_config(name, vcpus, mem_mb, kernel, rootfs) — produce Firecracker machine-config JSON
 
 Config persisted to /var/lib/ankavm/firecracker_vms.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -32,7 +32,7 @@ _SOCKET_DIR = Path("/var/lib/ankavm/firecracker_sockets")
 _lock = threading.Lock()
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -53,7 +53,7 @@ def _save(data: dict) -> None:
         log.warning("firecracker save fail: %s", e)
 
 
-# â”€â”€ Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Detection ─────────────────────────────────────────────────────────────────
 
 def detect_firecracker() -> dict:
     """Check if Firecracker binary is available and KVM is accessible."""
@@ -105,7 +105,7 @@ def detect_firecracker() -> dict:
     return result
 
 
-# â”€â”€ Config generation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Config generation ─────────────────────────────────────────────────────────
 
 def generate_config(name: str, vcpus: int, mem_mb: int, kernel: str, rootfs: str) -> dict:
     """Generate a Firecracker machine-config JSON dict."""
@@ -131,7 +131,7 @@ def generate_config(name: str, vcpus: int, mem_mb: int, kernel: str, rootfs: str
     }
 
 
-# â”€â”€ microVM lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── microVM lifecycle ─────────────────────────────────────────────────────────
 
 def create_microvm(
     name: str,
@@ -242,9 +242,9 @@ def stop_microvm(vm_id: str) -> dict:
         data["vms"][vm_id] = vm
         _save(data)
     return {"stopped": True, "vm_id": vm_id}
-
-
-
-
-
-
+
+
+
+
+
+

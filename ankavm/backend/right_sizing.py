@@ -1,9 +1,9 @@
-﻿"""
+"""
 ankavm Right-Sizing Advisor + Capacity Planning + Forecasting
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-GeÃ§miÅŸ perf_history verisinden VM kaynaklarÄ±nÄ± analiz et:
-  - Over-provisioned? (CPU/RAM az kullanÄ±yorsa downsize Ã¶ner)
-  - Under-provisioned? (CPU/RAM hep dolu â†’ upsize Ã¶ner)
+─────────────────────────────────────────────────────────────
+Geçmiş perf_history verisinden VM kaynaklarını analiz et:
+  - Over-provisioned? (CPU/RAM az kullanıyorsa downsize öner)
+  - Under-provisioned? (CPU/RAM hep dolu → upsize öner)
   - Cluster kapasite tahmini (linear regression)
 
 API:
@@ -24,9 +24,9 @@ except ImportError:
 
 
 def analyze_vm(vm_id: str, period: str = "30d") -> dict:
-    """VM'in geÃ§miÅŸ kullanÄ±mÄ±na gÃ¶re right-size Ã¶nerisi."""
+    """VM'in geçmiş kullanımına göre right-size önerisi."""
     if not perf_history:
-        return {"error": "perf_history modÃ¼lÃ¼ yok"}
+        return {"error": "perf_history modülü yok"}
 
     try:
         rows = perf_history.get_vm_history(vm_id, period)
@@ -35,7 +35,7 @@ def analyze_vm(vm_id: str, period: str = "30d") -> dict:
 
     if not rows or len(rows) < 10:
         return {"vm_id": vm_id, "recommendation": None,
-                "reason": "Yetersiz veri (min 10 Ã¶rnek gerekli)"}
+                "reason": "Yetersiz veri (min 10 örnek gerekli)"}
 
     cpu_vals  = [r.get("cpu_pct", 0) or 0 for r in rows]
     mem_vals  = [r.get("mem_pct", 0) or 0 for r in rows]
@@ -48,13 +48,13 @@ def analyze_vm(vm_id: str, period: str = "30d") -> dict:
     mem_max  = max(mem_vals)
 
     recs = []
-    # CPU Ã¶nerileri
+    # CPU önerileri
     if cpu_p95 < 25 and cpu_avg < 15:
         recs.append({
             "resource": "vcpu",
             "action":   "decrease",
             "current_usage": {"avg": round(cpu_avg, 1), "p95": round(cpu_p95, 1)},
-            "suggestion":    "vCPU sayÄ±sÄ±nÄ± yarÄ±ya indirmeyi dÃ¼ÅŸÃ¼n",
+            "suggestion":    "vCPU sayısını yarıya indirmeyi düşün",
             "savings_pct":   50,
         })
     elif cpu_p95 > 85 and cpu_avg > 60:
@@ -62,11 +62,11 @@ def analyze_vm(vm_id: str, period: str = "30d") -> dict:
             "resource": "vcpu",
             "action":   "increase",
             "current_usage": {"avg": round(cpu_avg, 1), "p95": round(cpu_p95, 1)},
-            "suggestion":    "vCPU sayÄ±sÄ±nÄ± arttÄ±r â€” sÃ¼rekli yÃ¼ksek yÃ¼k",
+            "suggestion":    "vCPU sayısını arttır — sürekli yüksek yük",
             "savings_pct":   0,
         })
 
-    # RAM Ã¶nerileri
+    # RAM önerileri
     if mem_p95 < 35 and mem_avg < 25:
         recs.append({
             "resource": "memory",
@@ -80,7 +80,7 @@ def analyze_vm(vm_id: str, period: str = "30d") -> dict:
             "resource": "memory",
             "action":   "increase",
             "current_usage": {"avg": round(mem_avg, 1), "p95": round(mem_p95, 1)},
-            "suggestion":    "RAM'i %50 arttÄ±r â€” swap riski yÃ¼ksek",
+            "suggestion":    "RAM'i %50 arttır — swap riski yüksek",
             "savings_pct":   0,
         })
 
@@ -97,7 +97,7 @@ def analyze_vm(vm_id: str, period: str = "30d") -> dict:
 
 
 def list_recommendations(min_savings_pct: int = 10) -> list:
-    """TÃ¼m VM'leri analiz et, Ã¶neri olanlarÄ± dÃ¶ndÃ¼r."""
+    """Tüm VM'leri analiz et, öneri olanları döndür."""
     if not perf_history:
         return []
     try:
@@ -135,7 +135,7 @@ def _linear_regression(xs, ys):
 
 
 def forecast_capacity(metric: str = "disk", period_days: int = 90) -> dict:
-    """Trend bazlÄ± kapasite tahmini. metric: disk | cpu | ram"""
+    """Trend bazlı kapasite tahmini. metric: disk | cpu | ram"""
     if not perf_history:
         return {"error": "perf_history yok"}
     try:
@@ -159,14 +159,14 @@ def forecast_capacity(metric: str = "disk", period_days: int = 90) -> dict:
     xs = list(range(len(ys)))
     slope, intercept = _linear_regression(xs, ys)
 
-    # Forecast: ne zaman %100'e ulaÅŸÄ±r?
+    # Forecast: ne zaman %100'e ulaşır?
     days_to_full = None
     if slope > 0:
         steps_to_100 = (100 - ys[-1]) / slope
         sample_interval_minutes = (rows[-1].get("ts", 0) - rows[0].get("ts", 0)) / max(len(rows) - 1, 1) / 60
         days_to_full = int(steps_to_100 * sample_interval_minutes / 60 / 24)
 
-    # 30 gÃ¼n sonrasÄ± tahmin
+    # 30 gün sonrası tahmin
     forecast_30d = intercept + slope * (len(ys) + 30 * 24 * 60)  # rough
     return {
         "metric":              metric,
@@ -179,9 +179,9 @@ def forecast_capacity(metric: str = "disk", period_days: int = 90) -> dict:
         "days_until_full":     days_to_full,
         "samples":             len(ys),
     }
-
-
-
-
-
-
+
+
+
+
+
+

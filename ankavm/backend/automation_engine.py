@@ -1,6 +1,6 @@
-﻿"""
-ankavm Automation Engine â€” Auto-remediation + Policy-as-Code + Workflows
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Automation Engine — Auto-remediation + Policy-as-Code + Workflows
+────────────────────────────────────────────────────────────────────────
 Trigger -> condition -> action chains.
 OPA/Rego style policy rules (NO arbitrary code execution - safe DSL only).
 CloudEvents 1.0 event system.
@@ -217,7 +217,7 @@ def get_history(limit: int = 50) -> list:
     return sorted(history, key=lambda x: x["ts"], reverse=True)[:limit]
 
 
-# â”€â”€ Policy-as-Code (lightweight OPA-style, SAFE DSL ONLY) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Policy-as-Code (lightweight OPA-style, SAFE DSL ONLY) ──────────────────
 def list_policies() -> list:
     return _load(_POLICIES, _default_policies())
 
@@ -345,9 +345,9 @@ def _cmp(a, b, op: str) -> bool:
     if op == "==": return a == b
     if op == "!=": return a != b
     return False
-
-
-
-
-
-
+
+
+
+
+
+

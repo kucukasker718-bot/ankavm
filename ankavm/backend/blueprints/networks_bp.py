@@ -1,15 +1,15 @@
-﻿"""networks_bp â€” v2 network inventory + IP-pool helpers.
+"""networks_bp — v2 network inventory + IP-pool helpers.
 
 Mounted at /api/v2/networks. Read-mostly mirrors of the legacy network
 routes plus two new helpers the panel was constructing client-side:
 free-IP enumeration and bridge attachment count.
 
 Endpoints:
-    GET /api/v2/networks                          â€” list with light fields
-    GET /api/v2/networks/<name>                   â€” detail
-    GET /api/v2/networks/<name>/free-ips          â€” unused IPs in pool
-    GET /api/v2/networks/<name>/attached-vms      â€” VMs using this network
-    GET /api/v2/networks/host-interfaces          â€” host NIC inventory
+    GET /api/v2/networks                          — list with light fields
+    GET /api/v2/networks/<name>                   — detail
+    GET /api/v2/networks/<name>/free-ips          — unused IPs in pool
+    GET /api/v2/networks/<name>/attached-vms      — VMs using this network
+    GET /api/v2/networks/host-interfaces          — host NIC inventory
 """
 from __future__ import annotations
 from flask import Blueprint
@@ -137,9 +137,9 @@ def _register_routes():
             return _ok(interfaces=ifaces, count=len(ifaces))
         except Exception as e:
             return _err(str(e), 400)
-
-
-
-
-
-
+
+
+
+
+
+

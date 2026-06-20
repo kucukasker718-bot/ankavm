@@ -1,5 +1,5 @@
-﻿"""
-audit_log.py - SQLite tabanlÄ± kullanÄ±cÄ± aksiyon kaydÄ±.
+"""
+audit_log.py - SQLite tabanlı kullanıcı aksiyon kaydı.
 DB: /var/lib/ankavm/audit.db
 """
 
@@ -23,7 +23,7 @@ _lock   = threading.Lock()
 # ---------------------------------------------------------------------------
 
 def init_db():
-    """audit_entries tablosunu ve indekslerini oluÅŸturur."""
+    """audit_entries tablosunu ve indekslerini oluşturur."""
     try:
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         with _lock:
@@ -48,30 +48,30 @@ def init_db():
             """)
             conn.commit()
             conn.close()
-        log.info("audit_log DB hazÄ±r: %s", DB_PATH)
+        log.info("audit_log DB hazır: %s", DB_PATH)
     except Exception as e:
-        log.error("init_db hatasÄ±: %s", e)
+        log.error("init_db hatası: %s", e)
 
 
 # ---------------------------------------------------------------------------
-# KayÄ±t ekleme
+# Kayıt ekleme
 # ---------------------------------------------------------------------------
 
 def log_action(username, action, resource_type="", resource_id="",
                details=None, ip="", user_agent="", result="success", role=""):
     """
-    Yeni audit kaydÄ± ekler.
+    Yeni audit kaydı ekler.
 
     Parametreler:
-        username      â€“ iÅŸlemi yapan kullanÄ±cÄ± adÄ±
-        action        â€“ yapÄ±lan iÅŸlem (Ã¶rn. "vm.start", "user.login")
-        resource_type â€“ etkilenen kaynak tipi (Ã¶rn. "vm", "user")
-        resource_id   â€“ etkilenen kaynaÄŸÄ±n ID'si
-        details       â€“ ek bilgi (dict veya herhangi bir nesne â†’ JSON'a Ã§evrilir)
-        ip            â€“ istemci IP adresi
-        user_agent    â€“ HTTP User-Agent baÅŸlÄ±ÄŸÄ±
-        result        â€“ "success" | "failed" | "error"
-        role          â€“ kullanÄ±cÄ± rolÃ¼
+        username      – işlemi yapan kullanıcı adı
+        action        – yapılan işlem (örn. "vm.start", "user.login")
+        resource_type – etkilenen kaynak tipi (örn. "vm", "user")
+        resource_id   – etkilenen kaynağın ID'si
+        details       – ek bilgi (dict veya herhangi bir nesne → JSON'a çevrilir)
+        ip            – istemci IP adresi
+        user_agent    – HTTP User-Agent başlığı
+        result        – "success" | "failed" | "error"
+        role          – kullanıcı rolü
     """
     try:
         details_str = json.dumps(details, ensure_ascii=False) if details is not None else None
@@ -89,7 +89,7 @@ def log_action(username, action, resource_type="", resource_id="",
             conn.commit()
             conn.close()
     except Exception as e:
-        log.error("log_action hatasÄ± (action=%s): %s", action, e)
+        log.error("log_action hatası (action=%s): %s", action, e)
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ def log_action(username, action, resource_type="", resource_id="",
 def get_logs(username=None, action=None, resource_type=None,
              since=None, until=None, limit=100, offset=0):
     """
-    Filtreli audit kaydÄ± listesi dÃ¶ndÃ¼rÃ¼r (dict listesi).
+    Filtreli audit kaydı listesi döndürür (dict listesi).
 
     since / until: unix timestamp veya None.
     """
@@ -146,20 +146,20 @@ def get_logs(username=None, action=None, resource_type=None,
             conn.close()
         return rows
     except Exception as e:
-        log.error("get_logs hatasÄ±: %s", e)
+        log.error("get_logs hatası: %s", e)
         return []
 
 
 # ---------------------------------------------------------------------------
-# Ä°statistikler
+# İstatistikler
 # ---------------------------------------------------------------------------
 
 def get_stats():
     """
-    DÃ¶ndÃ¼rÃ¼r:
-      - total     : toplam kayÄ±t sayÄ±sÄ±
+    Döndürür:
+      - total     : toplam kayıt sayısı
       - by_user   : {username: count}
-      - last_24h  : son 24 saatteki aksiyon sayÄ±sÄ±
+      - last_24h  : son 24 saatteki aksiyon sayısı
       - by_action : {action: count}
     """
     try:
@@ -190,17 +190,17 @@ def get_stats():
             "by_action": by_action,
         }
     except Exception as e:
-        log.error("get_stats hatasÄ±: %s", e)
+        log.error("get_stats hatası: %s", e)
         return {"total": 0, "by_user": {}, "last_24h": 0, "by_action": {}}
 
 
 # ---------------------------------------------------------------------------
-# CSV dÄ±ÅŸa aktarÄ±m
+# CSV dışa aktarım
 # ---------------------------------------------------------------------------
 
 def export_csv(username=None, since=None, until=None):
     """
-    KayÄ±tlarÄ± CSV string olarak dÃ¶ndÃ¼rÃ¼r.
+    Kayıtları CSV string olarak döndürür.
     """
     try:
         rows = get_logs(username=username, since=since, until=until, limit=100000)
@@ -218,17 +218,17 @@ def export_csv(username=None, since=None, until=None):
 
         return output.getvalue()
     except Exception as e:
-        log.error("export_csv hatasÄ±: %s", e)
+        log.error("export_csv hatası: %s", e)
         return ""
 
 
 # ---------------------------------------------------------------------------
-# ModÃ¼l yÃ¼klendiÄŸinde DB'yi hazÄ±rla
+# Modül yüklendiğinde DB'yi hazırla
 # ---------------------------------------------------------------------------
 init_db()
-
-
-
-
-
-
+
+
+
+
+
+

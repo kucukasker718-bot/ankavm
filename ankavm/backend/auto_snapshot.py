@@ -1,12 +1,12 @@
-﻿"""
-auto_snapshot.py â€” Otomatik gÃ¼nlÃ¼k VM snapshot + X-gÃ¼n temizleme.
-YapÄ±landÄ±rma: /var/lib/ankavm/auto_snapshot_config.json
+"""
+auto_snapshot.py — Otomatik günlük VM snapshot + X-gün temizleme.
+Yapılandırma: /var/lib/ankavm/auto_snapshot_config.json
   {
     "enabled": true,
-    "hour": 2,          // her gÃ¼n kaÃ§ta (0-23)
+    "hour": 2,          // her gün kaçta (0-23)
     "minute": 0,
-    "keep_days": 7,     // kaÃ§ gÃ¼nlÃ¼k snapshot saklanacak
-    "vm_filter": []     // boÅŸsa tÃ¼m VM'ler, doluysa sadece bunlar
+    "keep_days": 7,     // kaç günlük snapshot saklanacak
+    "vm_filter": []     // boşsa tüm VM'ler, doluysa sadece bunlar
   }
 """
 
@@ -44,7 +44,7 @@ def _load_config():
             # Merge defaults
             return {**_DEFAULT_CONFIG, **cfg}
     except Exception as e:
-        log.error("_load_config hatasÄ±: %s", e)
+        log.error("_load_config hatası: %s", e)
     return dict(_DEFAULT_CONFIG)
 
 
@@ -56,7 +56,7 @@ def _save_config(cfg):
             json.dump(cfg, f, indent=2, ensure_ascii=False)
         os.replace(tmp, CONFIG_PATH)
     except Exception as e:
-        log.error("_save_config hatasÄ±: %s", e)
+        log.error("_save_config hatası: %s", e)
 
 
 def get_config():
@@ -74,7 +74,7 @@ def update_config(**kwargs):
 
 
 # ---------------------------------------------------------------------------
-# VM listesi yardÄ±mcÄ±
+# VM listesi yardımcı
 # ---------------------------------------------------------------------------
 
 def _list_vms():
@@ -85,15 +85,15 @@ def _list_vms():
         ).decode("utf-8", errors="replace").strip().splitlines()
         return [v.strip() for v in out if v.strip()]
     except FileNotFoundError:
-        log.warning("virsh bulunamadÄ± â€” auto-snapshot Ã§alÄ±ÅŸmayacak.")
+        log.warning("virsh bulunamadı — auto-snapshot çalışmayacak.")
         return []
     except Exception as e:
-        log.error("_list_vms hatasÄ±: %s", e)
+        log.error("_list_vms hatası: %s", e)
         return []
 
 
 # ---------------------------------------------------------------------------
-# Snapshot iÅŸlemleri
+# Snapshot işlemleri
 # ---------------------------------------------------------------------------
 
 def _take_snapshot(vm_name):
@@ -106,19 +106,19 @@ def _take_snapshot(vm_name):
             capture_output=True, text=True, timeout=300
         )
         if result.returncode == 0:
-            log.info("auto-snapshot oluÅŸturuldu: %s / %s", vm_name, name)
+            log.info("auto-snapshot oluşturuldu: %s / %s", vm_name, name)
             return True, name
         else:
             err = result.stderr.strip()
-            log.warning("auto-snapshot baÅŸarÄ±sÄ±z: %s â€” %s", vm_name, err)
+            log.warning("auto-snapshot başarısız: %s — %s", vm_name, err)
             return False, err
     except Exception as e:
-        log.error("_take_snapshot hatasÄ± (vm=%s): %s", vm_name, e)
+        log.error("_take_snapshot hatası (vm=%s): %s", vm_name, e)
         return False, str(e)
 
 
 def _cleanup_old_snapshots(vm_name, keep_days):
-    """keep_days'den eski oxw-autosnap-* snapshot'larÄ±nÄ± siler."""
+    """keep_days'den eski oxw-autosnap-* snapshot'larını siler."""
     try:
         out = subprocess.check_output(
             ["virsh", "snapshot-list", vm_name, "--name"],
@@ -147,20 +147,20 @@ def _cleanup_old_snapshots(vm_name, keep_days):
                         deleted += 1
                         log.info("Eski auto-snapshot silindi: %s / %s", vm_name, sname)
             except Exception as pe:
-                log.debug("Tarih ayrÄ±ÅŸtÄ±rma hatasÄ± (%s): %s", sname, pe)
+                log.debug("Tarih ayrıştırma hatası (%s): %s", sname, pe)
 
         if deleted:
-            log.info("cleanup: %s iÃ§in %d eski snapshot silindi.", vm_name, deleted)
+            log.info("cleanup: %s için %d eski snapshot silindi.", vm_name, deleted)
     except Exception as e:
-        log.error("_cleanup_old_snapshots hatasÄ± (vm=%s): %s", vm_name, e)
+        log.error("_cleanup_old_snapshots hatası (vm=%s): %s", vm_name, e)
 
 
 # ---------------------------------------------------------------------------
-# Toplu Ã§alÄ±ÅŸtÄ±rma
+# Toplu çalıştırma
 # ---------------------------------------------------------------------------
 
 def run_auto_snapshots():
-    """TÃ¼m VM'ler iÃ§in auto-snapshot alÄ±r ve temizler."""
+    """Tüm VM'ler için auto-snapshot alır ve temizler."""
     cfg       = _load_config()
     keep_days = cfg.get("keep_days", 7)
     vm_filter = cfg.get("vm_filter", [])
@@ -168,11 +168,11 @@ def run_auto_snapshots():
     all_vms   = _list_vms()
     targets   = [v for v in all_vms if not vm_filter or v in vm_filter]
 
-    log.info("run_auto_snapshots baÅŸladÄ±: %d VM hedefleniyor.", len(targets))
+    log.info("run_auto_snapshots başladı: %d VM hedefleniyor.", len(targets))
     for vm_name in targets:
         _take_snapshot(vm_name)
         _cleanup_old_snapshots(vm_name, keep_days)
-    log.info("run_auto_snapshots tamamlandÄ±.")
+    log.info("run_auto_snapshots tamamlandı.")
 
 
 # ---------------------------------------------------------------------------
@@ -183,7 +183,7 @@ _scheduler_started = False
 
 
 def _seconds_until_next(hour, minute):
-    """Sonraki hedef saate kaÃ§ saniye kaldÄ±ÄŸÄ±nÄ± hesaplar."""
+    """Sonraki hedef saate kaç saniye kaldığını hesaplar."""
     now = datetime.now()
     target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
     if target <= now:
@@ -193,8 +193,8 @@ def _seconds_until_next(hour, minute):
 
 def start_scheduler():
     """
-    Daemon thread baÅŸlatÄ±r.
-    Her gÃ¼n config'deki saat:dakikada auto-snapshot Ã§alÄ±ÅŸtÄ±rÄ±r.
+    Daemon thread başlatır.
+    Her gün config'deki saat:dakikada auto-snapshot çalıştırır.
     """
     global _scheduler_started
     if _scheduler_started:
@@ -202,7 +202,7 @@ def start_scheduler():
     _scheduler_started = True
 
     def _loop():
-        log.info("auto_snapshot scheduler baÅŸladÄ±.")
+        log.info("auto_snapshot scheduler başladı.")
         while True:
             try:
                 cfg = _load_config()
@@ -217,7 +217,7 @@ def start_scheduler():
                          wait / 60, hour, minute)
                 time.sleep(wait)
 
-                # Tekrar okuyarak enabled kontrolÃ¼ yap
+                # Tekrar okuyarak enabled kontrolü yap
                 cfg = _load_config()
                 if cfg.get("enabled", True):
                     t = threading.Thread(
@@ -227,16 +227,16 @@ def start_scheduler():
                     )
                     t.start()
             except Exception as e:
-                log.error("auto_snapshot loop hatasÄ±: %s", e)
+                log.error("auto_snapshot loop hatası: %s", e)
                 time.sleep(60)
 
     t = threading.Thread(target=_loop, name="auto-snapshot-scheduler", daemon=True)
     t.start()
-    log.info("auto_snapshot scheduler thread baÅŸlatÄ±ldÄ±.")
+    log.info("auto_snapshot scheduler thread başlatıldı.")
     return t
-
-
-
-
-
-
+
+
+
+
+
+

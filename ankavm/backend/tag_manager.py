@@ -1,4 +1,4 @@
-﻿"""ankavm VM Tag Manager â€” stores tags in /var/lib/ankavm/vm_tags.json"""
+"""ankavm VM Tag Manager — stores tags in /var/lib/ankavm/vm_tags.json"""
 import json, os, threading
 from pathlib import Path
 
@@ -62,9 +62,9 @@ def list_all_unique_tags():
         all_tags = set()
         for tags in _load().values(): all_tags.update(tags)
     return sorted(all_tags)
-
-
-
-
-
-
+
+
+
+
+
+

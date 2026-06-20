@@ -1,8 +1,8 @@
-﻿"""
-nginx_manager.py â€” nginx/OpenResty reverse proxy management
+"""
+nginx_manager.py — nginx/OpenResty reverse proxy management
 ankavm Hypervisor backend module
 
-OpenResty (openresty) is preferred when available â€” it supports Lua scripting
+OpenResty (openresty) is preferred when available — it supports Lua scripting
 via ngx_http_lua_module. Falls back to plain nginx automatically.
 """
 
@@ -27,7 +27,7 @@ _lock = threading.Lock()
 # ---------------------------------------------------------------------------
 
 def _detect_binary() -> str:
-    """openresty varsa openresty, yoksa nginx dÃ¶ner."""
+    """openresty varsa openresty, yoksa nginx döner."""
     if shutil.which("openresty"):
         return "openresty"
     return "nginx"
@@ -36,7 +36,7 @@ def _detect_binary() -> str:
 def _detect_sites_dirs() -> tuple:
     """
     OpenResty ve nginx config dizinlerini tespit et.
-    DÃ¶ner: (sites_available, sites_enabled)
+    Döner: (sites_available, sites_enabled)
     """
     # OpenResty default locations
     for base in ("/usr/local/openresty/nginx/conf",
@@ -159,16 +159,16 @@ def get_site(name):
 
 
 def _sanitize_nginx_token(value: str, field: str = "value") -> str:
-    """rapor #61 fix: nginx config injection Ã¶nleme.
+    """rapor #61 fix: nginx config injection önleme.
     server_name, upstream_host, proxy_pass gibi alanlara
-    yalnÄ±zca gÃ¼venli karakterler geÃ§er. Newline, ';', '{', '}' yasak.
+    yalnızca güvenli karakterler geçer. Newline, ';', '{', '}' yasak.
     """
     import re as _re
     if not value:
-        raise ValueError(f"nginx config: {field} boÅŸ olamaz")
-    # Sadece hostname/IP karakterlerine izin ver: harf, rakam, nokta, tire, alt Ã§izgi, iki nokta, kÃ¶ÅŸeli parantez
+        raise ValueError(f"nginx config: {field} boş olamaz")
+    # Sadece hostname/IP karakterlerine izin ver: harf, rakam, nokta, tire, alt çizgi, iki nokta, köşeli parantez
     if not _re.match(r'^[a-zA-Z0-9._:\-\[\]]+$', value):
-        raise ValueError(f"nginx config: {field} geÃ§ersiz karakter iÃ§eriyor: {value!r}")
+        raise ValueError(f"nginx config: {field} geçersiz karakter içeriyor: {value!r}")
     return value
 
 def create_site(name, server_name, upstream_host, upstream_port,
@@ -342,9 +342,9 @@ def generate_lua_middleware(rate_limit_rps: int = 20,
                            auth_token: str = "",
                            block_ips: list = None) -> str:
     """
-    OpenResty Lua middleware bloÄŸu Ã¼ret (access_by_lua_block).
-    Ã–zellikler: rate limiting, Bearer token kontrolÃ¼, IP bloklama.
-    nginx'te lua desteÄŸi yoksa bu blok atlanmalÄ±.
+    OpenResty Lua middleware bloğu üret (access_by_lua_block).
+    Özellikler: rate limiting, Bearer token kontrolü, IP bloklama.
+    nginx'te lua desteği yoksa bu blok atlanmalı.
     """
     block_ips = block_ips or []
     blocked_set = (
@@ -453,7 +453,7 @@ def _generate_config(name, server_name, upstream_host, upstream_port,
         + f"}}\n"
     )
 
-    # HTTP â†’ HTTPS redirect when SSL is enabled
+    # HTTP → HTTPS redirect when SSL is enabled
     if ssl:
         config += (
             f"\nserver {{\n"
@@ -464,9 +464,9 @@ def _generate_config(name, server_name, upstream_host, upstream_port,
         )
 
     return config
-
-
-
-
-
-
+
+
+
+
+
+

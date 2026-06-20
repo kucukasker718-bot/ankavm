@@ -1,5 +1,5 @@
-﻿"""
-smart_monitor.py â€” SMART disk health monitoring via smartctl
+"""
+smart_monitor.py — SMART disk health monitoring via smartctl
 ankavm Hypervisor backend module
 """
 
@@ -82,7 +82,7 @@ def get_smart_data(device):
         # smartctl returns non-zero even on partial success; parse anyway
         raw = json.loads(result.stdout)
     except FileNotFoundError:
-        log.error("smartctl not found â€” install smartmontools")
+        log.error("smartctl not found — install smartmontools")
         return _unknown_entry(device)
     except json.JSONDecodeError as exc:
         log.warning("smartctl JSON parse error for %s: %s", device, exc)
@@ -168,9 +168,9 @@ def get_all_devices_health():
     Return health summary for every detected disk.
 
     Status rules:
-        critical â€” FAILED, or reallocated_sectors > 0, or pending_sectors > 0
-        warning  â€” temperature > 50
-        ok       â€” everything else
+        critical — FAILED, or reallocated_sectors > 0, or pending_sectors > 0
+        warning  — temperature > 50
+        ok       — everything else
     """
     devices = list_devices()
     results = []
@@ -213,7 +213,7 @@ def check_and_alert():
         _has_notifications = True
     except ImportError:
         _has_notifications = False
-        log.debug("notifications module not available â€” skipping alerts")
+        log.debug("notifications module not available — skipping alerts")
 
     health_list = get_all_devices_health()
     for entry in health_list:
@@ -221,7 +221,7 @@ def check_and_alert():
             msg = (
                 f"Disk {entry['device']} [{entry.get('model', '')}] "
                 f"status={entry['status']}, health={entry['health']}, "
-                f"temp={entry['temperature']}Â°C, "
+                f"temp={entry['temperature']}°C, "
                 f"reallocated={entry.get('reallocated_sectors', 0)}, "
                 f"pending={entry.get('pending_sectors', 0)}"
             )
@@ -288,9 +288,9 @@ def get_summary():
         else:
             summary["healthy"] += 1
     return summary
-
-
-
-
-
-
+
+
+
+
+
+

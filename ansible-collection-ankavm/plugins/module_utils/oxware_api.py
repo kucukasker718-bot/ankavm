@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 ankavm API helper for Ansible modules.
 Shared HTTP client with auth, JSON handling, retries.
@@ -16,7 +16,7 @@ except ImportError:
 
 
 class ankavmClient(object):
-    """Minimal stdlib HTTP client â€” no external deps for ansible-galaxy installs."""
+    """Minimal stdlib HTTP client — no external deps for ansible-galaxy installs."""
 
     def __init__(self, host, token=None, username=None, password=None,
                  verify_ssl=True, timeout=30):
@@ -109,9 +109,9 @@ def build_client(module):
         )
     except Exception as e:
         module.fail_json(msg="Auth failed: %s" % str(e))
-
-
-
-
-
-
+
+
+
+
+
+

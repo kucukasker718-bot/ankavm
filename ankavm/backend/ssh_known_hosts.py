@@ -1,4 +1,4 @@
-﻿"""SEC-032 â€” Persistent SSH known-hosts file with first-contact prompt.
+"""SEC-032 — Persistent SSH known-hosts file with first-contact prompt.
 
 ankavm used `paramiko.AutoAddPolicy()` for every outbound SSH connection,
 which transparently trusts whatever key the peer presents. This module
@@ -153,11 +153,11 @@ class ankavmPolicy:
             return
         raise Exception(
             f"unknown ssh host {hostname!r} (fingerprint {fp}); "
-            f"approve via panel â†’ Security â†’ SSH Known Hosts"
+            f"approve via panel → Security → SSH Known Hosts"
         )
-
-
-
-
-
-
+
+
+
+
+
+

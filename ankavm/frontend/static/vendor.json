@@ -1,5 +1,5 @@
-﻿{
-  "note": "Vendored JS libraries â€” all sourced from official npm packages via jsDelivr CDN. Source maps point to CDN for browser DevTools.",
+{
+  "note": "Vendored JS libraries — all sourced from official npm packages via jsDelivr CDN. Source maps point to CDN for browser DevTools.",
   "libraries": [
     {
       "file": "xterm.min.js",
@@ -39,9 +39,9 @@
     }
   ]
 }
-
-
-
-
-
-
+
+
+
+
+
+

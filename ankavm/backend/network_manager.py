@@ -1,4 +1,4 @@
-﻿import libvirt
+import libvirt
 import xml.etree.ElementTree as ET
 import subprocess
 import config
@@ -11,7 +11,7 @@ def _connect():
 
 
 def _safe_bridge_name(net):
-    """Passthrough/macvtap aÄŸlarda bridgeName() exception fÄ±rlatÄ±r â€” yakala."""
+    """Passthrough/macvtap ağlarda bridgeName() exception fırlatır — yakala."""
     try:
         return net.bridgeName() if net.isActive() else ""
     except Exception:
@@ -54,9 +54,9 @@ def create_network(name, forward_mode="nat", bridge_name=None,
                    dhcp_start="192.168.100.100", dhcp_end="192.168.100.200",
                    bridge_iface=None):
 
-    # Bridge / passthrough modu: fiziksel arayÃ¼zÃ¼ doÄŸrudan kullan
-    # libvirt bridge modunda mevcut bir bridge aygÄ±tÄ± (br0 gibi) gerekir.
-    # Fiziksel interface (ens160, enp1s0) iÃ§in passthrough kullan â€” ayrÄ± bridge kurmaya gerek yok.
+    # Bridge / passthrough modu: fiziksel arayüzü doğrudan kullan
+    # libvirt bridge modunda mevcut bir bridge aygıtı (br0 gibi) gerekir.
+    # Fiziksel interface (ens160, enp1s0) için passthrough kullan — ayrı bridge kurmaya gerek yok.
     if forward_mode == "bridge":
         iface = bridge_iface or "enp1s0"
         xml = f"""<network>
@@ -152,8 +152,8 @@ def update_network(net_uuid: str, dhcp_start: str = None, dhcp_end: str = None,
                    ip_address: str = None, netmask: str = None) -> dict:
     """
     Edit a libvirt network's IP/DHCP config.
-    Must stop â†’ redefine â†’ start because libvirt doesn't support live DHCP edits.
-    Bridge/passthrough networks don't support IP/DHCP via libvirt XML â€” autostart only.
+    Must stop → redefine → start because libvirt doesn't support live DHCP edits.
+    Bridge/passthrough networks don't support IP/DHCP via libvirt XML — autostart only.
     """
     conn = _connect()
     try:
@@ -164,13 +164,13 @@ def update_network(net_uuid: str, dhcp_start: str = None, dhcp_end: str = None,
         xml_str = net.XMLDesc(0)
         root = ET.fromstring(xml_str)
 
-        # Detect bridge/passthrough â€” these networks have no <ip> element in libvirt XML
+        # Detect bridge/passthrough — these networks have no <ip> element in libvirt XML
         fwd_el = root.find("forward")
         fwd_mode = fwd_el.get("mode", "nat") if fwd_el is not None else "nat"
         is_bridge = fwd_mode in ("bridge", "passthrough", "private", "vepa")
 
         if is_bridge:
-            # Bridge networks: libvirt XML has no <ip> â€” can't configure gateway/DHCP here.
+            # Bridge networks: libvirt XML has no <ip> — can't configure gateway/DHCP here.
             # IP addressing is handled by physical network or ankavm IPAM pools.
             # Only save autostart (handled by caller via separate endpoint).
             return {
@@ -178,8 +178,8 @@ def update_network(net_uuid: str, dhcp_start: str = None, dhcp_end: str = None,
                 "active": bool(net.isActive()),
                 "autostart": bool(net.autostart()),
                 "bridge_note": (
-                    "Bu aÄŸ bir kÃ¶prÃ¼ aÄŸÄ±dÄ±r. Gateway ve DHCP libvirt Ã¼zerinden "
-                    "yapÄ±landÄ±rÄ±lamaz. IPAM â†’ IP Havuzu oluÅŸturun ve bu aÄŸÄ± seÃ§in."
+                    "Bu ağ bir köprü ağıdır. Gateway ve DHCP libvirt üzerinden "
+                    "yapılandırılamaz. IPAM → IP Havuzu oluşturun ve bu ağı seçin."
                 ),
             }
 
@@ -204,7 +204,7 @@ def update_network(net_uuid: str, dhcp_start: str = None, dhcp_end: str = None,
                 range_el.set("start", dhcp_start)
                 range_el.set("end", dhcp_end)
         elif ip_address and netmask:
-            # No <ip> element yet â€” create one (for NAT/route networks)
+            # No <ip> element yet — create one (for NAT/route networks)
             ip_el = ET.SubElement(root, "ip")
             ip_el.set("address", ip_address)
             ip_el.set("netmask", netmask)
@@ -216,7 +216,7 @@ def update_network(net_uuid: str, dhcp_start: str = None, dhcp_end: str = None,
 
         new_xml = ET.tostring(root, encoding="unicode")
 
-        # Stop â†’ redefine â†’ start
+        # Stop → redefine → start
         if was_active:
             net.destroy()
         net.undefine()
@@ -243,8 +243,8 @@ def get_network_info(net_uuid):
         ip_el = root.find("ip")
         dhcp_el = ip_el.find("dhcp") if ip_el is not None else None
         range_el = dhcp_el.find("range") if dhcp_el is not None else None
-        # forward mode â€” use .get() on element, NOT findtext("forward/@mode")
-        # (stdlib ET doesn't support @attr in findtext path â†’ SyntaxError)
+        # forward mode — use .get() on element, NOT findtext("forward/@mode")
+        # (stdlib ET doesn't support @attr in findtext path → SyntaxError)
         fwd_el = root.find("forward")
         fwd_mode = fwd_el.get("mode", "nat") if fwd_el is not None else "nat"
         # bridge name
@@ -278,7 +278,7 @@ def _read_sys(path: str, default="") -> str:
 
 
 def _parse_proc_net_dev() -> dict:
-    """Parse /proc/net/dev â†’ {iface: {rx_bytes, tx_bytes, rx_packets, tx_packets}}"""
+    """Parse /proc/net/dev → {iface: {rx_bytes, tx_bytes, rx_packets, tx_packets}}"""
     stats = {}
     try:
         with open("/proc/net/dev") as f:
@@ -321,19 +321,19 @@ def _iface_type(name: str) -> str:
 def setup_host_bridge(bridge_name: str = "oxbr0", physical_iface: str = "enp1s0",
                       libvirt_net_name: str = "oxbridge") -> dict:
     """
-    Host Ã¼zerinde Linux bridge oluÅŸtur ve libvirt'e kaydet.
-    VMs bu bridge'e baÄŸlanarak host NIC Ã¼zerinden doÄŸrudan IP alÄ±r (gerÃ§ek IP izolasyonu).
+    Host üzerinde Linux bridge oluştur ve libvirt'e kaydet.
+    VMs bu bridge'e bağlanarak host NIC üzerinden doğrudan IP alır (gerçek IP izolasyonu).
 
-    AdÄ±mlar:
+    Adımlar:
     1. ip link add oxbr0 type bridge
     2. ip link set enp1s0 master oxbr0
     3. ip link set oxbr0 up
-    4. libvirt'e bridge network tanÄ±mla (forward mode=bridge)
+    4. libvirt'e bridge network tanımla (forward mode=bridge)
     """
     errors = []
     steps  = []
 
-    # 1. Bridge oluÅŸtur (varsa atla)
+    # 1. Bridge oluştur (varsa atla)
     r = subprocess.run(["ip", "link", "show", bridge_name], capture_output=True)
     if r.returncode != 0:
         r2 = subprocess.run(
@@ -341,9 +341,9 @@ def setup_host_bridge(bridge_name: str = "oxbr0", physical_iface: str = "enp1s0"
             capture_output=True, text=True
         )
         if r2.returncode == 0:
-            steps.append(f"Bridge oluÅŸturuldu: {bridge_name}")
+            steps.append(f"Bridge oluşturuldu: {bridge_name}")
         else:
-            errors.append(f"Bridge oluÅŸturulamadÄ±: {r2.stderr.strip()}")
+            errors.append(f"Bridge oluşturulamadı: {r2.stderr.strip()}")
     else:
         steps.append(f"Bridge zaten var: {bridge_name}")
 
@@ -353,7 +353,7 @@ def setup_host_bridge(bridge_name: str = "oxbr0", physical_iface: str = "enp1s0"
         capture_output=True, text=True
     )
     if r3.returncode == 0:
-        steps.append(f"{physical_iface} â†’ {bridge_name}")
+        steps.append(f"{physical_iface} → {bridge_name}")
     else:
         errors.append(f"NIC bridge'e eklenemedi: {r3.stderr.strip()}")
 
@@ -361,7 +361,7 @@ def setup_host_bridge(bridge_name: str = "oxbr0", physical_iface: str = "enp1s0"
     subprocess.run(["ip", "link", "set", bridge_name, "up"], capture_output=True)
     steps.append(f"{bridge_name} UP")
 
-    # 4. Libvirt bridge network tanÄ±mla
+    # 4. Libvirt bridge network tanımla
     xml = f"""<network>
   <name>{libvirt_net_name}</name>
   <forward mode='bridge'/>
@@ -371,7 +371,7 @@ def setup_host_bridge(bridge_name: str = "oxbr0", physical_iface: str = "enp1s0"
     try:
         conn = _connect()
         try:
-            # Varsa Ã¶nce sil
+            # Varsa önce sil
             try:
                 existing = conn.networkLookupByName(libvirt_net_name)
                 if existing.isActive():
@@ -383,11 +383,11 @@ def setup_host_bridge(bridge_name: str = "oxbr0", physical_iface: str = "enp1s0"
             net = conn.networkDefineXML(xml)
             net.setAutostart(1)
             net.create()
-            steps.append(f"Libvirt network tanÄ±mlandÄ±: {libvirt_net_name}")
+            steps.append(f"Libvirt network tanımlandı: {libvirt_net_name}")
         finally:
             conn.close()
     except Exception as e:
-        errors.append(f"Libvirt network hatasÄ±: {e}")
+        errors.append(f"Libvirt network hatası: {e}")
 
     return {
         "ok": len(errors) == 0,
@@ -397,14 +397,14 @@ def setup_host_bridge(bridge_name: str = "oxbr0", physical_iface: str = "enp1s0"
         "steps": steps,
         "errors": errors,
         "info": (
-            "VMs bu aÄŸda oluÅŸturulduÄŸunda fiziksel NIC Ã¼zerinden doÄŸrudan IP alÄ±r. "
-            "Upstream DHCP veya cloud-init static IP kullanÄ±n."
+            "VMs bu ağda oluşturulduğunda fiziksel NIC üzerinden doğrudan IP alır. "
+            "Upstream DHCP veya cloud-init static IP kullanın."
         ),
     }
 
 
 def list_host_bridges() -> list:
-    """Host Ã¼zerindeki Linux bridge listesi."""
+    """Host üzerindeki Linux bridge listesi."""
     result = subprocess.run(
         ["ip", "-j", "link", "show", "type", "bridge"],
         capture_output=True, text=True
@@ -416,7 +416,7 @@ def list_host_bridges() -> list:
         for item in data:
             name = item.get("ifname", "")
             state = item.get("operstate", "UNKNOWN").lower()
-            # Ãœyeleri bul
+            # Üyeleri bul
             r2 = subprocess.run(
                 ["ip", "link", "show", "master", name],
                 capture_output=True, text=True
@@ -457,12 +457,12 @@ def ensure_physnet() -> dict:
     the physical network.
 
     Priority:
-    1. oxbridge already active in libvirt â†’ return it
-    2. oxbr0 Linux bridge exists on host â†’ register with libvirt as oxbridge
-    3. Any other passthrough/bridge libvirt network â†’ return it
+    1. oxbridge already active in libvirt → return it
+    2. oxbr0 Linux bridge exists on host → register with libvirt as oxbridge
+    3. Any other passthrough/bridge libvirt network → return it
     4. Fallback: macvtap passthrough on detected interface (single-VM only)
 
-    Never raises â€” caller logs result.
+    Never raises — caller logs result.
     """
     try:
         conn = _connect()
@@ -513,7 +513,7 @@ def ensure_physnet() -> dict:
             finally:
                 conn.close()
         except Exception as e:
-            # oxbr0 exists but libvirt registration failed â€” still usable
+            # oxbr0 exists but libvirt registration failed — still usable
             if _fallback:
                 return _fallback
             return {"ok": False, "error": f"oxbridge register failed: {e}"}
@@ -528,8 +528,8 @@ def ensure_physnet() -> dict:
         result["created"] = True
         result["iface"] = iface
         result["warning"] = (
-            "macvtap passthrough kullanÄ±lÄ±yor â€” host VM'lere ulaÅŸamaz. "
-            "KalÄ±cÄ± Ã§Ã¶zÃ¼m iÃ§in install.sh Ã§alÄ±ÅŸtÄ±rÄ±n (oxbr0 bridge kurar)."
+            "macvtap passthrough kullanılıyor — host VM'lere ulaşamaz. "
+            "Kalıcı çözüm için install.sh çalıştırın (oxbr0 bridge kurar)."
         )
         return result
     except Exception as e:
@@ -606,7 +606,7 @@ def get_host_interfaces():
     return interfaces
 
 
-# â”€â”€ MAC OUI lookup (Ã§evrimdÄ±ÅŸÄ±, sadece yaygÄ±n satÄ±cÄ±lar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── MAC OUI lookup (çevrimdışı, sadece yaygın satıcılar) ─────────────────────
 _OUI_TABLE = {
     "00:00:0c": "Cisco", "00:01:42": "Cisco", "00:0d:60": "Cisco",
     "00:1a:a2": "Cisco", "00:25:45": "Cisco", "00:50:56": "VMware",
@@ -631,13 +631,13 @@ def _mac_vendor(mac: str) -> str:
 
 def get_lldp_neighbors() -> list:
     """
-    LLDP komÅŸu cihazlarÄ± dÃ¶ndÃ¼r.
-    lldpd kuruluysa lldpctl -f json ile gerÃ§ek veri,
-    kurulu deÄŸilse ARP tablosu + MAC vendor lookup ile tahmin.
+    LLDP komşu cihazları döndür.
+    lldpd kuruluysa lldpctl -f json ile gerçek veri,
+    kurulu değilse ARP tablosu + MAC vendor lookup ile tahmin.
     """
     neighbors = []
 
-    # â”€â”€ YÃ¶ntem 1: lldpctl (lldpd paketi) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Yöntem 1: lldpctl (lldpd paketi) ──────────────────────────────────
     try:
         import subprocess, json as _json
         result = subprocess.run(
@@ -683,11 +683,11 @@ def get_lldp_neighbors() -> list:
             if neighbors:
                 return neighbors
     except FileNotFoundError:
-        pass  # lldpd kurulu deÄŸil
+        pass  # lldpd kurulu değil
     except Exception:
         pass
 
-    # â”€â”€ YÃ¶ntem 2: ARP tablosu + MAC vendor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Yöntem 2: ARP tablosu + MAC vendor ────────────────────────────────
     try:
         import subprocess
         result = subprocess.run(
@@ -704,7 +704,7 @@ def get_lldp_neighbors() -> list:
                 state = e.get("state", [])
                 if not mac or not ip:
                     continue
-                # Sadece eriÅŸilebilir/kalÄ±cÄ± kayÄ±tlar
+                # Sadece erişilebilir/kalıcı kayıtlar
                 if isinstance(state, list) and any(s in state for s in ("REACHABLE", "PERMANENT", "STALE", "DELAY")):
                     vendor = _mac_vendor(mac)
                     neighbors.append({
@@ -725,7 +725,7 @@ def get_lldp_neighbors() -> list:
 
 
 def get_arp_table() -> list:
-    """Tam ARP tablosunu dÃ¶ndÃ¼r (tÃ¼m kayÄ±tlar)."""
+    """Tam ARP tablosunu döndür (tüm kayıtlar)."""
     try:
         import subprocess, json as _json
         result = subprocess.run(["ip", "-j", "neigh"], capture_output=True, text=True, timeout=5)
@@ -745,9 +745,9 @@ def get_arp_table() -> list:
     except Exception:
         pass
     return []
-
-
-
-
-
-
+
+
+
+
+
+

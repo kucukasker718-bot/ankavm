@@ -1,5 +1,5 @@
-﻿"""
-backup_scheduler.py - ZamanlanmÄ±ÅŸ VM backup yÃ¶netimi.
+"""
+backup_scheduler.py - Zamanlanmış VM backup yönetimi.
 Schedules: /var/lib/ankavm/backup_schedules.json
 History:   /var/log/ankavm/backup_history.jsonl
 """
@@ -54,18 +54,18 @@ _history_lock  = threading.Lock()
 # ---------------------------------------------------------------------------
 
 def _load():
-    """Schedules JSON dosyasÄ±nÄ± yÃ¼kler."""
+    """Schedules JSON dosyasını yükler."""
     try:
         if os.path.exists(SCHEDULES_PATH):
             with open(SCHEDULES_PATH, "r", encoding="utf-8") as f:
                 return json.load(f)
     except Exception as e:
-        log.error("_load hatasÄ±: %s", e)
+        log.error("_load hatası: %s", e)
     return {}
 
 
 def _save(data):
-    """Schedules JSON dosyasÄ±nÄ± atomik yazar."""
+    """Schedules JSON dosyasını atomik yazar."""
     try:
         os.makedirs(os.path.dirname(SCHEDULES_PATH), exist_ok=True)
         tmp = SCHEDULES_PATH + ".tmp"
@@ -73,17 +73,17 @@ def _save(data):
             json.dump(data, f, indent=2, ensure_ascii=False)
         os.replace(tmp, SCHEDULES_PATH)
     except Exception as e:
-        log.error("_save hatasÄ±: %s", e)
+        log.error("_save hatası: %s", e)
 
 
 # ---------------------------------------------------------------------------
-# Cron yardÄ±mcÄ±sÄ±
+# Cron yardımcısı
 # ---------------------------------------------------------------------------
 
 def _next_run(cron_expr):
     """
-    Sonraki Ã§alÄ±ÅŸma zamanÄ±nÄ± unix timestamp olarak dÃ¶ndÃ¼rÃ¼r.
-    croniter yoksa None dÃ¶ndÃ¼rÃ¼r.
+    Sonraki çalışma zamanını unix timestamp olarak döndürür.
+    croniter yoksa None döndürür.
     """
     if not CRONITER_AVAILABLE:
         return None
@@ -91,7 +91,7 @@ def _next_run(cron_expr):
         it = croniter(cron_expr, time.time())
         return it.get_next(float)
     except Exception as e:
-        log.error("_next_run hatasÄ± (expr=%s): %s", cron_expr, e)
+        log.error("_next_run hatası (expr=%s): %s", cron_expr, e)
         return None
 
 
@@ -102,9 +102,9 @@ def _next_run(cron_expr):
 def create_schedule(vm_id, vm_name, cron_expr, retention_count=7,
                     description="", remote_type=None, remote_config=None):
     """
-    Yeni backup schedule oluÅŸturur.
+    Yeni backup schedule oluşturur.
     remote_type: "s3" | "ftp" | None
-    DÃ¶ner: schedule dict
+    Döner: schedule dict
     """
     try:
         schedule_id = str(uuid.uuid4())
@@ -130,36 +130,36 @@ def create_schedule(vm_id, vm_name, cron_expr, retention_count=7,
         log.info("create_schedule: vm=%s cron='%s' id=%s", vm_name, cron_expr, schedule_id)
         return schedule
     except Exception as e:
-        log.error("create_schedule hatasÄ±: %s", e)
+        log.error("create_schedule hatası: %s", e)
         return {}
 
 
 def list_schedules():
-    """TÃ¼m schedule'larÄ± liste olarak dÃ¶ndÃ¼rÃ¼r."""
+    """Tüm schedule'ları liste olarak döndürür."""
     try:
         with _lock:
             data = _load()
         return list(data.values())
     except Exception as e:
-        log.error("list_schedules hatasÄ±: %s", e)
+        log.error("list_schedules hatası: %s", e)
         return []
 
 
 def get_schedule(schedule_id):
-    """Tek schedule dÃ¶ndÃ¼rÃ¼r veya None."""
+    """Tek schedule döndürür veya None."""
     try:
         with _lock:
             data = _load()
         return data.get(schedule_id)
     except Exception as e:
-        log.error("get_schedule hatasÄ±: %s", e)
+        log.error("get_schedule hatası: %s", e)
         return None
 
 
 def update_schedule(schedule_id, **kwargs):
     """
-    Schedule alanlarÄ±nÄ± gÃ¼nceller.
-    cron_expr deÄŸiÅŸirse next_run yeniden hesaplanÄ±r.
+    Schedule alanlarını günceller.
+    cron_expr değişirse next_run yeniden hesaplanır.
     """
     try:
         with _lock:
@@ -173,15 +173,15 @@ def update_schedule(schedule_id, **kwargs):
             if "cron_expr" in kwargs:
                 entry["next_run"] = _next_run(entry["cron_expr"])
             _save(data)
-        log.info("update_schedule: %s gÃ¼ncellendi.", schedule_id)
+        log.info("update_schedule: %s güncellendi.", schedule_id)
         return True
     except Exception as e:
-        log.error("update_schedule hatasÄ±: %s", e)
+        log.error("update_schedule hatası: %s", e)
         return False
 
 
 def delete_schedule(schedule_id):
-    """Schedule'Ä± kalÄ±cÄ± olarak siler."""
+    """Schedule'ı kalıcı olarak siler."""
     try:
         with _lock:
             data = _load()
@@ -192,20 +192,20 @@ def delete_schedule(schedule_id):
         log.info("delete_schedule: %s silindi.", schedule_id)
         return True
     except Exception as e:
-        log.error("delete_schedule hatasÄ±: %s", e)
+        log.error("delete_schedule hatası: %s", e)
         return False
 
 
 # ---------------------------------------------------------------------------
-# Backup Ã§alÄ±ÅŸtÄ±rma
+# Backup çalıştırma
 # ---------------------------------------------------------------------------
 
 def _run_backup(schedule):
     """
-    Verilen schedule iÃ§in:
-      1) virsh snapshot-create-as ile snapshot alÄ±r
-      2) retention uygulanÄ±r (eski snapshot'lar silinir)
-      3) remote_type varsa uzak hedefe yÃ¼kler
+    Verilen schedule için:
+      1) virsh snapshot-create-as ile snapshot alır
+      2) retention uygulanır (eski snapshot'lar silinir)
+      3) remote_type varsa uzak hedefe yükler
     """
     vm_id    = schedule["vm_id"]
     vm_name  = schedule["vm_name"]
@@ -216,7 +216,7 @@ def _run_backup(schedule):
     error   = ""
 
     try:
-        # 1. Snapshot oluÅŸtur
+        # 1. Snapshot oluştur
         cmd = ["virsh", "snapshot-create-as",
                vm_name, snap_name,
                "--description", f"ankavm auto-backup {snap_ts}",
@@ -224,9 +224,9 @@ def _run_backup(schedule):
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         if result.returncode != 0:
             raise RuntimeError(f"virsh snapshot-create-as failed: {result.stderr.strip()}")
-        log.info("_run_backup: snapshot '%s' oluÅŸturuldu.", snap_name)
+        log.info("_run_backup: snapshot '%s' oluşturuldu.", snap_name)
 
-        # 2. Retention â€“ eski snapshot'larÄ± listele ve sil
+        # 2. Retention – eski snapshot'ları listele ve sil
         try:
             ls_out = subprocess.check_output(
                 ["virsh", "snapshot-list", vm_name, "--name"],
@@ -245,9 +245,9 @@ def _run_backup(schedule):
                 )
                 log.info("_run_backup: eski snapshot silindi: %s", old_snap)
         except Exception as re:
-            log.warning("_run_backup: retention hatasÄ±: %s", re)
+            log.warning("_run_backup: retention hatası: %s", re)
 
-        # 3. Remote yÃ¼kleme
+        # 3. Remote yükleme
         remote_type   = schedule.get("remote_type")
         remote_config = schedule.get("remote_config", {})
 
@@ -263,20 +263,20 @@ def _run_backup(schedule):
         success = True
 
     except FileNotFoundError:
-        error = "virsh bulunamadÄ±"
+        error = "virsh bulunamadı"
         log.error("_run_backup: %s", error)
     except Exception as e:
         error = str(e)
-        log.error("_run_backup hatasÄ± (vm=%s): %s", vm_name, e)
+        log.error("_run_backup hatası (vm=%s): %s", vm_name, e)
 
     _log_history(vm_id, vm_name, snap_name, success, error)
     return success
 
 
 def _upload_s3(vm_name, snap_name, cfg):
-    """boto3 ile S3'e snapshot meta yÃ¼kleme (graceful fallback)."""
+    """boto3 ile S3'e snapshot meta yükleme (graceful fallback)."""
     if not _BOTO3_OK:
-        log.warning("_upload_s3: boto3 yok, atlanÄ±yor.")
+        log.warning("_upload_s3: boto3 yok, atlanıyor.")
         return
     try:
         s3 = boto3.client(
@@ -291,13 +291,13 @@ def _upload_s3(vm_name, snap_name, cfg):
         payload = json.dumps({"vm_name": vm_name, "snapshot": snap_name,
                               "ts": time.time()}).encode("utf-8")
         s3.put_object(Bucket=bucket, Key=key, Body=payload)
-        log.info("_upload_s3: s3://%s/%s yÃ¼klendi.", bucket, key)
+        log.info("_upload_s3: s3://%s/%s yüklendi.", bucket, key)
     except Exception as e:
-        log.error("_upload_s3 hatasÄ±: %s", e)
+        log.error("_upload_s3 hatası: %s", e)
 
 
 def _upload_ftp(vm_name, snap_name, cfg):
-    """ftplib ile FTP'ye snapshot meta yÃ¼kleme."""
+    """ftplib ile FTP'ye snapshot meta yükleme."""
     try:
         host    = cfg.get("host", "localhost")
         port    = int(cfg.get("port", 21))
@@ -323,18 +323,18 @@ def _upload_ftp(vm_name, snap_name, cfg):
             pass
         ftp.storbinary(f"STOR {filename}", io.BytesIO(payload))
         ftp.quit()
-        log.info("_upload_ftp: ftp://%s/%s/%s yÃ¼klendi.", host, remote_dir, filename)
+        log.info("_upload_ftp: ftp://%s/%s/%s yüklendi.", host, remote_dir, filename)
     except Exception as e:
-        log.error("_upload_ftp hatasÄ±: %s", e)
+        log.error("_upload_ftp hatası: %s", e)
 
 
 def _upload_sftp(vm_name, snap_name, cfg):
     """
-    paramiko ile SFTP Ã¼zerinden backup yÃ¼kleme.
+    paramiko ile SFTP üzerinden backup yükleme.
     cfg keys: host, port(22), username, password|private_key_path, remote_dir
     """
     if not _PARAMIKO_OK:
-        log.warning("_upload_sftp: paramiko yok. 'pip install paramiko' Ã§alÄ±ÅŸtÄ±rÄ±n.")
+        log.warning("_upload_sftp: paramiko yok. 'pip install paramiko' çalıştırın.")
         return
     try:
         host       = cfg.get("host", "localhost")
@@ -366,7 +366,7 @@ def _upload_sftp(vm_name, snap_name, cfg):
             ssh.connect(host, port=port, username=user, password=passwd, timeout=30)
 
         sftp = ssh.open_sftp()
-        # Dizini oluÅŸtur (exist_ok)
+        # Dizini oluştur (exist_ok)
         try:
             sftp.stat(remote_dir)
         except FileNotFoundError:
@@ -375,16 +375,16 @@ def _upload_sftp(vm_name, snap_name, cfg):
         sftp.putfo(io.BytesIO(payload), remote_path)
         sftp.close()
         ssh.close()
-        log.info("_upload_sftp: sftp://%s%s yÃ¼klendi.", host, remote_path)
+        log.info("_upload_sftp: sftp://%s%s yüklendi.", host, remote_path)
     except Exception as e:
-        log.error("_upload_sftp hatasÄ±: %s", e)
+        log.error("_upload_sftp hatası: %s", e)
 
 
 def _upload_ssh_scp(vm_name, snap_name, cfg):
     """
-    scp (subprocess) ile SSH Ã¼zerinden yÃ¼kleme.
+    scp (subprocess) ile SSH üzerinden yükleme.
     cfg keys: host, port(22), username, private_key_path, remote_dir
-    Parola desteklenmez â€” SSH key kullan.
+    Parola desteklenmez — SSH key kullan.
     """
     try:
         host       = cfg.get("host", "localhost")
@@ -397,7 +397,7 @@ def _upload_ssh_scp(vm_name, snap_name, cfg):
             "vm_name": vm_name, "snapshot": snap_name, "ts": time.time()
         }).encode("utf-8")
 
-        # GeÃ§ici dosyaya yaz
+        # Geçici dosyaya yaz
         tmp_path = f"/tmp/{filename}"
         with open(tmp_path, "wb") as f:
             f.write(payload)
@@ -412,11 +412,11 @@ def _upload_ssh_scp(vm_name, snap_name, cfg):
         r = subprocess.run(scp_cmd, capture_output=True, text=True, timeout=60)
         os.unlink(tmp_path)
         if r.returncode == 0:
-            log.info("_upload_ssh_scp: %s â†’ %s:%s/%s", filename, host, remote_dir, filename)
+            log.info("_upload_ssh_scp: %s → %s:%s/%s", filename, host, remote_dir, filename)
         else:
             log.error("_upload_ssh_scp hata: %s", r.stderr.strip())
     except Exception as e:
-        log.error("_upload_ssh_scp hatasÄ±: %s", e)
+        log.error("_upload_ssh_scp hatası: %s", e)
 
 
 # ---------------------------------------------------------------------------
@@ -424,7 +424,7 @@ def _upload_ssh_scp(vm_name, snap_name, cfg):
 # ---------------------------------------------------------------------------
 
 def _log_history(vm_id, vm_name, snapshot_name, success, error=""):
-    """JSONL history dosyasÄ±na yeni satÄ±r ekler."""
+    """JSONL history dosyasına yeni satır ekler."""
     try:
         os.makedirs(os.path.dirname(HISTORY_PATH), exist_ok=True)
         entry = {
@@ -439,13 +439,13 @@ def _log_history(vm_id, vm_name, snapshot_name, success, error=""):
             with open(HISTORY_PATH, "a", encoding="utf-8") as f:
                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except Exception as e:
-        log.error("_log_history hatasÄ±: %s", e)
+        log.error("_log_history hatası: %s", e)
 
 
 def get_history(vm_id=None, limit=50):
     """
-    JSONL history dosyasÄ±ndan kayÄ±tlarÄ± okur.
-    vm_id verilirse filtreler. En yeni `limit` kadar dÃ¶ndÃ¼rÃ¼r.
+    JSONL history dosyasından kayıtları okur.
+    vm_id verilirse filtreler. En yeni `limit` kadar döndürür.
     """
     try:
         if not os.path.exists(HISTORY_PATH):
@@ -467,20 +467,20 @@ def get_history(vm_id=None, limit=50):
             except Exception:
                 pass
 
-        # En yeni Ã¶nce, limit uygula
+        # En yeni önce, limit uygula
         records.sort(key=lambda r: r.get("ts", 0), reverse=True)
         return records[:limit]
     except Exception as e:
-        log.error("get_history hatasÄ±: %s", e)
+        log.error("get_history hatası: %s", e)
         return []
 
 
 # ---------------------------------------------------------------------------
-# Scheduler dÃ¶ngÃ¼sÃ¼
+# Scheduler döngüsü
 # ---------------------------------------------------------------------------
 
 def check_due():
-    """ZamanÄ± gelen (next_run <= now) ve enabled schedule'larÄ± Ã§alÄ±ÅŸtÄ±rÄ±r."""
+    """Zamanı gelen (next_run <= now) ve enabled schedule'ları çalıştırır."""
     try:
         now = time.time()
         with _lock:
@@ -495,7 +495,7 @@ def check_due():
             if now < next_run:
                 continue
 
-            # Yeni next_run hesapla (Ã§alÄ±ÅŸtÄ±rmadan Ã¶nce kaydet)
+            # Yeni next_run hesapla (çalıştırmadan önce kaydet)
             new_next = _next_run(schedule["cron_expr"])
             with _lock:
                 fresh = _load()
@@ -504,7 +504,7 @@ def check_due():
                     fresh[schedule_id]["next_run"]  = new_next
                     _save(fresh)
 
-            # Backup'Ä± ayrÄ± thread'de Ã§alÄ±ÅŸtÄ±r
+            # Backup'ı ayrı thread'de çalıştır
             t = threading.Thread(
                 target=_run_backup,
                 args=(schedule,),
@@ -516,39 +516,39 @@ def check_due():
                      schedule_id, schedule.get("vm_name"))
 
     except Exception as e:
-        log.error("check_due hatasÄ±: %s", e)
+        log.error("check_due hatası: %s", e)
 
 
 def start_scheduler():
     """
-    Daemon thread baÅŸlatÄ±r; her 30 saniyede check_due Ã§aÄŸÄ±rÄ±r.
+    Daemon thread başlatır; her 30 saniyede check_due çağırır.
     """
     def _loop():
-        log.info("backup_scheduler baÅŸladÄ±.")
+        log.info("backup_scheduler başladı.")
         while True:
             try:
                 check_due()
             except Exception as e:
-                log.error("Scheduler dÃ¶ngÃ¼sÃ¼ hatasÄ±: %s", e)
+                log.error("Scheduler döngüsü hatası: %s", e)
             time.sleep(30)
 
     t = threading.Thread(target=_loop, name="backup-scheduler", daemon=True)
     t.start()
-    log.info("backup_scheduler thread baÅŸlatÄ±ldÄ±.")
+    log.info("backup_scheduler thread başlatıldı.")
     return t
 
 
 def trigger_now(schedule_id):
     """
-    Belirtilen schedule'Ä± elle tetikler.
-    DÃ¶ner: True (baÅŸarÄ±) / False (bulunamadÄ± veya hata)
+    Belirtilen schedule'ı elle tetikler.
+    Döner: True (başarı) / False (bulunamadı veya hata)
     """
     try:
         with _lock:
             data = _load()
         schedule = data.get(schedule_id)
         if not schedule:
-            log.warning("trigger_now: schedule bulunamadÄ± (%s).", schedule_id)
+            log.warning("trigger_now: schedule bulunamadı (%s).", schedule_id)
             return False
 
         t = threading.Thread(
@@ -561,11 +561,11 @@ def trigger_now(schedule_id):
         log.info("trigger_now: %s manuel tetiklendi.", schedule_id)
         return True
     except Exception as e:
-        log.error("trigger_now hatasÄ±: %s", e)
+        log.error("trigger_now hatası: %s", e)
         return False
-
-
-
-
-
-
+
+
+
+
+
+

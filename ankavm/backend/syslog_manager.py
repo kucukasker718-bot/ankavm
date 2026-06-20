@@ -1,5 +1,5 @@
-﻿"""
-ankavm Syslog Manager â€” Centralized log viewer.
+"""
+ankavm Syslog Manager — Centralized log viewer.
 Reads from journald, /var/log/syslog, /var/log/kern.log.
 Supports filtering by level, service, time range.
 """
@@ -136,9 +136,9 @@ def get_core_dumps():
     except Exception:
         pass
     return dumps
-
-
-
-
-
-
+
+
+
+
+
+

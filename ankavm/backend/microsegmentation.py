@@ -1,11 +1,11 @@
-﻿"""
-microsegmentation.py â€” Per-VM L7 Firewall (nftables-based)
+"""
+microsegmentation.py — Per-VM L7 Firewall (nftables-based)
 ankavm v2.5.9 Network Advanced 2
 
 Features:
-  - set_vm_policy(vm_id, rules) â€” nftables chain per VM tap interface
+  - set_vm_policy(vm_id, rules) — nftables chain per VM tap interface
   - get_vm_policy(vm_id), list_policies(), delete_vm_policy(vm_id)
-  - apply_zero_trust(vm_id) â€” default deny-all + only defined allow rules
+  - apply_zero_trust(vm_id) — default deny-all + only defined allow rules
   - Config persisted to /var/lib/ankavm/microseg_policies.json (reboot restore)
   - nftables via subprocess; graceful fallback if nftables unavailable
   - No external dependencies (stdlib + subprocess only)
@@ -26,7 +26,7 @@ _POLICY_FILE = Path("/var/lib/ankavm/microseg_policies.json")
 _lock        = threading.Lock()
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -47,7 +47,7 @@ def _save(data: dict) -> None:
         log.warning("microseg save fail: %s", e)
 
 
-# â”€â”€ nftables helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── nftables helpers ──────────────────────────────────────────────────────────
 
 def _nft_available() -> bool:
     try:
@@ -85,7 +85,7 @@ def _rule_to_nft(rule: dict) -> Optional[str]:
     if port and proto in ("tcp", "udp"):
         parts.append(f"{proto} dport {port}")
     if l7_app:
-        # L7 comment only â€” actual L7 enforcement requires conntrack mark or NFQueue
+        # L7 comment only — actual L7 enforcement requires conntrack mark or NFQueue
         parts.append(f"comment \"l7:{l7_app}\"")
     parts.append(nft_action)
     return " ".join(parts) if parts else None
@@ -145,7 +145,7 @@ def _nft_add_rule(chain: str, rule_stmt: str) -> bool:
         return False
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def set_vm_policy(vm_id: str, rules: list) -> dict:
     """
@@ -171,7 +171,7 @@ def set_vm_policy(vm_id: str, rules: list) -> dict:
                 else:
                     errors.append({"rule": rule, "error": "unrepresentable rule"})
         else:
-            log.warning("microseg: nftables not available â€” storing policy only (no kernel enforcement)")
+            log.warning("microseg: nftables not available — storing policy only (no kernel enforcement)")
             applied = list(rules)
 
         # Persist
@@ -278,9 +278,9 @@ def restore_all_from_config() -> dict:
             except Exception as e:
                 errors.append({"vm_id": vm_id, "error": str(e)})
         return {"ok": True, "restored": restored, "errors": errors}
-
-
-
-
-
-
+
+
+
+
+
+

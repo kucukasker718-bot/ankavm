@@ -1,7 +1,7 @@
-﻿"""
+"""
 ankavm SSH Watchdog
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-sshd servisini izler; Ã¶lÃ¼rse otomatik yeniden baÅŸlatÄ±r.
+───────────────────
+sshd servisini izler; ölürse otomatik yeniden başlatır.
 Her 60 saniyede kontrol eder, event log'a yazar.
 """
 
@@ -63,13 +63,13 @@ def _restart_sshd() -> bool:
         )
         return r.returncode == 0
     except Exception as e:
-        log.error("sshd restart hatasÄ±: %s", e)
+        log.error("sshd restart hatası: %s", e)
         return False
 
 
 def _loop():
     global _running
-    log.info("SSH watchdog baÅŸlatÄ±ldÄ± (interval=%ds, port=%d)", CHECK_INTERVAL, SSH_PORT)
+    log.info("SSH watchdog başlatıldı (interval=%ds, port=%d)", CHECK_INTERVAL, SSH_PORT)
 
     while _running:
         active   = _is_service_active()
@@ -78,25 +78,25 @@ def _loop():
         error    = None
 
         if not active:
-            log.warning("sshd aktif deÄŸil â€” yeniden baÅŸlatÄ±lÄ±yor...")
+            log.warning("sshd aktif değil — yeniden başlatılıyor...")
             ok = _restart_sshd()
             if ok:
                 active = _is_service_active()
                 port_ok = _is_port_open()
-                log.info("sshd yeniden baÅŸlatÄ±ldÄ±. active=%s port=%s", active, port_ok)
+                log.info("sshd yeniden başlatıldı. active=%s port=%s", active, port_ok)
                 with _lock:
                     _state["restart_count"] += 1
                     _state["last_restart"]   = now
                 try:
                     from ankavm.backend import event_logger as _ev
-                    _ev.warning("SSH watchdog: sshd Ã¶lmÃ¼ÅŸtÃ¼, yeniden baÅŸlatÄ±ldÄ±.", category="system")
+                    _ev.warning("SSH watchdog: sshd ölmüştü, yeniden başlatıldı.", category="system")
                 except Exception:
                     pass
             else:
-                error = "sshd restart baÅŸarÄ±sÄ±z"
-                log.error("sshd restart baÅŸarÄ±sÄ±z!")
+                error = "sshd restart başarısız"
+                log.error("sshd restart başarısız!")
         elif not port_ok:
-            error = f"sshd aktif ama port {SSH_PORT} yanÄ±t vermiyor"
+            error = f"sshd aktif ama port {SSH_PORT} yanıt vermiyor"
             log.warning(error)
 
         with _lock:
@@ -130,9 +130,9 @@ def start():
 def stop():
     global _running
     _running = False
-
-
-
-
-
-
+
+
+
+
+
+

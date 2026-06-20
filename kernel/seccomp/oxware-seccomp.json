@@ -1,5 +1,5 @@
-﻿{
-  "_comment": "ankavm Hypervisor seccomp filter â€” Python 3 / Flask / libvirt / KVM",
+{
+  "_comment": "ankavm Hypervisor seccomp filter — Python 3 / Flask / libvirt / KVM",
   "_install": "Used by systemd: SystemCallFilter= or applied via prctl() wrapper",
   "_version": "1.0.0",
   "defaultAction": "SCMP_ACT_ERRNO",
@@ -95,9 +95,9 @@
     }
   ]
 }
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,5 +1,5 @@
-﻿"""
-haproxy_manager.py â€” HAProxy load balancer management
+"""
+haproxy_manager.py — HAProxy load balancer management
 ankavm Hypervisor backend module
 """
 
@@ -259,7 +259,7 @@ def _write_config(frontends, backends, global_section="", defaults_section=""):
     for be in backends:
         lines.append(f"backend {be['name']}")
         for ln in be.get("lines", []):
-            # Skip raw server lines â€” regenerate from structured data
+            # Skip raw server lines — regenerate from structured data
             if re.match(r"\s*server\s+", ln):
                 continue
             lines.append(ln)
@@ -429,9 +429,9 @@ def reload():
     except Exception as exc:
         log.exception("reload error: %s", exc)
         return {"success": False, "output": str(exc)}
-
-
-
-
-
-
+
+
+
+
+
+

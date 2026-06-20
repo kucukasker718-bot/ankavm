@@ -1,13 +1,13 @@
-﻿"""
-drift_capacity.py â€” Config Drift Detection + Capacity Planning + What-If
+"""
+drift_capacity.py — Config Drift Detection + Capacity Planning + What-If
 ankavm v2.5.8 Observability
 
 Features:
-  - capture_baseline(name) â€” snapshot host config (sysctl, pkg hash, network, kernel)
-  - check_drift(baseline_name) â€” diff current vs baseline
+  - capture_baseline(name) — snapshot host config (sysctl, pkg hash, network, kernel)
+  - check_drift(baseline_name) — diff current vs baseline
   - list_baselines()
-  - whatif_add_vms(count, vcpus, ram_mb, disk_gb) â€” what-if capacity analysis
-  - capacity_summary() â€” total vs allocated vs free (CPU/RAM/disk)
+  - whatif_add_vms(count, vcpus, ram_mb, disk_gb) — what-if capacity analysis
+  - capacity_summary() — total vs allocated vs free (CPU/RAM/disk)
 
 Persisted to /var/lib/ankavm/drift_baselines.json
 """
@@ -28,7 +28,7 @@ _BASELINES_FILE = Path("/var/lib/ankavm/drift_baselines.json")
 _lock           = threading.Lock()
 
 
-# â”€â”€ Persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistence ───────────────────────────────────────────────────────────────
 
 def _load_baselines() -> dict:
     try:
@@ -49,7 +49,7 @@ def _save_baselines(data: dict) -> None:
         log.warning("drift baselines save fail: %s", e)
 
 
-# â”€â”€ Config collectors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Config collectors ─────────────────────────────────────────────────────────
 
 def _run(cmd: list, timeout: int = 10) -> str:
     try:
@@ -60,7 +60,7 @@ def _run(cmd: list, timeout: int = 10) -> str:
 
 
 def _collect_sysctl() -> dict:
-    """Return a dict of sysctl keyâ†’value pairs."""
+    """Return a dict of sysctl key→value pairs."""
     out = _run(["sysctl", "-a"])
     result: dict = {}
     for line in out.splitlines():
@@ -112,7 +112,7 @@ def _current_snapshot() -> dict:
     }
 
 
-# â”€â”€ Host capacity helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Host capacity helpers ─────────────────────────────────────────────────────
 
 def _host_cpu_threads() -> int:
     """Total logical CPU threads on host."""
@@ -177,11 +177,11 @@ def _virsh_allocated() -> dict:
                 except Exception:
                     pass
 
-    # Estimate disk from virsh domblkinfo is complex â€” skip, use df
+    # Estimate disk from virsh domblkinfo is complex — skip, use df
     return {"vcpus": total_vcpus, "ram_mb": total_ram_mb}
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def capture_baseline(name: str) -> dict:
     """Capture and persist current host config snapshot as `name`."""
@@ -355,9 +355,9 @@ def whatif_add_vms(
             "disk_gb_each": disk_gb,
         },
     }
-
-
-
-
-
-
+
+
+
+
+
+

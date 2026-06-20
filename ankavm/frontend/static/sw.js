@@ -1,4 +1,4 @@
-﻿/* ankavm Service Worker
+/* ankavm Service Worker
  * Strategy:
  *  - Static assets (JS/CSS/img/fonts): cache-first
  *  - API requests: network-only (never cache, always fresh)
@@ -11,7 +11,7 @@ const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 const STATIC_ASSETS = [
   "/static/manifest.json",
-  "/static/img/sadeceikon.png",
+  "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&",
   "/static/xterm.min.css",
   "/static/xterm.min.js",
   "/static/addon-fit.min.js",
@@ -19,7 +19,7 @@ const STATIC_ASSETS = [
   "/static/socket.io.min.js",
 ];
 
-// â”€â”€ Install: precache static â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Install: precache static ──────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
@@ -28,7 +28,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// â”€â”€ Activate: cleanup old caches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Activate: cleanup old caches ──────────────────────────────────────────────
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -41,7 +41,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// â”€â”€ Fetch: route by request type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Fetch: route by request type ──────────────────────────────────────────────
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -87,15 +87,15 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-// â”€â”€ Push notifications (opsiyonel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Push notifications (opsiyonel) ────────────────────────────────────────────
 self.addEventListener("push", (event) => {
   try {
     const data = event.data ? event.data.json() : {};
     const title = data.title || "ankavm";
     const opts  = {
       body: data.body || "",
-      icon: "/static/img/sadeceikon.png",
-      badge: "/static/img/sadeceikon.png",
+      icon: "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&",
+      badge: "https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&",
       tag:  data.tag || "ankavm-notification",
       data: data.url || "/",
     };
@@ -115,6 +115,12 @@ self.addEventListener("notificationclick", (event) => {
     })
   );
 });
+
+
+
+
+
+
 
 
 

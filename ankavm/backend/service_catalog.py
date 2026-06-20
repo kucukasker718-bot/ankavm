@@ -1,12 +1,12 @@
-﻿"""
-ankavm Service Catalog â€” Self-Service VM Templates
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-OperatÃ¶rÃ¼n kataloÄŸa eklediÄŸi "ready-to-deploy" VM ÅŸablonlarÄ±.
+"""
+ankavm Service Catalog — Self-Service VM Templates
+─────────────────────────────────────────────────────
+Operatörün kataloğa eklediği "ready-to-deploy" VM şablonları.
 
   - Persistent: /var/lib/ankavm/service_catalog.json (atomic write)
   - Built-in default catalog: Ubuntu, Debian, Windows Server, WordPress,
     GitLab CE, Docker Host
-  - deploy_from_catalog â†’ self_service_portal.request_vm_create() Ã§aÄŸÄ±rÄ±r
+  - deploy_from_catalog → self_service_portal.request_vm_create() çağırır
 """
 from __future__ import annotations
 
@@ -24,12 +24,12 @@ log = logging.getLogger("service_catalog")
 _FILE = Path("/var/lib/ankavm/service_catalog.json")
 _lock = threading.RLock()
 
-# â”€â”€ Built-in default items â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Built-in default items ────────────────────────────────────────────────────
 DEFAULT_CATALOG = [
     {
         "id":               "builtin-ubuntu-24",
         "name":             "Ubuntu 24.04 LTS",
-        "description":      "Canonical Ubuntu Server 24.04 LTS (Noble) â€” cloud-init enabled",
+        "description":      "Canonical Ubuntu Server 24.04 LTS (Noble) — cloud-init enabled",
         "category":         "linux",
         "icon":             "ubuntu",
         "template_id":      "ubuntu-24.04",
@@ -43,7 +43,7 @@ DEFAULT_CATALOG = [
     {
         "id":               "builtin-debian-12",
         "name":             "Debian 12",
-        "description":      "Debian 12 (Bookworm) â€” minimal cloud image",
+        "description":      "Debian 12 (Bookworm) — minimal cloud image",
         "category":         "linux",
         "icon":             "debian",
         "template_id":      "debian-12",
@@ -57,7 +57,7 @@ DEFAULT_CATALOG = [
     {
         "id":               "builtin-winsrv-2022",
         "name":             "Windows Server 2022",
-        "description":      "Windows Server 2022 â€” Standard Edition (BYOL veya deÄŸerlendirme)",
+        "description":      "Windows Server 2022 — Standard Edition (BYOL veya değerlendirme)",
         "category":         "windows",
         "icon":             "windows",
         "template_id":      "winsrv-2022",
@@ -85,7 +85,7 @@ DEFAULT_CATALOG = [
     {
         "id":               "builtin-gitlab",
         "name":             "GitLab CE",
-        "description":      "GitLab Community Edition â€” DevOps platformu",
+        "description":      "GitLab Community Edition — DevOps platformu",
         "category":         "devops",
         "icon":             "gitlab",
         "template_id":      "gitlab-ce",
@@ -99,7 +99,7 @@ DEFAULT_CATALOG = [
     {
         "id":               "builtin-docker-host",
         "name":             "Docker Host",
-        "description":      "Ubuntu + Docker CE + docker-compose â€” hazÄ±r container runtime",
+        "description":      "Ubuntu + Docker CE + docker-compose — hazır container runtime",
         "category":         "container",
         "icon":             "docker",
         "template_id":      "docker-host",
@@ -113,7 +113,7 @@ DEFAULT_CATALOG = [
 ]
 
 
-# â”€â”€ Persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistence ──────────────────────────────────────────────────────────────
 def _load() -> list:
     try:
         if _FILE.exists():
@@ -136,7 +136,7 @@ def _save(items: list) -> None:
 
 
 def _all_items() -> list:
-    """Built-in + persistent (custom) items birleÅŸik."""
+    """Built-in + persistent (custom) items birleşik."""
     persistent = _load()
     persistent_ids = {i.get("id") for i in persistent}
     out = list(persistent)
@@ -146,9 +146,9 @@ def _all_items() -> list:
     return out
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ───────────────────────────────────────────────────────────────
 def list_catalog(tenant_id: Optional[str] = None) -> list:
-    """allowed_tenants boÅŸ â†’ herkese aÃ§Ä±k; dolu â†’ sadece listedeki tenant'lara gÃ¶rÃ¼nÃ¼r."""
+    """allowed_tenants boş → herkese açık; dolu → sadece listedeki tenant'lara görünür."""
     items = _all_items()
     if not tenant_id:
         return items
@@ -169,7 +169,7 @@ def get_catalog_item(catalog_id: str) -> Optional[dict]:
 
 def add_catalog_item(item: dict) -> dict:
     if not isinstance(item, dict):
-        return {"ok": False, "error": "geÃ§ersiz item"}
+        return {"ok": False, "error": "geçersiz item"}
     name = (item.get("name") or "").strip()
     if not name:
         return {"ok": False, "error": "name zorunlu"}
@@ -190,7 +190,7 @@ def add_catalog_item(item: dict) -> dict:
     }
     with _lock:
         items = _load()
-        # AynÄ± id varsa gÃ¼ncelle
+        # Aynı id varsa güncelle
         items = [i for i in items if i.get("id") != new_item["id"]]
         items.append(new_item)
         _save(items)
@@ -198,35 +198,35 @@ def add_catalog_item(item: dict) -> dict:
 
 
 def delete_catalog_item(catalog_id: str) -> dict:
-    # builtin silinmez â€” sadece "gizle" mantÄ±ÄŸÄ± iÃ§in ayrÄ± bir mekanizma gerekir
+    # builtin silinmez — sadece "gizle" mantığı için ayrı bir mekanizma gerekir
     if any(b["id"] == catalog_id for b in DEFAULT_CATALOG):
-        return {"ok": False, "error": "built-in kataloÄŸun silinmesi engellendi"}
+        return {"ok": False, "error": "built-in kataloğun silinmesi engellendi"}
     with _lock:
         items = _load()
         new_items = [i for i in items if i.get("id") != catalog_id]
         if len(new_items) == len(items):
-            return {"ok": False, "error": "katalog bulunamadÄ±"}
+            return {"ok": False, "error": "katalog bulunamadı"}
         _save(new_items)
     return {"ok": True, "id": catalog_id}
 
 
 def deploy_from_catalog(username: str, catalog_id: str, vm_name: str) -> dict:
-    """self_service_portal aracÄ±lÄ±ÄŸÄ±yla VM oluÅŸturur â€” quota + ownership otomatik."""
+    """self_service_portal aracılığıyla VM oluşturur — quota + ownership otomatik."""
     item = get_catalog_item(catalog_id)
     if not item:
-        return {"ok": False, "error": "katalog bulunamadÄ±"}
+        return {"ok": False, "error": "katalog bulunamadı"}
     vm_name = (vm_name or "").strip()
     if not vm_name:
         return {"ok": False, "error": "vm_name zorunlu"}
 
-    # Tenant kÄ±sÄ±tÄ± (varsa)
+    # Tenant kısıtı (varsa)
     allowed = item.get("allowed_tenants", []) or []
     if allowed:
         try:
             import tenant_manager  # type: ignore
             tid = tenant_manager.get_user_tenant(username)
             if tid not in allowed:
-                return {"ok": False, "error": "bu katalog tenant'Ä±nÄ±za atanmamÄ±ÅŸ"}
+                return {"ok": False, "error": "bu katalog tenant'ınıza atanmamış"}
         except Exception:
             pass
 
@@ -243,9 +243,9 @@ def deploy_from_catalog(username: str, catalog_id: str, vm_name: str) -> dict:
         disk_gb=int(item.get("default_disk_gb", 20)),
         template_id=item.get("template_id") or None,
     )
-
-
-
-
-
-
+
+
+
+
+
+

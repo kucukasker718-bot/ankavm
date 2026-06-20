@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ankavm â€“ VM Konsol</title>
-  <link rel="icon" type="image/png" href="/static/img/sadeceikon.png">
+  <title>Ankavm – VM Konsol</title>
+  <link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -31,7 +31,7 @@
       flex-direction: column;
     }
 
-    /* â”€â”€ TOP TOOLBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── TOP TOOLBAR ─────────────────────────────────────────────── */
     .toolbar {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -118,7 +118,7 @@
 
     .spacer { flex: 1; }
 
-    /* â”€â”€ TOOLBAR ACTIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── TOOLBAR ACTIONS ─────────────────────────────────────────── */
     .toolbar-actions {
       display: flex;
       align-items: center;
@@ -177,7 +177,7 @@
       border-color: var(--border);
     }
 
-    /* â”€â”€ CONSOLE AREA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── CONSOLE AREA ────────────────────────────────────────────── */
     .console-wrap {
       flex: 1;
       position: relative;
@@ -192,7 +192,7 @@
       display: none;
     }
 
-    /* â”€â”€ LOADING OVERLAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── LOADING OVERLAY ─────────────────────────────────────────── */
     #loadingOverlay {
       position: absolute;
       inset: 0;
@@ -267,7 +267,7 @@
     .step-item.done { opacity: 0.6; color: var(--green); }
     .step-icon { width: 14px; text-align: center; }
 
-    /* â”€â”€ STATUS BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── STATUS BAR ──────────────────────────────────────────────── */
     .statusbar {
       background: var(--panel);
       border-top: 1px solid var(--border);
@@ -288,7 +288,7 @@
     .sb-item svg { width: 11px; height: 11px; }
     #sb-latency { transition: color 0.3s; }
 
-    /* â”€â”€ KEYBOARD SHORTCUT HINT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── KEYBOARD SHORTCUT HINT ──────────────────────────────────── */
     .kbd-hint {
       display: inline-flex;
       align-items: center;
@@ -309,10 +309,10 @@
 </head>
 <body>
 
-  <!-- â”€â”€ TOOLBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── TOOLBAR ───────────────────────────────────────────────────── -->
   <div class="toolbar">
     <a class="brand" href="/" target="_blank" title="Ankavm Panel">
-      <img src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a35c712&is=6a347592&hm=f8dc87cf2a64668757d78438072600f0ae493fca110b7545fc6ff69ab68c34fc&" alt="Ankavm" onerror="this.style.display='none'">
+      <img src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&" alt="Ankavm" onerror="this.style.display='none'">
       <span class="brand-name">Ankavm</span>
     </a>
 
@@ -321,10 +321,10 @@
     <div class="vm-info">
       <div class="status-badge" id="statusBadge">
         <div class="dot"></div>
-        <span id="statusText">Ã‡alÄ±ÅŸÄ±yor</span>
+        <span id="statusText">Çalışıyor</span>
       </div>
       <div class="vm-label">
-        Konsol â€º <strong id="vmNameLabel">YÃ¼kleniyorâ€¦</strong>
+        Konsol › <strong id="vmNameLabel">Yükleniyor…</strong>
       </div>
     </div>
 
@@ -344,22 +344,22 @@
         Tam Ekran
       </button>
 
-      <button class="tb-btn" onclick="openPasteModal()" title="Panoya yapÄ±ÅŸtÄ±r (izin gerekmez)">
+      <button class="tb-btn" onclick="openPasteModal()" title="Panoya yapıştır (izin gerekmez)">
         <svg viewBox="0 0 16 16" fill="currentColor">
           <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
           <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
         </svg>
-        YapÄ±ÅŸtÄ±r
+        Yapıştır
       </button>
 
-      <button class="tb-btn danger" onclick="sendCtrlAltDel()" title="Ctrl+Alt+Del gÃ¶nder">
+      <button class="tb-btn danger" onclick="sendCtrlAltDel()" title="Ctrl+Alt+Del gönder">
         <svg viewBox="0 0 16 16" fill="currentColor">
           <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm.75-8.25h-1.5v4.5l3.5 2.1.75-1.23-2.75-1.63z"/>
         </svg>
         Ctrl+Alt+Del
       </button>
 
-      <button class="tb-btn" onclick="takeScreenshot()" title="Ekran gÃ¶rÃ¼ntÃ¼sÃ¼ al">
+      <button class="tb-btn" onclick="takeScreenshot()" title="Ekran görüntüsü al">
         <svg viewBox="0 0 16 16" fill="currentColor">
           <path d="M6 1a1 1 0 0 0-.894.553L4.382 3H2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2.382l-.724-1.447A1 1 0 0 0 10 1H6zm4 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
         </svg>
@@ -375,7 +375,7 @@
     </div>
   </div>
 
-  <!-- â”€â”€ CONSOLE AREA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── CONSOLE AREA ──────────────────────────────────────────────── -->
   <div class="console-wrap">
     <div id="loadingOverlay">
       <div class="ox-spinner">
@@ -383,39 +383,39 @@
         <div class="ring ring-inner"></div>
         <div class="ring ring-dot"></div>
       </div>
-      <div class="load-text">Konsol baÄŸlantÄ±sÄ± kuruluyorâ€¦</div>
+      <div class="load-text">Konsol bağlantısı kuruluyor…</div>
       <div class="load-steps">
         <div class="step-item active" id="step1">
           <span class="step-icon"></span>
-          <span>Kimlik doÄŸrulanÄ±yor</span>
+          <span>Kimlik doğrulanıyor</span>
         </div>
         <div class="step-item" id="step2">
           <span class="step-icon"></span>
-          <span>VNC sunucusuna baÄŸlanÄ±lÄ±yor</span>
+          <span>VNC sunucusuna bağlanılıyor</span>
         </div>
         <div class="step-item" id="step3">
           <span class="step-icon"></span>
-          <span>Ekran akÄ±ÅŸÄ± baÅŸlatÄ±lÄ±yor</span>
+          <span>Ekran akışı başlatılıyor</span>
         </div>
       </div>
     </div>
     <iframe id="novnc-iframe" allowfullscreen></iframe>
   </div>
 
-  <!-- â”€â”€ STATUS BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── STATUS BAR ────────────────────────────────────────────────── -->
   <div class="statusbar">
     <div class="sb-item">
       <svg viewBox="0 0 16 16" fill="currentColor">
         <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v1h14V4a1 1 0 0 0-1-1H2zm13 3H1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6z"/>
       </svg>
-      <span id="sb-vmid">VM: â€”</span>
+      <span id="sb-vmid">VM: —</span>
     </div>
     <div class="sb-item">
       <svg viewBox="0 0 16 16" fill="currentColor">
         <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
         <path d="M7.5 5.5a.5.5 0 0 1 1 0v3.793l1.854 1.853a.5.5 0 0 1-.708.708l-2-2a.5.5 0 0 1-.146-.354V5.5z"/>
       </svg>
-      <span id="sb-time">â€”</span>
+      <span id="sb-time">—</span>
     </div>
     <div class="spacer"></div>
     <div class="sb-item">
@@ -428,21 +428,21 @@
       <svg viewBox="0 0 16 16" fill="currentColor">
         <path d="M14.763.075A.5.5 0 0 1 15 .5v15a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V14h-1v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V10a.5.5 0 0 1 .342-.474L6 7.64V4.5a.5.5 0 0 1 .276-.447l8-4a.5.5 0 0 1 .487.022zM6 8.694 1 10.36V15h5V8.694zM7 15h2v-1.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5V15h2V1.309l-7 3.5V15z"/>
       </svg>
-      <span id="sb-protocol">â€”</span>
+      <span id="sb-protocol">—</span>
     </div>
   </div>
 
   <script>
     const vmId = {{ vm_id | tojson }}; /* OXW-2026-SEC-006: tojson = XSS-safe JS literal */
 
-    // â”€â”€ Auth: vnc_token (WiseCP/WHMCS) veya JWT (native panel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Auth: vnc_token (WiseCP/WHMCS) veya JWT (native panel) ──────────────
     const _urlParams = new URLSearchParams(window.location.search);
     const _vncToken = _urlParams.get("vnc_token");
     const _jwtToken = localStorage.getItem("ankavm_token") || localStorage.getItem("adaos_token");
 
     if (!_vncToken && !_jwtToken) { window.location.href = "/login"; }
 
-    // â”€â”€ Status bar clock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Status bar clock ─────────────────────────────────────────────────────
     document.getElementById("sb-vmid").textContent = "VM: " + vmId;
     function _clockTick() {
       document.getElementById("sb-time").textContent =
@@ -451,7 +451,7 @@
     _clockTick();
     setInterval(_clockTick, 1000);
 
-    // â”€â”€ Step progress helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Step progress helpers ─────────────────────────────────────────────────
     function stepDone(id) {
       const el = document.getElementById("step" + id);
       if (el) { el.classList.remove("active"); el.classList.add("done"); el.querySelector(".step-icon").textContent = ""; }
@@ -461,27 +461,27 @@
       if (el) el.classList.add("active");
     }
 
-    // â”€â”€ Hide loading overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Hide loading overlay ──────────────────────────────────────────────────
     function hideLoading() {
       const ov = document.getElementById("loadingOverlay");
       ov.classList.add("hidden");
       setTimeout(() => { ov.style.display = "none"; }, 450);
     }
 
-    // â”€â”€ Status badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Status badge ─────────────────────────────────────────────────────────
     function setStatus(state) {
       const badge = document.getElementById("statusBadge");
       const txt = document.getElementById("statusText");
       if (state === "running") {
         badge.className = "status-badge";
-        txt.textContent = "Ã‡alÄ±ÅŸÄ±yor";
+        txt.textContent = "Çalışıyor";
       } else {
         badge.className = "status-badge stopped";
-        txt.textContent = "DurdurulmuÅŸ";
+        txt.textContent = "Durdurulmuş";
       }
     }
 
-    // â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Main ─────────────────────────────────────────────────────────────────
     async function initConsole() {
       const isHttps = location.protocol === "https:";
       try {
@@ -544,8 +544,8 @@
           headers: { Authorization: "Bearer " + _jwtToken }
         });
 
-        // OXW-2026-SEC-008: raw JWT'yi WS URL'sine koyma. Tek kullanÄ±mlÄ±k,
-        // 60sn Ã¶mÃ¼rlÃ¼ vnc_token al â†’ URL'de o gÃ¶rÃ¼nÃ¼r (log/referer sÄ±zÄ±ntÄ±sÄ± zararsÄ±z).
+        // OXW-2026-SEC-008: raw JWT'yi WS URL'sine koyma. Tek kullanımlık,
+        // 60sn ömürlü vnc_token al → URL'de o görünür (log/referer sızıntısı zararsız).
         let _wsToken = "", _wsParam = "token";
         try {
           const tr = await fetch("/api/vms/" + vmId + "/vnc-token", {
@@ -557,9 +557,9 @@
             if (_wsToken) _wsParam = "vnc_token";
           }
         } catch (_) {}
-        if (!_wsToken) _wsToken = _jwtToken; // fallback (eski sunucu) â€” yine de Ã§alÄ±ÅŸsÄ±n
+        if (!_wsToken) _wsToken = _jwtToken; // fallback (eski sunucu) — yine de çalışsın
 
-        // Flask WS proxy â€” same host:port as the page, no websockify needed
+        // Flask WS proxy — same host:port as the page, no websockify needed
         const wsPath = "ws/vnc/" + vmId + "?" + _wsParam + "=" + encodeURIComponent(_wsToken);
         const wsPort = location.port || (isHttps ? "443" : "80");
         const novncUrl = "/novnc/vnc.html?" +
@@ -579,7 +579,7 @@
         setTimeout(hideLoading, 6000);
 
       } catch (e) {
-        document.querySelector(".load-text").textContent = "BaÄŸlantÄ± hatasÄ±: " + e.message;
+        document.querySelector(".load-text").textContent = "Bağlantı hatası: " + e.message;
         document.querySelector(".load-steps").style.display = "none";
       }
     }
@@ -607,14 +607,14 @@
       } catch (_) {}
     }
 
-    // Alt+F â†’ fullscreen
+    // Alt+F → fullscreen
     document.addEventListener("keydown", e => {
       if (e.altKey && e.key === "f") { e.preventDefault(); toggleFullscreen(); }
     });
 
-    // â”€â”€ Inject key-sender into noVNC iframe (same-origin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Inject key-sender into noVNC iframe (same-origin) ───────────────────────
     // Injects a script that listens for postMessage and calls rfb.sendKey()
-    // with proper X11 keysyms â€” synthetic KeyboardEvent dispatch doesn't work
+    // with proper X11 keysyms — synthetic KeyboardEvent dispatch doesn't work
     // because noVNC checks isTrusted; rfb.sendKey() bypasses that entirely.
     function _injectVncKeyHelper(iframe) {
       try {
@@ -652,7 +652,7 @@
       } catch(e) { console.warn("[AnkaVM] VNC key inject failed:", e); }
     }
 
-    // â”€â”€ Paste Modal â€” no clipboard permission needed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Paste Modal — no clipboard permission needed ──────────────────────────
     function openPasteModal() {
       const existing = document.getElementById("paste-modal");
       if (existing) { existing.remove(); return; }
@@ -665,15 +665,15 @@
       box.style.cssText = "background:#141c2e;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:22px 24px;width:420px;max-width:90vw;box-shadow:0 16px 48px rgba(0,0,0,.7)";
 
       const ttl = document.createElement("div");
-      ttl.textContent = " VM'ye YapÄ±ÅŸtÄ±r";
+      ttl.textContent = " VM'ye Yapıştır";
       ttl.style.cssText = "font-size:14px;font-weight:700;color:#e6edf3;margin-bottom:6px";
 
       const hint = document.createElement("div");
-      hint.textContent = "Ctrl+V ile buraya yapÄ±ÅŸtÄ±rÄ±n â†’ GÃ¶nder'e tÄ±klayÄ±n. Ä°zin gerekmez.";
+      hint.textContent = "Ctrl+V ile buraya yapıştırın → Gönder'e tıklayın. İzin gerekmez.";
       hint.style.cssText = "font-size:11px;color:#7d8590;margin-bottom:10px";
 
       const ta = document.createElement("textarea");
-      ta.placeholder = "Metni buraya yapÄ±ÅŸtÄ±rÄ±nâ€¦";
+      ta.placeholder = "Metni buraya yapıştırın…";
       ta.style.cssText = "width:100%;height:90px;box-sizing:border-box;background:#0d1117;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:9px 12px;color:#e6edf3;font-size:13px;font-family:monospace;resize:vertical;outline:none";
       ta.addEventListener("focus", () => { ta.style.borderColor = "rgba(61,130,240,.5)"; });
       ta.addEventListener("blur", () => { ta.style.borderColor = "rgba(255,255,255,.15)"; });
@@ -682,12 +682,12 @@
       row.style.cssText = "display:flex;gap:8px;justify-content:flex-end;margin-top:10px";
 
       const cBtn = document.createElement("button");
-      cBtn.textContent = "Ä°ptal";
+      cBtn.textContent = "İptal";
       cBtn.style.cssText = "padding:7px 16px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#e6edf3;cursor:pointer;font-size:12px";
       cBtn.onclick = () => overlay.remove();
 
       const sBtn = document.createElement("button");
-      sBtn.textContent = "GÃ¶nder â†’";
+      sBtn.textContent = "Gönder →";
       sBtn.style.cssText = "padding:7px 18px;border-radius:7px;border:none;background:#3d82f0;color:#fff;cursor:pointer;font-size:12px;font-weight:600";
       sBtn.onclick = () => {
         const text = ta.value;
@@ -708,7 +708,7 @@
     }
 
     function sendTextToVNC(text) {
-      // postMessage â†’ injected script in iframe calls rfb.sendKey() with X11 keysyms
+      // postMessage → injected script in iframe calls rfb.sendKey() with X11 keysyms
       document.getElementById("novnc-iframe").contentWindow
         .postMessage({ type: "AnkaVM_keys", text: text }, location.origin); /* OXW-2026-SEC-007 */
     }

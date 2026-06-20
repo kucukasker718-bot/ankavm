@@ -1,4 +1,4 @@
-﻿# app.py Modularization Plan (v2.8 â†’ v3.0)
+# app.py Modularization Plan (v2.8 → v3.0)
 
 `app.py` carries ~30,000 lines and ~270 routes. We are splitting it into
 domain-scoped Flask blueprints under `ankavm/backend/blueprints/`. The
@@ -45,7 +45,7 @@ auth_bp.init_auth_bp(
 app.register_blueprint(auth_bp.bp)
 ```
 
-`deps` is a plain dict â€” blueprints query it with `_safe_get(name)`
+`deps` is a plain dict — blueprints query it with `_safe_get(name)`
 so missing dependencies degrade gracefully instead of crashing the
 import.
 
@@ -115,15 +115,15 @@ release before removal.
 
 - Routes still in `app.py`: ~206 (see `grep '@app.route' app.py | wc -l`)
 - Routes in blueprints: ~64
-- Target by v2.8 GA: â‰¥160 in blueprints, â‰¤110 in `app.py`
+- Target by v2.8 GA: ≥160 in blueprints, ≤110 in `app.py`
 - Target by v3.0: `app.py` reduced to bootstrap + `register_blueprint`
   wiring only (~1500 lines)
 
 When a route migration lands, update the counts above and tick the
 domain in the table.
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,5 +1,5 @@
-﻿"""
-ankavm DPM â€” Distributed Power Management
+"""
+ankavm DPM — Distributed Power Management
 Monitors cluster node utilization and recommends/executes power actions.
 Storage: /var/lib/ankavm/dpm_config.json
 """
@@ -153,9 +153,9 @@ def wakeup_node(ip):
         return {"ok": False, "error": "No MAC address registered for this node"}
     result = _wake_node(mac)
     return {"ok": result, "mac": mac, "ip": ip}
-
-
-
-
-
-
+
+
+
+
+
+

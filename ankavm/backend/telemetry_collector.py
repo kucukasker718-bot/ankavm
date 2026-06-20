@@ -1,16 +1,16 @@
-﻿"""ankavm Anonymous Usage Telemetry â€” STRICTLY OPT-IN.
+"""ankavm Anonymous Usage Telemetry — STRICTLY OPT-IN.
 
 Default: DISABLED. No data leaves the host until an admin explicitly
-turns it on from Settings â†’ Privacy â†’ Anonymous Telemetry, or by
+turns it on from Settings → Privacy → Anonymous Telemetry, or by
 setting the env var ankavm_TELEMETRY_ENABLED=1 before service start.
 
 What we collect (when enabled):
   - ankavm_version
   - install_age_days (whole number)
-  - host_os_id        (ubuntu, debian â€” never the FQDN)
+  - host_os_id        (ubuntu, debian — never the FQDN)
   - host_os_version   (22.04, 12, etc.)
   - host_arch         (x86_64, aarch64)
-  - kernel_major      (5, 6 â€” never the full kernel string)
+  - kernel_major      (5, 6 — never the full kernel string)
   - cpu_logical_cores (integer count, no model name)
   - ram_total_gb      (integer, rounded)
   - vm_count          (integer)
@@ -114,7 +114,7 @@ def status() -> dict:
     return {
         "enabled": bool(cfg.get("enabled", False)),
         "endpoint": cfg.get("endpoint", DEFAULT_ENDPOINT),
-        "installation_id": (cfg.get("installation_id") or "")[:8] + "â€¦"
+        "installation_id": (cfg.get("installation_id") or "")[:8] + "…"
         if cfg.get("installation_id") else None,
         "enabled_at": cfg.get("enabled_at"),
         "last_sent_at": cfg.get("last_sent_at"),
@@ -144,8 +144,8 @@ def enable(endpoint: str | None = None) -> dict:
         cfg.setdefault("installation_id", str(uuid.uuid4()))
         cfg.setdefault("enabled_at", time.time())
         _save_cfg(cfg)
-    log.info("telemetry enabled â€” installation_id %s",
-             cfg["installation_id"][:8] + "â€¦")
+    log.info("telemetry enabled — installation_id %s",
+             cfg["installation_id"][:8] + "…")
     return status()
 
 
@@ -158,7 +158,7 @@ def disable() -> dict:
         cfg.pop("installation_id", None)
         cfg.pop("enabled_at", None)
         _save_cfg(cfg)
-    log.info("telemetry disabled â€” installation_id wiped")
+    log.info("telemetry disabled — installation_id wiped")
     return status()
 
 
@@ -205,7 +205,7 @@ def _detect_host_facts(deps: dict) -> dict:
                     facts["host_os_version"] = v[:16]
     except Exception:
         pass
-    # CPU / RAM counts only â€” no model, no flags, no microarch name.
+    # CPU / RAM counts only — no model, no flags, no microarch name.
     try:
         facts["cpu_logical_cores"] = os.cpu_count() or 0
     except Exception:
@@ -239,7 +239,7 @@ def _detect_host_facts(deps: dict) -> dict:
 
 
 def _scrub(payload: dict) -> dict:
-    """Drop any key not on the allowlist. Defence in depth â€” a future bug
+    """Drop any key not on the allowlist. Defence in depth — a future bug
     that accidentally adds a field will not leak it."""
     return {k: v for k, v in payload.items() if k in _ALLOWED_FIELDS}
 
@@ -257,7 +257,7 @@ def _record_history(payload: dict, ok: bool, error: str | None) -> None:
 
 
 def build_payload(deps: dict | None = None) -> dict:
-    """Public helper â€” what we'd send right now, ready for inspection.
+    """Public helper — what we'd send right now, ready for inspection.
     The Settings page calls this to show the operator the exact JSON we
     would transmit before they flip the toggle."""
     cfg = _load_cfg()
@@ -334,9 +334,9 @@ def start_background_sender(deps_factory) -> None:
                          daemon=True)
     t.start()
     log.info("telemetry background sender started (weekly, opt-in)")
-
-
-
-
-
-
+
+
+
+
+
+

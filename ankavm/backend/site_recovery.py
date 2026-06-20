@@ -1,7 +1,7 @@
-﻿"""
+"""
 ankavm Site Recovery Manager (SRM-lite) + RPO/RTO Monitoring
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-DR plan tanÄ±mla â†’ otomatik failover/failback runbook.
+────────────────────────────────────────────────────────────
+DR plan tanımla → otomatik failover/failback runbook.
 RPO (Recovery Point Objective) ve RTO (Recovery Time Objective) takibi.
 
 API:
@@ -48,7 +48,7 @@ def create_dr_plan(name: str, vms: list, target_site: str = "",
         "description":  description,
         "vms":          vms,
         "target_site":  target_site,
-        "boot_order":   boot_order or vms,    # sÄ±rasÄ±yla baÅŸlatma
+        "boot_order":   boot_order or vms,    # sırasıyla başlatma
         "rpo_minutes":  rpo_minutes,
         "rto_minutes":  rto_minutes,
         "enabled":      True,
@@ -86,13 +86,13 @@ def execute_plan(plan_id: str, mode: str = "test") -> dict:
     """
     mode:
       'test'     - sandbox failover (test drill, no commit)
-      'failover' - gerÃ§ek failover
-      'failback' - geri dÃ¶nÃ¼ÅŸ
+      'failover' - gerçek failover
+      'failback' - geri dönüş
     """
     plans = list_plans()
     plan  = next((p for p in plans if p["id"] == plan_id), None)
     if not plan:
-        raise KeyError("Plan bulunamadÄ±")
+        raise KeyError("Plan bulunamadı")
 
     run_id = uuid.uuid4().hex[:10]
     started = time.time()
@@ -112,12 +112,12 @@ def execute_plan(plan_id: str, mode: str = "test") -> dict:
             step = {"vm": vm, "order": i + 1, "started": int(step_start)}
             try:
                 if mode == "test":
-                    # Test: VM'i target_site'a clone et, baÅŸlat, durdur
+                    # Test: VM'i target_site'a clone et, başlat, durdur
                     step["action"] = "clone_to_target_and_start"
                     step["ok"]     = True
-                    step["note"]   = "Test mode â€” simulation only"
+                    step["note"]   = "Test mode — simulation only"
                 elif mode == "failover":
-                    # GerÃ§ek: VM'i durdur, target site'da baÅŸlat (replication varsayar)
+                    # Gerçek: VM'i durdur, target site'da başlat (replication varsayar)
                     step["action"] = "start_at_target"
                     r = subprocess.run(["virsh", "start", vm],
                                        capture_output=True, text=True, timeout=30)
@@ -126,7 +126,7 @@ def execute_plan(plan_id: str, mode: str = "test") -> dict:
                 elif mode == "failback":
                     step["action"] = "migrate_back"
                     step["ok"]     = True
-                    step["note"]   = "Failback â€” VM target'tan source'a"
+                    step["note"]   = "Failback — VM target'tan source'a"
             except Exception as e:
                 step["ok"]    = False
                 step["error"] = str(e)
@@ -173,7 +173,7 @@ def list_runs(plan_id: str = None, limit: int = 50) -> list:
 
 
 def get_rpo_rto_status() -> dict:
-    """RPO/RTO SLA durumu â€” tÃ¼m planlar iÃ§in."""
+    """RPO/RTO SLA durumu — tüm planlar için."""
     plans = list_plans()
     runs  = _load(_RUNS, [])
     out = []
@@ -193,9 +193,9 @@ def get_rpo_rto_status() -> dict:
             "vms_count":   len(p["vms"]),
         })
     return {"plans": out, "total": len(out)}
-
-
-
-
-
-
+
+
+
+
+
+

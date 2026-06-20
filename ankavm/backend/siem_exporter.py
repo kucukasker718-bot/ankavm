@@ -1,15 +1,15 @@
-﻿"""
-ankavm SIEM Exporter â€” CEF/LEEF/Syslog formatlarÄ±nda log akÄ±ÅŸÄ±
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Splunk, Elastic, Wazuh, QRadar gibi SIEM sistemlerine event akÄ±ÅŸÄ±.
+"""
+ankavm SIEM Exporter — CEF/LEEF/Syslog formatlarında log akışı
+──────────────────────────────────────────────────────────────
+Splunk, Elastic, Wazuh, QRadar gibi SIEM sistemlerine event akışı.
 
 Desteklenen formatlar:
-  - CEF (Common Event Format â€” ArcSight)
+  - CEF (Common Event Format — ArcSight)
   - LEEF (QRadar)
   - JSON (Elastic, Splunk HEC)
   - RFC5424 syslog
 
-Ã‡Ä±kÄ±ÅŸ kanallarÄ±:
+Çıkış kanalları:
   - syslog (UDP/TCP)
   - HTTP webhook
   - File (rotated)
@@ -85,7 +85,7 @@ def _format_leef(event_type: str, severity: str, fields: dict, cfg: dict) -> str
     sev = _SEVERITY_CEF.get(severity, 3)
     parts = [f"sev={sev}", f"cat={event_type}"]
     for k, v in (fields or {}).items():
-        parts.append(f"{k}={str(v).replace(chr(94), '_')}")  # ^ ayraÃ§
+        parts.append(f"{k}={str(v).replace(chr(94), '_')}")  # ^ ayraç
     return (
         f"LEEF:2.0|{cfg['vendor']}|{cfg['product']}|{cfg['version']}|"
         f"{event_type}|^|{'^'.join(parts)}"
@@ -147,7 +147,7 @@ def _send_file(line: str, cfg: dict):
 
 
 def emit(event_type: str, severity: str = "info", fields: dict = None) -> None:
-    """Asla bloklamaz â€” arka planda gÃ¶nder."""
+    """Asla bloklamaz — arka planda gönder."""
     cfg = get_config()
     if not cfg.get("enabled"):
         return
@@ -174,24 +174,24 @@ def emit(event_type: str, severity: str = "info", fields: dict = None) -> None:
             elif t == "file":
                 _send_file(line, cfg)
         except Exception as e:
-            log.warning("SIEM emit hatasÄ± (%s): %s", event_type, e)
+            log.warning("SIEM emit hatası (%s): %s", event_type, e)
 
     threading.Thread(target=_send, daemon=True, name=f"siem-{event_type}").start()
 
 
 def test_connection() -> dict:
-    """YapÄ±landÄ±rma test eventi."""
+    """Yapılandırma test eventi."""
     cfg = get_config()
     if not cfg.get("enabled"):
         return {"ok": False, "error": "SIEM disabled"}
     try:
         emit("test_event", "info", {"src": "ankavm-test", "msg": "SIEM connection test"})
-        return {"ok": True, "message": f"Test event {cfg['transport']} â†’ {cfg['target_host']}"}
+        return {"ok": True, "message": f"Test event {cfg['transport']} → {cfg['target_host']}"}
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

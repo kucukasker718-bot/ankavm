@@ -1,6 +1,6 @@
-﻿"""
+"""
 ankavm Shared Security Validators (v2.7.1 SEC-017..023)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+─────────────────────────────────────────────────────────
 Reusable helpers shared by federation, runbook executor, blueprints.
 
 - validate_external_url(): scheme+host allowlist, SSRF guard
@@ -20,9 +20,9 @@ import ipaddress
 import re
 from urllib.parse import urlparse
 
-# Strict libvirt domain name pattern â€” letters, digits, dot, dash, underscore.
+# Strict libvirt domain name pattern — letters, digits, dot, dash, underscore.
 # Excludes whitespace, semicolons, pipes, ampersands, quotes, dollar signs,
-# backticks, backslashes â€” anything a shell would interpret.
+# backticks, backslashes — anything a shell would interpret.
 _VM_ID_RE = re.compile(r"^[A-Za-z0-9._\-]{1,128}$")
 
 # Allowed paths for federation forward(). Member RBAC + audit log enforce
@@ -105,7 +105,7 @@ def validate_external_url(url: str, *, allow_loopback: bool = False,
         )
     if parsed.scheme == "http" and not allow_http:
         raise SecurityValidationError(
-            "http:// not permitted for external calls â€” use https://"
+            "http:// not permitted for external calls — use https://"
         )
     if not parsed.hostname:
         raise SecurityValidationError("url has no hostname")
@@ -144,7 +144,7 @@ def validate_forward_path(path: str) -> str:
 
 
 # Shell metacharacters that should never appear in subprocess argv elements
-# derived from user input â€” even when the caller uses argv form, presence of
+# derived from user input — even when the caller uses argv form, presence of
 # these characters in a single element is a strong injection signal.
 _SHELL_META = set(";|&`$<>\n\r\t\\\"'\x00")
 
@@ -161,9 +161,9 @@ def safe_subprocess_arg(value: str) -> str:
     return value
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────
 # SEC-029: safe archive extraction (replaces unguarded extractall() calls)
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────
 import os as _os
 import tarfile as _tarfile
 import zipfile as _zipfile
@@ -246,9 +246,9 @@ def safe_zip_extract(archive_path: str, dest_dir: str) -> int:
     return count
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────
 # SEC-030: DNS rebinding mitigation
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─────────────────────────────────────────────────────────────────────────
 import socket as _socket
 
 
@@ -272,9 +272,9 @@ def resolve_safe_host(host: str, *, allow_loopback: bool = False) -> str:
             f"resolved from {host!r}"
         )
     return ip
-
-
-
-
-
-
+
+
+
+
+
+

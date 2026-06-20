@@ -1,14 +1,14 @@
-﻿#!/bin/bash
-# ankavm Host Bridge Setup â€” opt-in, SSH-safe (netplan try ile 120s rollback)
-# KullanÄ±m: sudo /opt/ankavm/scripts/setup-bridge.sh
+#!/bin/bash
+# ankavm Host Bridge Setup — opt-in, SSH-safe (netplan try ile 120s rollback)
+# Kullanım: sudo /opt/ankavm/scripts/setup-bridge.sh
 set -uo pipefail
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 
 [[ $EUID -ne 0 ]] && { echo -e "${RED}Root gerekli${NC}"; exit 1; }
 
-echo -e "${YELLOW}âš  Host Bridge Kurulumu â€” SSH baÄŸlantÄ±n 10sn iÃ§in dÃ¼ÅŸebilir.${NC}"
-echo -e "${YELLOW}âš  netplan try kullanÄ±lÄ±yor: 120sn iÃ§inde Enter basmazsan eski config geri gelir.${NC}"
+echo -e "${YELLOW}⚠ Host Bridge Kurulumu — SSH bağlantın 10sn için düşebilir.${NC}"
+echo -e "${YELLOW}⚠ netplan try kullanılıyor: 120sn içinde Enter basmazsan eski config geri gelir.${NC}"
 read -p "Devam et? [e/H]: " -r
 [[ ! $REPLY =~ ^[Ee]$ ]] && exit 0
 
@@ -17,7 +17,7 @@ PIFACE=$(ip route show default 2>/dev/null | awk '/^default/{for(i=1;i<=NF;i++) 
 PIP=$(ip addr show "$PIFACE" 2>/dev/null | awk '/inet /{print $2; exit}')
 PGW=$(ip route show default 2>/dev/null | awk '/^default/{for(i=1;i<=NF;i++) if($i=="via"){print $(i+1); exit}}')
 
-echo -e "${GREEN}Bulundu: $PIFACE ($PIP) â†’ oxbr0, gw: $PGW${NC}"
+echo -e "${GREEN}Bulundu: $PIFACE ($PIP) → oxbr0, gw: $PGW${NC}"
 
 cp -r /etc/netplan "/etc/netplan.bak.$(date +%s)"
 
@@ -44,9 +44,9 @@ NP
 chmod 600 /etc/netplan/60-ankavm-bridge.yaml
 
 netplan try --timeout 120
-
-
-
-
-
-
+
+
+
+
+
+

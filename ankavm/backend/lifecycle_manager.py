@@ -1,7 +1,7 @@
-﻿"""
-ankavm Lifecycle Manager â€” Rolling host upgrade & config drift
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-- Host paketlerini gÃ¼ncelle (rolling, VM downtime'sÄ±z single-host iÃ§in en azÄ±ndan ÅŸedÃ¼ller)
+"""
+ankavm Lifecycle Manager — Rolling host upgrade & config drift
+──────────────────────────────────────────────────────────────
+- Host paketlerini güncelle (rolling, VM downtime'sız single-host için en azından şedüller)
 - Config drift detection (hash compare)
 - Update notification
 
@@ -51,7 +51,7 @@ def check_updates() -> dict:
         return {
             "available":         len(pkgs),
             "security_updates":  sec_count,
-            "packages":          pkgs[:200],   # sÄ±nÄ±rla
+            "packages":          pkgs[:200],   # sınırla
             "reboot_required":   Path("/var/run/reboot-required").exists(),
             "checked_at":        int(time.time()),
         }
@@ -61,7 +61,7 @@ def check_updates() -> dict:
 
 def apply_updates(packages: list = None, dry_run: bool = False,
                    security_only: bool = False) -> dict:
-    """Paket gÃ¼ncelle. dry_run â†’ --dry-run. packages None â†’ tÃ¼m gÃ¼ncellemeler."""
+    """Paket güncelle. dry_run → --dry-run. packages None → tüm güncellemeler."""
     cmd = ["apt-get"]
     if security_only:
         # unattended-upgrades varsa onu kullan
@@ -103,7 +103,7 @@ def _hash_file(path: str) -> str:
 
 
 def capture_baseline(name: str = "production") -> dict:
-    """Mevcut config dosyalarÄ±nÄ±n hash'ini snapshot al."""
+    """Mevcut config dosyalarının hash'ini snapshot al."""
     snapshot = {
         "name":       name,
         "captured":   int(time.time()),
@@ -140,13 +140,13 @@ def list_baselines() -> list:
 
 
 def detect_drift(baseline_name: str = "production") -> dict:
-    """Baseline'a gÃ¶re deÄŸiÅŸen dosyalarÄ± bul."""
+    """Baseline'a göre değişen dosyaları bul."""
     if not _BASELINES.exists():
-        return {"error": "Baseline yok â€” Ã¶nce capture_baseline Ã§alÄ±ÅŸtÄ±r"}
+        return {"error": "Baseline yok — önce capture_baseline çalıştır"}
     baselines = json.loads(_BASELINES.read_text())
     base = baselines.get(baseline_name)
     if not base:
-        return {"error": f"Baseline bulunamadÄ±: {baseline_name}"}
+        return {"error": f"Baseline bulunamadı: {baseline_name}"}
 
     drifted = []
     new_files = []
@@ -185,14 +185,14 @@ def detect_drift(baseline_name: str = "production") -> dict:
 def rolling_upgrade(target_packages: list = None, vms_per_batch: int = 5,
                      delay_sec: int = 30) -> dict:
     """
-    Rolling upgrade â€” VM'leri batch'lerle taÅŸÄ±/durdur, paket gÃ¼ncelle, geri baÅŸlat.
-    Bu basit single-host: sadece warning + gÃ¼ncellemeyi tetikle.
+    Rolling upgrade — VM'leri batch'lerle taşı/durdur, paket güncelle, geri başlat.
+    Bu basit single-host: sadece warning + güncellemeyi tetikle.
     Multi-host implementation cluster_manager gerektirir.
     """
     return {
         "ok":      False,
         "message": "Rolling upgrade multi-node cluster gerektirir. "
-                   "Tek node iÃ§in: maintenance_mode â†’ apply_updates â†’ reboot â†’ exit_maintenance",
+                   "Tek node için: maintenance_mode → apply_updates → reboot → exit_maintenance",
         "steps_suggestion": [
             "1. maintenance_mode.enter_maintenance(graceful)",
             "2. lifecycle_manager.apply_updates(security_only=True)",
@@ -200,9 +200,9 @@ def rolling_upgrade(target_packages: list = None, vms_per_batch: int = 5,
             "4. maintenance_mode.exit_maintenance(auto_start=True)",
         ],
     }
-
-
-
-
-
-
+
+
+
+
+
+

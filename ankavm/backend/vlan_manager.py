@@ -1,5 +1,5 @@
-﻿"""
-vlan_manager.py â€” VLAN network yÃ¶netimi (Linux bridge + libvirt) (ankavm Hypervisor)
+"""
+vlan_manager.py — VLAN network yönetimi (Linux bridge + libvirt) (ankavm Hypervisor)
 Root yetkisi gerekir.
 """
 
@@ -18,11 +18,11 @@ VLANS_FILE = "/var/lib/ankavm/vlans.json"
 _lock = threading.Lock()
 
 # ---------------------------------------------------------------------------
-# Ä°Ã§ yardÄ±mcÄ±lar
+# İç yardımcılar
 # ---------------------------------------------------------------------------
 
 def _run(*cmd):
-    """subprocess.run Ã§alÄ±ÅŸtÄ±rÄ±r; hata fÄ±rlatmaz."""
+    """subprocess.run çalıştırır; hata fırlatmaz."""
     try:
         result = subprocess.run(
             list(cmd),
@@ -32,19 +32,19 @@ def _run(*cmd):
             check=False,
         )
         if result.returncode != 0:
-            log.warning("Komut baÅŸarÄ±sÄ±z [%d]: %s | stderr: %s",
+            log.warning("Komut başarısız [%d]: %s | stderr: %s",
                         result.returncode, " ".join(cmd), result.stderr.strip())
         return result
     except FileNotFoundError:
-        log.error("Komut bulunamadÄ±: %s", cmd[0])
+        log.error("Komut bulunamadı: %s", cmd[0])
         return None
     except Exception as exc:
-        log.exception("_run hatasÄ±: %s", exc)
+        log.exception("_run hatası: %s", exc)
         return None
 
 
 def _load():
-    """VLANS_FILE'dan vlan listesini yÃ¼kler."""
+    """VLANS_FILE'dan vlan listesini yükler."""
     try:
         os.makedirs(os.path.dirname(VLANS_FILE), exist_ok=True)
         if not os.path.exists(VLANS_FILE):
@@ -52,7 +52,7 @@ def _load():
         with open(VLANS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except (OSError, json.JSONDecodeError) as exc:
-        log.error("VLANS_FILE okunamadÄ±: %s", exc)
+        log.error("VLANS_FILE okunamadı: %s", exc)
         return {}
 
 
@@ -63,12 +63,12 @@ def _save(data):
         with open(VLANS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
     except OSError as exc:
-        log.error("VLANS_FILE yazÄ±lamadÄ±: %s", exc)
+        log.error("VLANS_FILE yazılamadı: %s", exc)
         raise
 
 
 def _libvirt_network_xml(vlan_id, name, bridge_name):
-    """libvirt network tanÄ±m XML'ini dÃ¶ner."""
+    """libvirt network tanım XML'ini döner."""
     return f"""<network>
   <name>vlan{vlan_id}-{name}</name>
   <uuid>{uuid.uuid4()}</uuid>
@@ -86,12 +86,12 @@ def _libvirt_network_xml(vlan_id, name, bridge_name):
 
 def list_vlans():
     """
-    VLANS_FILE + ip link show ile enriched vlan listesini dÃ¶ner.
+    VLANS_FILE + ip link show ile enriched vlan listesini döner.
     """
     try:
         vlans = _load()
 
-        # ip link show type vlan ile aktif olanlarÄ± bul
+        # ip link show type vlan ile aktif olanları bul
         active_ifaces = set()
         result = _run("ip", "-j", "link", "show", "type", "vlan")
         if result and result.returncode == 0:
@@ -111,13 +111,13 @@ def list_vlans():
 
         return enriched
     except Exception as exc:
-        log.exception("list_vlans hatasÄ±: %s", exc)
+        log.exception("list_vlans hatası: %s", exc)
         return []
 
 
 def create_vlan(parent_iface, vlan_id, name, ip_address=None, gateway=None):
     """
-    VLAN arayÃ¼zÃ¼ oluÅŸturur, libvirt network tanÄ±mlar ve VLANS_FILE'a kaydeder.
+    VLAN arayüzü oluşturur, libvirt network tanımlar ve VLANS_FILE'a kaydeder.
     """
     with _lock:
         try:
@@ -129,7 +129,7 @@ def create_vlan(parent_iface, vlan_id, name, ip_address=None, gateway=None):
             r = _run("ip", "link", "add", "link", parent_iface,
                      "name", iface_name, "type", "vlan", "id", str(vlan_id))
             if r is None or r.returncode != 0:
-                return {"success": False, "error": f"VLAN arayÃ¼zÃ¼ oluÅŸturulamadÄ±: {r.stderr.strip() if r else 'komut yok'}"}
+                return {"success": False, "error": f"VLAN arayüzü oluşturulamadı: {r.stderr.strip() if r else 'komut yok'}"}
 
             # ip link set up
             _run("ip", "link", "set", iface_name, "up")
@@ -143,7 +143,7 @@ def create_vlan(parent_iface, vlan_id, name, ip_address=None, gateway=None):
             _run("ip", "link", "set", iface_name, "master", bridge_name)
             _run("ip", "link", "set", bridge_name, "up")
 
-            # libvirt network XML oluÅŸtur ve tanÄ±mla
+            # libvirt network XML oluştur ve tanımla
             xml = _libvirt_network_xml(vlan_id, name, bridge_name)
             xml_path = f"/tmp/ankavm_vlan_{vlan_id}.xml"
             try:
@@ -153,7 +153,7 @@ def create_vlan(parent_iface, vlan_id, name, ip_address=None, gateway=None):
                 _run("virsh", "net-start", f"vlan{vlan_id}-{name}")
                 _run("virsh", "net-autostart", f"vlan{vlan_id}-{name}")
             except OSError as exc:
-                log.warning("libvirt network tanÄ±mlanamadÄ±: %s", exc)
+                log.warning("libvirt network tanımlanamadı: %s", exc)
 
             # VLANS_FILE'a kaydet
             vlans = _load()
@@ -169,7 +169,7 @@ def create_vlan(parent_iface, vlan_id, name, ip_address=None, gateway=None):
             }
             _save(vlans)
 
-            log.info("VLAN oluÅŸturuldu: %s (id=%d)", iface_name, vlan_id)
+            log.info("VLAN oluşturuldu: %s (id=%d)", iface_name, vlan_id)
             return {
                 "success": True,
                 "vlan_id": vlan_id,
@@ -177,12 +177,12 @@ def create_vlan(parent_iface, vlan_id, name, ip_address=None, gateway=None):
                 "bridge_name": bridge_name,
             }
         except Exception as exc:
-            log.exception("create_vlan hatasÄ±: %s", exc)
+            log.exception("create_vlan hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def delete_vlan(vlan_id):
-    """VLAN arayÃ¼zÃ¼nÃ¼ ve libvirt network'Ã¼ siler."""
+    """VLAN arayüzünü ve libvirt network'ü siler."""
     with _lock:
         try:
             vlan_id = int(vlan_id)
@@ -190,18 +190,18 @@ def delete_vlan(vlan_id):
             vlan = vlans.get(str(vlan_id))
 
             if not vlan:
-                return {"success": False, "error": "VLAN bulunamadÄ±"}
+                return {"success": False, "error": "VLAN bulunamadı"}
 
             iface_name = vlan.get("iface_name", f"*.{vlan_id}")
             bridge_name = vlan.get("bridge_name", f"br-vlan{vlan_id}")
             libvirt_net = vlan.get("libvirt_network", "")
 
-            # libvirt network kaldÄ±r
+            # libvirt network kaldır
             if libvirt_net:
                 _run("virsh", "net-destroy", libvirt_net)
                 _run("virsh", "net-undefine", libvirt_net)
 
-            # Bridge ve vlan arayÃ¼zÃ¼nÃ¼ kaldÄ±r
+            # Bridge ve vlan arayüzünü kaldır
             _run("ip", "link", "set", bridge_name, "down")
             _run("ip", "link", "del", bridge_name)
             _run("ip", "link", "del", iface_name)
@@ -212,26 +212,26 @@ def delete_vlan(vlan_id):
             log.info("VLAN silindi: %d", vlan_id)
             return {"success": True, "vlan_id": vlan_id}
         except Exception as exc:
-            log.exception("delete_vlan hatasÄ±: %s", exc)
+            log.exception("delete_vlan hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def get_vlan(vlan_id):
-    """Belirtilen VLAN bilgisini dÃ¶ner."""
+    """Belirtilen VLAN bilgisini döner."""
     try:
         vlans = _load()
         vlan = vlans.get(str(vlan_id))
         if not vlan:
-            return {"success": False, "error": "VLAN bulunamadÄ±"}
+            return {"success": False, "error": "VLAN bulunamadı"}
         return {"success": True, "vlan": vlan}
     except Exception as exc:
-        log.exception("get_vlan hatasÄ±: %s", exc)
+        log.exception("get_vlan hatası: %s", exc)
         return {"success": False, "error": str(exc)}
 
 
 def list_interfaces():
     """
-    ip link show parse eder; mevcut arayÃ¼zleri listeler.
+    ip link show parse eder; mevcut arayüzleri listeler.
     """
     try:
         result = _run("ip", "-j", "link", "show")
@@ -259,17 +259,17 @@ def list_interfaces():
                     interfaces.append({"name": m.group(1).rstrip("@")})
             return interfaces
     except Exception as exc:
-        log.exception("list_interfaces hatasÄ±: %s", exc)
+        log.exception("list_interfaces hatası: %s", exc)
         return []
 
 
 def attach_vm_to_vlan(vm_id, vlan_id):
-    """VM'i VLAN'a baÄŸlar (virsh attach-interface)."""
+    """VM'i VLAN'a bağlar (virsh attach-interface)."""
     try:
         vlans = _load()
         vlan = vlans.get(str(vlan_id))
         if not vlan:
-            return {"success": False, "error": "VLAN bulunamadÄ±"}
+            return {"success": False, "error": "VLAN bulunamadı"}
 
         network_name = vlan.get("libvirt_network", f"vlan{vlan_id}")
         result = _run("virsh", "attach-interface", str(vm_id),
@@ -279,10 +279,10 @@ def attach_vm_to_vlan(vm_id, vlan_id):
                       "--config", "--live")
 
         if result is None:
-            return {"success": False, "error": "virsh bulunamadÄ±"}
+            return {"success": False, "error": "virsh bulunamadı"}
 
         success = result.returncode == 0
-        log.info("VM %s VLAN %d'e baÄŸlandÄ±: %s", vm_id, vlan_id, success)
+        log.info("VM %s VLAN %d'e bağlandı: %s", vm_id, vlan_id, success)
         return {
             "success": success,
             "vm_id": vm_id,
@@ -290,12 +290,12 @@ def attach_vm_to_vlan(vm_id, vlan_id):
             "stderr": result.stderr.strip(),
         }
     except Exception as exc:
-        log.exception("attach_vm_to_vlan hatasÄ±: %s", exc)
+        log.exception("attach_vm_to_vlan hatası: %s", exc)
         return {"success": False, "error": str(exc)}
 
 
 def detach_vm_from_vlan(vm_id, vlan_id):
-    """VM'i VLAN'dan ayÄ±rÄ±r (virsh detach-interface)."""
+    """VM'i VLAN'dan ayırır (virsh detach-interface)."""
     try:
         vlans = _load()
         vlan = vlans.get(str(vlan_id))
@@ -306,10 +306,10 @@ def detach_vm_from_vlan(vm_id, vlan_id):
                       "--config", "--live")
 
         if result is None:
-            return {"success": False, "error": "virsh bulunamadÄ±"}
+            return {"success": False, "error": "virsh bulunamadı"}
 
         success = result.returncode == 0
-        log.info("VM %s VLAN %d'den ayrÄ±ldÄ±: %s", vm_id, vlan_id, success)
+        log.info("VM %s VLAN %d'den ayrıldı: %s", vm_id, vlan_id, success)
         return {
             "success": success,
             "vm_id": vm_id,
@@ -317,23 +317,23 @@ def detach_vm_from_vlan(vm_id, vlan_id):
             "stderr": result.stderr.strip(),
         }
     except Exception as exc:
-        log.exception("detach_vm_from_vlan hatasÄ±: %s", exc)
+        log.exception("detach_vm_from_vlan hatası: %s", exc)
         return {"success": False, "error": str(exc)}
 
 
 def get_vlan_stats(vlan_id):
-    """ip -s link show ile VLAN arayÃ¼z istatistiklerini dÃ¶ner."""
+    """ip -s link show ile VLAN arayüz istatistiklerini döner."""
     try:
         vlans = _load()
         vlan = vlans.get(str(vlan_id))
         if not vlan:
-            return {"success": False, "error": "VLAN bulunamadÄ±"}
+            return {"success": False, "error": "VLAN bulunamadı"}
 
         iface_name = vlan.get("iface_name", f"*.{vlan_id}")
 
         result = _run("ip", "-j", "-s", "link", "show", iface_name)
         if result is None or result.returncode != 0:
-            return {"success": False, "error": "ArayÃ¼z bulunamadÄ±"}
+            return {"success": False, "error": "Arayüz bulunamadı"}
 
         try:
             data = json.loads(result.stdout)
@@ -350,15 +350,15 @@ def get_vlan_stats(vlan_id):
                     "tx_errors": stats.get("tx", {}).get("errors", 0),
                 }
         except (json.JSONDecodeError, TypeError, KeyError) as exc:
-            log.warning("Stats JSON parse hatasÄ±: %s", exc)
+            log.warning("Stats JSON parse hatası: %s", exc)
 
         return {"success": True, "iface": iface_name, "raw": result.stdout}
     except Exception as exc:
-        log.exception("get_vlan_stats hatasÄ±: %s", exc)
+        log.exception("get_vlan_stats hatası: %s", exc)
         return {"success": False, "error": str(exc)}
-
-
-
-
-
-
+
+
+
+
+
+

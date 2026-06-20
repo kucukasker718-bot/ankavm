@@ -1,4 +1,4 @@
-﻿"""ankavm VM Notes Manager â€” /var/lib/ankavm/vm_notes.json"""
+"""ankavm VM Notes Manager — /var/lib/ankavm/vm_notes.json"""
 import json, threading, re
 from pathlib import Path
 from datetime import datetime
@@ -6,7 +6,7 @@ from datetime import datetime
 _NOTES_FILE = "/var/lib/ankavm/vm_notes.json"
 _lock = threading.Lock()
 
-# rapor #62 fix: stored XSS â€” HTML tehlikeli taglarÄ± strip et
+# rapor #62 fix: stored XSS — HTML tehlikeli tagları strip et
 _TAG_RE  = re.compile(r"<(script|style|iframe|object|embed|form|input|button|link|meta)[^>]*>.*?</\1>",
                       re.IGNORECASE | re.DOTALL)
 _TAG_ALL = re.compile(r"<[^>]+>")
@@ -41,9 +41,9 @@ def save_note(vm_id, content):
 def delete_note(vm_id):
     with _lock:
         d = _load(); d.pop(str(vm_id), None); _save(d)
-
-
-
-
-
-
+
+
+
+
+
+

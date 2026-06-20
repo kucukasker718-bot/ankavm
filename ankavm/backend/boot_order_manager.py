@@ -1,5 +1,5 @@
-﻿"""
-Boot Order Manager â€” DR scenario VM startup orchestration with dependencies.
+"""
+Boot Order Manager — DR scenario VM startup orchestration with dependencies.
 """
 import json
 import time
@@ -214,9 +214,9 @@ def execute_boot_sequence(dry_run: bool = False) -> dict:
     except Exception as e:
         log.error("execute_boot_sequence: %s", e)
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

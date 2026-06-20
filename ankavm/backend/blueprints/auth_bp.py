@@ -1,16 +1,16 @@
-﻿"""auth_bp â€” v2 authentication + session endpoints.
+"""auth_bp — v2 authentication + session endpoints.
 
 Mounted at /api/v2/auth. Delegates to the existing `auth` module +
 audit log so the legacy /api/auth/* routes in app.py keep working
-unchanged. This file is intentionally small â€” full extraction of the
+unchanged. This file is intentionally small — full extraction of the
 auth subsystem is tracked in MODULARIZATION_PLAN.md.
 
 New endpoints exposed here:
-    GET  /api/v2/auth/me             â€” current user info
-    GET  /api/v2/auth/sessions       â€” active sessions for current user
-    POST /api/v2/auth/csrf/rotate    â€” rotate CSRF cookie pair
-    GET  /api/v2/auth/permissions    â€” flat list of role permissions
-    POST /api/v2/auth/touch          â€” bump session last-seen
+    GET  /api/v2/auth/me             — current user info
+    GET  /api/v2/auth/sessions       — active sessions for current user
+    POST /api/v2/auth/csrf/rotate    — rotate CSRF cookie pair
+    GET  /api/v2/auth/permissions    — flat list of role permissions
+    POST /api/v2/auth/touch          — bump session last-seen
 """
 from __future__ import annotations
 import time
@@ -121,7 +121,7 @@ def _register_routes():
             return _err(str(e), 400)
 
 
-# Conservative defaults for the fallback path â€” real perms come from the
+# Conservative defaults for the fallback path — real perms come from the
 # auth module's RBAC table when wired.
 _BASE_PERMS = {
     "administrator": ["*"],
@@ -139,9 +139,9 @@ _BASE_PERMS = {
 
 def _minimal_perms_for(role: str) -> list:
     return list(_BASE_PERMS.get(role, _BASE_PERMS["viewer"]))
-
-
-
-
-
-
+
+
+
+
+
+

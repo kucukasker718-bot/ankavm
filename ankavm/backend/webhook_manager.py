@@ -1,5 +1,5 @@
-﻿"""
-webhook_manager.py â€” Webhook management with HMAC signing and delivery logging
+"""
+webhook_manager.py — Webhook management with HMAC signing and delivery logging
 ankavm Hypervisor backend module
 """
 
@@ -37,10 +37,10 @@ except ImportError:
     _HAS_REQUESTS = False
     import urllib.request
     import urllib.error
-    log.debug("requests not available â€” using urllib.request as fallback")
+    log.debug("requests not available — using urllib.request as fallback")
 
 # OXW-2026-017 fix: Webhook SSRF block-list
-# Ä°Ã§ aÄŸ / loopback / link-local adreslerine webhook gÃ¶nderilmez
+# İç ağ / loopback / link-local adreslerine webhook gönderilmez
 _WEBHOOK_BLOCK_NETS = [
     ipaddress.ip_network("127.0.0.0/8"),
     ipaddress.ip_network("10.0.0.0/8"),
@@ -57,25 +57,25 @@ _WEBHOOK_ALLOWED_SCHEMES = {"https", "http"}   # http allow for internal test, h
 def _validate_webhook_url(url: str) -> tuple:
     """
     OXW-2026-017 + DNS-Rebinding fix:
-    URL'nin iÃ§ aÄŸa yÃ¶nlenmediÄŸini doÄŸrula.
-    DNS'i burada Ã§Ã¶z, resolved IP'yi dÃ¶ndÃ¼r â†’ caller IP'yi direkt kullanÄ±r,
-    ikinci DNS Ã§Ã¶zÃ¼mleme (rebinding penceresi) olmaz.
+    URL'nin iç ağa yönlenmediğini doğrula.
+    DNS'i burada çöz, resolved IP'yi döndür → caller IP'yi direkt kullanır,
+    ikinci DNS çözümleme (rebinding penceresi) olmaz.
     Returns: (ok: bool, reason: str, resolved_ip: str)
     """
     try:
         parsed = urlparse(url)
         if parsed.scheme not in _WEBHOOK_ALLOWED_SCHEMES:
-            return False, f"Ä°zinsiz ÅŸema: {parsed.scheme}", ""
+            return False, f"İzinsiz şema: {parsed.scheme}", ""
         hostname = parsed.hostname or ""
         if not hostname:
-            return False, "Host bulunamadÄ±", ""
+            return False, "Host bulunamadı", ""
         try:
             resolved_ip_str = socket.gethostbyname(hostname)
             ip = ipaddress.ip_address(resolved_ip_str)
         except Exception:
-            return False, f"Host Ã§Ã¶zÃ¼lemedi: {hostname}", ""
+            return False, f"Host çözülemedi: {hostname}", ""
         if any(ip in net for net in _WEBHOOK_BLOCK_NETS):
-            return False, f"Ä°Ã§ aÄŸ/loopback hedefi engellendi: {ip}", ""
+            return False, f"İç ağ/loopback hedefi engellendi: {ip}", ""
         return True, "", resolved_ip_str
     except Exception as e:
         return False, str(e), ""
@@ -83,20 +83,20 @@ def _validate_webhook_url(url: str) -> tuple:
 
 def _build_pinned_url(url: str, resolved_ip: str) -> tuple:
     """
-    DNS-rebinding korumasÄ±: hostname'i Ã§Ã¶zÃ¼lmÃ¼ÅŸ IP ile deÄŸiÅŸtir.
-    HTTP iÃ§in: IP'yi direkt URL'e koy, Host header ekle.
-    HTTPS iÃ§in: TLS SNI sorununa yol aÃ§ar, hostname koru ama
-                allow_redirects=False + tekrar doÄŸrulama yap.
+    DNS-rebinding koruması: hostname'i çözülmüş IP ile değiştir.
+    HTTP için: IP'yi direkt URL'e koy, Host header ekle.
+    HTTPS için: TLS SNI sorununa yol açar, hostname koru ama
+                allow_redirects=False + tekrar doğrulama yap.
     Returns: (pinned_url, host_header)
     """
     parsed  = urlparse(url)
     hostname = parsed.hostname or ""
     if parsed.scheme == "http" and resolved_ip:
-        # HTTP: IP ile deÄŸiÅŸtir, Host header ile orijinal hostname geÃ§
+        # HTTP: IP ile değiştir, Host header ile orijinal hostname geç
         port_part = f":{parsed.port}" if parsed.port else ""
         pinned = url.replace(f"//{hostname}", f"//{resolved_ip}{port_part}", 1)
         return pinned, hostname
-    # HTTPS: TLS cert hostname eÅŸleÅŸmesi iÃ§in hostname koru, Host header None
+    # HTTPS: TLS cert hostname eşleşmesi için hostname koru, Host header None
     return url, ""
 
 
@@ -245,11 +245,11 @@ def _send(webhook, event_name, payload):
     POST payload to a single webhook with HMAC-SHA256 signature.
     Logs the delivery result.
 
-    DNS-Rebinding korumasÄ±: DNS'i burada tek sefer Ã§Ã¶z, resolved IP ile request at.
-    Bu sayede validate â†’ request arasÄ±nda DNS deÄŸiÅŸse bile (TTL=0 rebinding) saldÄ±rÄ± bloke.
+    DNS-Rebinding koruması: DNS'i burada tek sefer çöz, resolved IP ile request at.
+    Bu sayede validate → request arasında DNS değişse bile (TTL=0 rebinding) saldırı bloke.
     """
     url    = webhook["url"]
-    # OXW-2026-017 + DNS-Rebinding fix: SSRF kontrolÃ¼ + tek sefer DNS Ã§Ã¶zÃ¼mle
+    # OXW-2026-017 + DNS-Rebinding fix: SSRF kontrolü + tek sefer DNS çözümle
     valid, reason, resolved_ip = _validate_webhook_url(url)
     if not valid:
         log.warning("Webhook SSRF engellendi [%s] %s: %s", webhook["id"], url, reason)
@@ -257,7 +257,7 @@ def _send(webhook, event_name, payload):
                       status_code=None, success=False, error=f"SSRF engellendi: {reason}")
         return
 
-    # DNS rebinding: resolved IP'yi kullan, hostname'i Host header'a taÅŸÄ±
+    # DNS rebinding: resolved IP'yi kullan, hostname'i Host header'a taşı
     pinned_url, host_hdr = _build_pinned_url(url, resolved_ip)
 
     secret = webhook.get("secret", "")
@@ -288,7 +288,7 @@ def _send(webhook, event_name, payload):
 
     try:
         if _HAS_REQUESTS:
-            # allow_redirects=False: redirect hedefi ayrÄ±ca doÄŸrulanamaz â†’ kapat
+            # allow_redirects=False: redirect hedefi ayrıca doğrulanamaz → kapat
             resp = _req.post(pinned_url, data=body, headers=headers,
                              timeout=10, allow_redirects=False)
             status_code = resp.status_code
@@ -384,7 +384,7 @@ def test_webhook(webhook_id):
     # Trigger synchronously for immediate feedback
     url    = wh["url"]
 
-    # OXW-2026-017 + DNS-Rebinding fix: test_webhook'ta da SSRF + DNS pin kontrolÃ¼
+    # OXW-2026-017 + DNS-Rebinding fix: test_webhook'ta da SSRF + DNS pin kontrolü
     valid, ssrf_reason, resolved_ip = _validate_webhook_url(url)
     if not valid:
         log.warning("Webhook test SSRF engellendi [%s] %s: %s", webhook_id, url, ssrf_reason)
@@ -432,9 +432,9 @@ def test_webhook(webhook_id):
 
     _log_delivery(webhook_id, "test.ping", url, status_code, success, error)
     return {"success": success, "status_code": status_code, "error": error}
-
-
-
-
-
-
+
+
+
+
+
+

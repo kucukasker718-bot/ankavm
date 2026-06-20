@@ -1,12 +1,12 @@
-﻿"""
-k8s_csi.py â€” Kubernetes CSI (Container Storage Interface) for ankavm
+"""
+k8s_csi.py — Kubernetes CSI (Container Storage Interface) for ankavm
 ankavm v2.5.10 Cloud/K8s
 
 Features:
-  - generate_csi_manifests() â€” DaemonSet + StorageClass YAML for ankavm CSI driver
-  - list_volumes() â€” list PersistentVolumes backed by ankavm storage
-  - create_volume_claim(name, size_gb, storage_class) â€” create PVC spec
-  - get_csi_status() â€” CSI driver health / node registration status
+  - generate_csi_manifests() — DaemonSet + StorageClass YAML for ankavm CSI driver
+  - list_volumes() — list PersistentVolumes backed by ankavm storage
+  - create_volume_claim(name, size_gb, storage_class) — create PVC spec
+  - get_csi_status() — CSI driver health / node registration status
 
 Config persisted to /var/lib/ankavm/k8s_csi.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -31,7 +31,7 @@ _DRIVER_IMAGE  = "ghcr.io/ankavm/csi-driver:v2.5.10"
 _NODE_IMAGE    = "ghcr.io/ankavm/csi-node:v2.5.10"
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -52,7 +52,7 @@ def _save(data: dict) -> None:
         log.warning("k8s_csi save fail: %s", e)
 
 
-# â”€â”€ kubectl helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── kubectl helper ────────────────────────────────────────────────────────────
 
 def _kubectl(args: list, timeout: int = 15) -> tuple[int, str, str]:
     """Run kubectl and return (returncode, stdout, stderr)."""
@@ -66,7 +66,7 @@ def _kubectl(args: list, timeout: int = 15) -> tuple[int, str, str]:
         return -1, "", str(e)
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def generate_csi_manifests() -> dict:
     """Generate CSI DaemonSet + StorageClass YAML manifests.
@@ -420,9 +420,9 @@ def get_csi_status() -> dict:
         "ready_nodes":   ready_nodes,
         "healthy":       registered and (node_count == ready_nodes) and node_count > 0,
     }
-
-
-
-
-
-
+
+
+
+
+
+

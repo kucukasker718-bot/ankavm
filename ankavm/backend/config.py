@@ -1,4 +1,4 @@
-﻿import os
+import os
 import configparser
 
 CONFIG_FILE = os.environ.get("ankavm_CONFIG", os.environ.get("ADAOS_CONFIG", "/etc/ankavm/ankavm.conf"))
@@ -51,7 +51,7 @@ SSL_ENABLED   = get("server", "ssl", "true").lower() == "true"
 SSL_CERT      = get("server", "ssl_cert")
 SSL_KEY       = get("server", "ssl_key")
 
-# JWT secret key â€” auto-generate and persist if not set or default
+# JWT secret key — auto-generate and persist if not set or default
 _SECRET_KEY_FILE = "/etc/ankavm/jwt_secret.key"
 _raw_secret = get("server", "secret_key") or ""
 if not _raw_secret or _raw_secret in ("ankavm-change-me-in-production", ""):
@@ -67,7 +67,7 @@ if not _raw_secret or _raw_secret in ("ankavm-change-me-in-production", ""):
                 _f.write(_raw_secret)
             os.chmod(_SECRET_KEY_FILE, 0o600)
         except OSError:
-            pass  # /etc/ankavm not writable yet (dev mode) â€” key ephemeral
+            pass  # /etc/ankavm not writable yet (dev mode) — key ephemeral
 SECRET_KEY = _raw_secret
 
 DATA_DIR      = get("storage", "data_dir")
@@ -87,27 +87,27 @@ LOG_LEVEL     = get("logging", "level")
 USERS_FILE    = os.path.join(DATA_DIR, "users.json")
 NOVNC_DIR     = get("server", "novnc_dir") or _defaults["novnc_dir"]
 
-# â”€â”€ GÃ¼venlik yapÄ±landÄ±rmasÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-# CORS: virgÃ¼lle ayrÄ±lmÄ±ÅŸ izinli origin listesi (boÅŸsa same-origin only)
-# Ã–rn: cors_origins = https://panel.example.com,https://admin.example.com
+# ── Güvenlik yapılandırması ───────────────────────────────────────────────────
+# CORS: virgülle ayrılmış izinli origin listesi (boşsa same-origin only)
+# Örn: cors_origins = https://panel.example.com,https://admin.example.com
 CORS_ORIGINS_RAW = get("server", "cors_origins", "") or ""
 CORS_ORIGINS = [o.strip() for o in CORS_ORIGINS_RAW.split(",") if o.strip()]
 
-# Trusted proxy CIDR listesi (XFF baÅŸlÄ±ÄŸÄ±na yalnÄ±zca bu aÄŸlardan gÃ¼venilir)
-# Ã–rn: trusted_proxies = 127.0.0.1/32,10.0.0.1/32
+# Trusted proxy CIDR listesi (XFF başlığına yalnızca bu ağlardan güvenilir)
+# Örn: trusted_proxies = 127.0.0.1/32,10.0.0.1/32
 TRUSTED_PROXIES_RAW = get("server", "trusted_proxies", "127.0.0.1/32") or "127.0.0.1/32"
 TRUSTED_PROXIES = [p.strip() for p in TRUSTED_PROXIES_RAW.split(",") if p.strip()]
 
-# GÃ¼ncelleme kanalÄ± allow-list (yalnÄ±zca bu repo URL'lerine gÃ¼ncelleme izni)
+# Güncelleme kanalı allow-list (yalnızca bu repo URL'lerine güncelleme izni)
 UPDATE_ALLOWED_REPOS_RAW = get("server", "update_allowed_repos",
     "https://github.com/ShinnAsukha/ankavm-hypervisor") or ""
 UPDATE_ALLOWED_REPOS = [r.strip() for r in UPDATE_ALLOWED_REPOS_RAW.split(",") if r.strip()]
 
 for d in [DATA_DIR, ISO_DIR, DISK_DIR, BACKUP_DIR, TEMPLATE_DIR, LOG_DIR]:
     os.makedirs(d, exist_ok=True)
-
-
-
-
-
-
+
+
+
+
+
+

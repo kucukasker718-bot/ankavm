@@ -1,4 +1,4 @@
-﻿"""ankavm Credential Vault â€” Fernet-encrypted VM credentials"""
+"""ankavm Credential Vault — Fernet-encrypted VM credentials"""
 import json, os, threading, base64, logging
 from pathlib import Path
 from datetime import datetime
@@ -84,9 +84,9 @@ def list_all():
                      "updated_at": v.get("updated_at", "")}
                     for ct, v in creds.items()]
             for vm_id, creds in raw.items()}
-
-
-
-
-
-
+
+
+
+
+
+

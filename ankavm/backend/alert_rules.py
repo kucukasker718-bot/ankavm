@@ -1,4 +1,4 @@
-﻿"""ankavm Alert Rules â€” threshold-based alerting"""
+"""ankavm Alert Rules — threshold-based alerting"""
 import json, os, uuid, logging, threading
 from pathlib import Path
 from datetime import datetime
@@ -75,7 +75,7 @@ def _trigger(rule, value):
                  "metric": rule["metric"], "value": value,
                  "threshold": rule["threshold"], "at": datetime.now().isoformat()}
         _append_history(entry)
-        log.warning("ALERT: %s â€” %s=%.1f %s %.1f",
+        log.warning("ALERT: %s — %s=%.1f %s %.1f",
                     rule["name"], rule["metric"], value, rule["operator"], rule["threshold"])
         if rule["action"] == "webhook":
             url = (rule.get("action_config") or {}).get("url")
@@ -119,9 +119,9 @@ def get_history(n=50):
         lines = Path(_HISTORY_FILE).read_text().splitlines()[-n:]
         return [json.loads(l) for l in lines if l.strip()]
     except Exception: return []
-
-
-
-
-
-
+
+
+
+
+
+

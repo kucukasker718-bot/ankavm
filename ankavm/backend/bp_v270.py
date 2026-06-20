@@ -1,6 +1,6 @@
-﻿"""
+"""
 ankavm v2.7.0 Flask Blueprint
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+─────────────────────────────
 Starts the app.py modularization the external reviewer asked for. The
 v2.7.0 enterprise endpoints (Confidential VM extensions, Runbook Executor,
 Cluster Federation) live here instead of growing app.py further.
@@ -69,13 +69,13 @@ def init_bp_v270(confidential_vm, runbook_exec, federation_mgr,
 
 
 def _register_routes():
-    # â”€â”€ Confidential VM extensions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Confidential VM extensions ────────────────────────────────────────
     @bp_v270.route("/api/v2/confidential-vm/vms/<vm_id>/vtpm", methods=["POST"])
     @_require_auth
     @_require_role("admin", "administrator")
     def api_cvm_vtpm(vm_id):
         if not _cvm:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         d = request.get_json(silent=True) or {}
         try:
             return _ok(**_cvm.set_vtpm(vm_id, bool(d.get("enabled", True))))
@@ -87,7 +87,7 @@ def _register_routes():
     @_require_role("admin", "administrator")
     def api_cvm_sb(vm_id):
         if not _cvm:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         d = request.get_json(silent=True) or {}
         try:
             return _ok(**_cvm.set_secure_boot(vm_id, bool(d.get("enabled", True))))
@@ -99,13 +99,13 @@ def _register_routes():
     @_require_role("admin", "administrator")
     def api_cvm_attest(vm_id):
         if not _cvm:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         try:
             return _ok(**_cvm.capture_attestation(vm_id))
         except Exception as e:
             return _err(e, 400)
 
-    # â”€â”€ Runbook Executor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Runbook Executor ──────────────────────────────────────────────────
     @bp_v270.route("/api/v2/runbooks", methods=["GET"])
     @_require_auth
     @_require_role("admin", "administrator")
@@ -119,7 +119,7 @@ def _register_routes():
     @_require_role("admin", "administrator")
     def api_rb_upsert():
         if not _rbx:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         try:
             return _ok(runbook=_rbx.upsert_runbook(request.get_json(silent=True) or {}))
         except Exception as e:
@@ -130,7 +130,7 @@ def _register_routes():
     @_require_role("admin", "administrator")
     def api_rb_delete(rb_id):
         if not _rbx:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         return _ok(removed=_rbx.delete_runbook(rb_id))
 
     @bp_v270.route("/api/v2/runbooks/<rb_id>/run", methods=["POST"])
@@ -138,10 +138,10 @@ def _register_routes():
     @_require_role("admin", "administrator")
     def api_rb_run(rb_id):
         if not _rbx:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         d = request.get_json(silent=True) or {}
         force = bool(d.get("force"))
-        # SEC-023: force=true bypasses cooldown+quota â€” require a server-side
+        # SEC-023: force=true bypasses cooldown+quota — require a server-side
         # confirm_token rotating every 60s. Client first POSTs without
         # confirm_token to obtain the expected one, then re-POSTs with it.
         if force:
@@ -167,7 +167,7 @@ def _register_routes():
             limit = 100
         return _ok(history=_rbx.history(limit=limit))
 
-    # â”€â”€ Cluster Federation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Cluster Federation ────────────────────────────────────────────────
     @bp_v270.route("/api/v2/federation/members", methods=["GET"])
     @_require_auth
     @_require_role("admin", "administrator")
@@ -186,7 +186,7 @@ def _register_routes():
     @_require_role("admin", "administrator")
     def api_fed_add():
         if not _fed:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         d = request.get_json(silent=True) or {}
         # SEC-021: pre-validate URL here so the API returns a clean 400 instead
         # of a 500 from a deep ValueError chain. add_member() will re-validate.
@@ -215,7 +215,7 @@ def _register_routes():
     @_require_role("admin", "administrator")
     def api_fed_mut(member_id):
         if not _fed:
-            return _err("modÃ¼l yok", 503)
+            return _err("modül yok", 503)
         if request.method == "DELETE":
             return _ok(removed=_fed.remove_member(member_id))
         d = request.get_json(silent=True) or {}
@@ -240,9 +240,9 @@ def _register_routes():
         if not _fed:
             return _ok(total=0, members=[], vms=[])
         return _ok(**_fed.inventory_vms())
-
-
-
-
-
-
+
+
+
+
+
+

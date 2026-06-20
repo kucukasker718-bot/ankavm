@@ -1,11 +1,11 @@
-﻿"""
-ml_forecaster.py â€” Heatmap + Forecasting (stdlib only, no numpy/scipy)
+"""
+ml_forecaster.py — Heatmap + Forecasting (stdlib only, no numpy/scipy)
 ankavm v2.5.8 Observability
 
 Features:
-  - forecast_resource(metric, horizon_days) â€” linear trend + moving avg
-  - get_heatmap(metric, period) â€” hourÃ—day matrix
-  - capacity_forecast() â€” "X days until disk/ram full"
+  - forecast_resource(metric, horizon_days) — linear trend + moving avg
+  - get_heatmap(metric, period) — hour×day matrix
+  - capacity_forecast() — "X days until disk/ram full"
 
 Uses perf_history (_safe_import) for data.  Graceful empty if no data.
 """
@@ -32,7 +32,7 @@ def _get_perf():
     return _perf_history
 
 
-# â”€â”€ Math helpers (stdlib only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Math helpers (stdlib only) ────────────────────────────────────────────────
 
 def _linreg(xs: list, ys: list):
     """Simple linear regression. Returns (slope, intercept)."""
@@ -59,7 +59,7 @@ def _moving_avg(values: list, window: int = 5) -> float:
 
 
 def _r_squared(xs: list, ys: list, slope: float, intercept: float) -> float:
-    """Coefficient of determination RÂ²."""
+    """Coefficient of determination R²."""
     if len(ys) < 2:
         return 0.0
     y_mean = sum(ys) / len(ys)
@@ -70,7 +70,7 @@ def _r_squared(xs: list, ys: list, slope: float, intercept: float) -> float:
     return max(0.0, 1.0 - ss_res / ss_tot)
 
 
-# â”€â”€ Metric extraction â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Metric extraction ─────────────────────────────────────────────────────────
 
 _METRIC_COLUMNS = {
     "cpu":  "cpu_pct",
@@ -95,7 +95,7 @@ def _fetch_history(period: str = "30d") -> list:
         return []
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def forecast_resource(metric: str = "cpu", horizon_days: int = 30) -> dict:
     """
@@ -166,7 +166,7 @@ def forecast_resource(metric: str = "cpu", horizon_days: int = 30) -> dict:
 
 def get_heatmap(metric: str = "cpu", period: str = "24h") -> dict:
     """
-    Build an hourÃ—day heatmap matrix.
+    Build an hour×day heatmap matrix.
     Returns {metric, period, matrix: [[avg_val per hour for each day], ...],
              hours: [0..23], days: ["Mon","Tue",...]}
     """
@@ -241,9 +241,9 @@ def capacity_forecast() -> dict:
         "disk": _forecast_fill("disk_pct"),
         "ram":  _forecast_fill("mem_pct"),
     }
-
-
-
-
-
-
+
+
+
+
+
+

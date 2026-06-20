@@ -1,4 +1,4 @@
-﻿# Code of Conduct
+# Code of Conduct
 
 ankavm is a small, friendly, no-drama project. Three rules:
 
@@ -6,7 +6,7 @@ ankavm is a small, friendly, no-drama project. Three rules:
 2. **Be specific.** When you file a bug, ask a question, or push back on a design choice, share enough context for the other side to engage. "It doesn't work" is not a bug report. "X breaks because of Y, here is the log" is.
 3. **Don't waste anyone's time.** That means yours, the maintainers', and the next reader's. If a thread is going nowhere, walk away. Maintainers may close threads that violate this rule without warning.
 
-These rules apply everywhere ankavm lives â€” this repo, GitHub Discussions, Discord, issue trackers, pull-request reviews, and any official ankavm event.
+These rules apply everywhere ankavm lives — this repo, GitHub Discussions, Discord, issue trackers, pull-request reviews, and any official ankavm event.
 
 ## Reporting
 
@@ -24,9 +24,9 @@ For severe cases (threats, doxxing, harassment campaigns) we will skip the warni
 ## Attribution
 
 This Code of Conduct is intentionally short. If you want the long version, [the Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) is a fine reference and we will apply its spirit when interpreting cases this document does not explicitly cover.
-
-
-
-
-
-
+
+
+
+
+
+

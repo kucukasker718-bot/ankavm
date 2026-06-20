@@ -1,8 +1,8 @@
-﻿"""
+"""
 ankavm VNC Thumbnail Manager
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Ã‡alÄ±ÅŸan VM'lerden VNC Ã¼zerinden ekran gÃ¶rÃ¼ntÃ¼sÃ¼ alÄ±r (5 dk cache).
-VM liste sayfasÄ±nda canlÄ± Ã¶nizleme iÃ§in.
+─────────────────────────────
+Çalışan VM'lerden VNC üzerinden ekran görüntüsü alır (5 dk cache).
+VM liste sayfasında canlı önizleme için.
 
 API:
     get_thumbnail(vm_id) -> bytes | None
@@ -18,7 +18,7 @@ log = logging.getLogger("vnc_thumbnail")
 _CACHE_DIR = Path("/var/lib/ankavm/thumbnails")
 _CACHE_TTL = 300                      # 5 dakika
 _LOCK      = threading.Lock()
-_IN_FLIGHT = set()                    # paralel duplicate Ã¶nle
+_IN_FLIGHT = set()                    # paralel duplicate önle
 
 
 def _path_for(vm_id: str) -> Path:
@@ -27,7 +27,7 @@ def _path_for(vm_id: str) -> Path:
 
 
 def _capture_via_virsh(vm_name: str, out_path: Path) -> bool:
-    """virsh screenshot ile PNG yakala. VM Ã§alÄ±ÅŸÄ±yorsa."""
+    """virsh screenshot ile PNG yakala. VM çalışıyorsa."""
     try:
         _CACHE_DIR.mkdir(parents=True, exist_ok=True)
         tmp_ppm = out_path.with_suffix(".ppm")
@@ -37,9 +37,9 @@ def _capture_via_virsh(vm_name: str, out_path: Path) -> bool:
             capture_output=True, text=True, timeout=10
         )
         if r.returncode != 0 or not tmp_ppm.exists():
-            log.debug("virsh screenshot baÅŸarÄ±sÄ±z (%s): %s", vm_name, r.stderr.strip())
+            log.debug("virsh screenshot başarısız (%s): %s", vm_name, r.stderr.strip())
             return False
-        # PPM â†’ PNG (kÃ¼Ã§Ã¼lt)
+        # PPM → PNG (küçült)
         png_out = subprocess.run(
             ["convert", str(tmp_ppm), "-resize", "320x180", "-quality", "70", str(out_path)],
             capture_output=True, timeout=10
@@ -50,15 +50,15 @@ def _capture_via_virsh(vm_name: str, out_path: Path) -> bool:
             pass
         return out_path.exists()
     except FileNotFoundError as e:
-        log.warning("Gerekli komut bulunamadÄ± (virsh veya convert): %s", e)
+        log.warning("Gerekli komut bulunamadı (virsh veya convert): %s", e)
         return False
     except Exception as e:
-        log.warning("Thumbnail capture hatasÄ± %s: %s", vm_name, e)
+        log.warning("Thumbnail capture hatası %s: %s", vm_name, e)
         return False
 
 
 def get_thumbnail(vm_id: str, vm_name: str = None) -> bytes:
-    """Cache'ten dÃ¶n, yoksa yakala. None = Ã§ekilemedi."""
+    """Cache'ten dön, yoksa yakala. None = çekilemedi."""
     if not vm_id:
         return None
     p = _path_for(vm_id)
@@ -70,10 +70,10 @@ def get_thumbnail(vm_id: str, vm_name: str = None) -> bytes:
             except Exception:
                 pass
 
-    # Anti-stampede: aynÄ± VM iÃ§in paralel istekleri engelle
+    # Anti-stampede: aynı VM için paralel istekleri engelle
     with _LOCK:
         if vm_id in _IN_FLIGHT:
-            # Eski cache varsa onu dÃ¶n
+            # Eski cache varsa onu dön
             if p.exists():
                 try:
                     return p.read_bytes()
@@ -95,7 +95,7 @@ def get_thumbnail(vm_id: str, vm_name: str = None) -> bytes:
 
 
 def invalidate(vm_id: str):
-    """Cache'i sil â€” VM aksiyonu sonrasÄ± tetiklenir (start/reboot)."""
+    """Cache'i sil — VM aksiyonu sonrası tetiklenir (start/reboot)."""
     try:
         p = _path_for(vm_id)
         if p.exists():
@@ -105,7 +105,7 @@ def invalidate(vm_id: str):
 
 
 def refresh_all(vm_list: list) -> int:
-    """TÃ¼m Ã§alÄ±ÅŸan VM'leri arka planda yenile. vm_list = [{id, name, state}]"""
+    """Tüm çalışan VM'leri arka planda yenile. vm_list = [{id, name, state}]"""
     count = 0
     for v in vm_list:
         if v.get("state") != "running":
@@ -133,9 +133,9 @@ def stats() -> dict:
         }
     except Exception as e:
         return {"error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-﻿"""ankavm Hotplug Manager â€” live CPU and RAM hot-plug via virsh."""
+"""ankavm Hotplug Manager — live CPU and RAM hot-plug via virsh."""
 import subprocess
 import re
 
@@ -42,7 +42,7 @@ def get_vcpu_info(vm_name):
         current = maximum = None
         for line in r.stdout.splitlines():
             if line.startswith("CPU:"):
-                # Multiple "CPU:" lines â€” last index is current-1, count lines
+                # Multiple "CPU:" lines — last index is current-1, count lines
                 pass
         # Count CPU entries for current, use dominfo for max
         cpu_lines = [l for l in r.stdout.splitlines() if l.startswith("CPU:")]
@@ -77,9 +77,9 @@ def get_mem_info(vm_name):
         return {"current_mb": current_mb, "max_mb": max_mb}
     except Exception as e:
         return {"current_mb": None, "max_mb": None, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

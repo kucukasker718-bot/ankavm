@@ -1,10 +1,10 @@
-﻿"""
-ankavm Disk Encryption â€” Live VM disk LUKS
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-qemu-img + cryptsetup ile VM disklerini AES-XTS-512 ile ÅŸifrele.
+"""
+ankavm Disk Encryption — Live VM disk LUKS
+───────────────────────────────────────────
+qemu-img + cryptsetup ile VM disklerini AES-XTS-512 ile şifrele.
 Key file: /etc/ankavm/disk_keys/<vm_id>.key (perm 0600, root-only)
 
-LUKS2 header'lÄ± raw/qcow2 disk Ã¼retir. VM XML'de:
+LUKS2 header'lı raw/qcow2 disk üretir. VM XML'de:
   <encryption format="luks">
     <secret type="passphrase" uuid="..."/>
   </encryption>
@@ -36,7 +36,7 @@ def _gen_passphrase(bits: int = 256) -> str:
 
 
 def encrypt_disk(disk_path: str, vm_id: str, passphrase: str = None) -> dict:
-    """Wrap raw disk with LUKS2 header. WARNING â€” destructive without backup."""
+    """Wrap raw disk with LUKS2 header. WARNING — destructive without backup."""
     if not os.path.exists(disk_path):
         return {"ok": False, "error": "disk not found"}
     _KEY_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -51,7 +51,7 @@ def encrypt_disk(disk_path: str, vm_id: str, passphrase: str = None) -> dict:
 
     secret_uuid = str(uuid.uuid4())
     try:
-        # qemu-img convert: raw â†’ luks
+        # qemu-img convert: raw → luks
         encrypted_path = disk_path + ".luks"
         r = subprocess.run([
             "qemu-img", "convert", "-O", "luks",
@@ -71,7 +71,7 @@ def encrypt_disk(disk_path: str, vm_id: str, passphrase: str = None) -> dict:
             "algorithm":   "aes-xts-256",
         }
         _save(d)
-        log.info("disk encrypted: %s â†’ %s", disk_path, encrypted_path)
+        log.info("disk encrypted: %s → %s", disk_path, encrypted_path)
         return {"ok": True, "path": encrypted_path, "secret_uuid": secret_uuid}
     except FileNotFoundError:
         return {"ok": False, "error": "qemu-img not installed"}
@@ -109,9 +109,9 @@ def rotate_key(vm_id: str) -> dict:
         return {"ok": True, "rotated_at": int(time.time())}
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

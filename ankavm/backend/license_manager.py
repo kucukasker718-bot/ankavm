@@ -1,7 +1,7 @@
-﻿"""
-ankavm Lisans YÃ¶neticisi
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Lisans doÄŸrulama sistemi.
+"""
+ankavm Lisans Yöneticisi
+─────────────────────────
+Lisans doğrulama sistemi.
 """
 import os
 import json
@@ -16,7 +16,7 @@ log = logging.getLogger("ankavm.license")
 LICENSE_FILE       = "/var/lib/ankavm/license.json"
 ACTIVATIONS_FILE   = "/var/lib/ankavm/license_activations.json"
 
-# â”€â”€ Runtime-assembled constants (not stored as literals) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Runtime-assembled constants (not stored as literals) ──────────────────────
 
 def _r(*parts):
     """Assemble string from base64 parts at runtime."""
@@ -26,7 +26,7 @@ def _rb(*parts):
     """Assemble bytes from base64 parts at runtime."""
     return b"".join(base64.b64decode(p) for p in parts)
 
-# Repo path â€” assembled at import time into module-level var
+# Repo path — assembled at import time into module-level var
 _LICENSE_REPO    = _r("U2hpbm5Bc3VraGE=", "L29wd2FyZS1saWNlbnNl")
 _LICENSE_RAW_URL = _r(
     "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tLw==",
@@ -34,7 +34,7 @@ _LICENSE_RAW_URL = _r(
     "L21haW4vLmxpY2Vuc2Vjb2Rlcw==",
 )
 
-# Passphrase â€” read from env first (production), fall back to assembled bytes
+# Passphrase — read from env first (production), fall back to assembled bytes
 def _get_passphrase() -> bytes:
     env = os.environ.get("OXW_LICENSE_KEY", "")
     if env:
@@ -61,12 +61,12 @@ def _get_fernet():
         key = base64.urlsafe_b64encode(key_bytes)
         return Fernet(key)
     except Exception as e:
-        log.warning("Fernet yÃ¼klenemedi: %s", e)
+        log.warning("Fernet yüklenemedi: %s", e)
         return None
 
 
 def _fetch_license_codes() -> list:
-    """Lisans listesini uzak kaynaktan al, Ã§Ã¶z ve Ã¶nbelleÄŸe al."""
+    """Lisans listesini uzak kaynaktan al, çöz ve önbelleğe al."""
     global _codes_cache, _cache_ts
 
     if _codes_cache and (time.time() - _cache_ts) < CACHE_TTL:
@@ -83,7 +83,7 @@ def _fetch_license_codes() -> list:
 
         fernet = _get_fernet()
         if not fernet:
-            log.error("Fernet baÅŸlatÄ±lamadÄ±")
+            log.error("Fernet başlatılamadı")
             return _codes_cache
 
         decrypted = fernet.decrypt(encrypted_data)
@@ -92,28 +92,28 @@ def _fetch_license_codes() -> list:
 
         _codes_cache = codes
         _cache_ts = time.time()
-        log.info("Lisans listesi gÃ¼ncellendi: %d kod", len(codes))
+        log.info("Lisans listesi güncellendi: %d kod", len(codes))
         return codes
 
     except Exception as e:
-        log.warning("Lisans dosyasÄ± alÄ±namadÄ±: %s", e)
+        log.warning("Lisans dosyası alınamadı: %s", e)
         return _codes_cache
 
 
 def validate_license(code: str, ip: str = None) -> dict:
-    """Lisans kodunu doÄŸrula. ip: aktivasyonu yapan sunucunun IP'si."""
+    """Lisans kodunu doğrula. ip: aktivasyonu yapan sunucunun IP'si."""
     try:
         code = code.strip().upper()
         if not code.startswith("ankavm-"):
-            return {"valid": False, "error": "GeÃ§ersiz lisans kodu formatÄ±"}
+            return {"valid": False, "error": "Geçersiz lisans kodu formatı"}
 
         parts = code.split("-")
         if len(parts) != 5 or not all(len(p) == 4 for p in parts[1:]):
-            return {"valid": False, "error": "GeÃ§ersiz lisans kodu formatÄ± (ankavm-XXXX-XXXX-XXXX-XXXX)"}
+            return {"valid": False, "error": "Geçersiz lisans kodu formatı (ankavm-XXXX-XXXX-XXXX-XXXX)"}
 
         codes = _fetch_license_codes()
         if not codes:
-            return {"valid": False, "error": "Lisans sunucusuna baÄŸlanÄ±lamadÄ±. LÃ¼tfen internet baÄŸlantÄ±sÄ±nÄ± kontrol edin."}
+            return {"valid": False, "error": "Lisans sunucusuna bağlanılamadı. Lütfen internet bağlantısını kontrol edin."}
 
         code_hash = hashlib.sha256(code.encode()).hexdigest()
         records = {}
@@ -126,18 +126,18 @@ def validate_license(code: str, ip: str = None) -> dict:
         for entry in records.values():
             if entry.get("code_hash") == code_hash:
                 if entry.get("activation_count", 0) >= 1 and entry.get("ip") != ip:
-                    return {"valid": False, "error": "Bu lisans kodu baÅŸka bir sunucuda kullanÄ±mda. Her lisans yalnÄ±zca 1 sunucuda kullanÄ±labilir."}
+                    return {"valid": False, "error": "Bu lisans kodu başka bir sunucuda kullanımda. Her lisans yalnızca 1 sunucuda kullanılabilir."}
                 break
 
         if code in codes:
             _save_license(code, ip=ip)
             _record_activation(code, ip=ip)
-            return {"valid": True, "code": code, "message": "Lisans baÅŸarÄ±yla doÄŸrulandÄ±", "max_servers": 1}
+            return {"valid": True, "code": code, "message": "Lisans başarıyla doğrulandı", "max_servers": 1}
         else:
-            return {"valid": False, "error": "Lisans kodu bulunamadÄ± veya geÃ§ersiz"}
+            return {"valid": False, "error": "Lisans kodu bulunamadı veya geçersiz"}
     except Exception as e:
         log.error("validate_license beklenmeyen hata: %s", e, exc_info=True)
-        return {"valid": False, "error": "DoÄŸrulama hatasÄ±"}
+        return {"valid": False, "error": "Doğrulama hatası"}
 
 
 def _save_license(code: str, ip: str = None):
@@ -158,11 +158,11 @@ def _save_license(code: str, ip: str = None):
         except Exception:
             pass
     except Exception as e:
-        log.error("Lisans kaydetme hatasÄ±: %s", e)
+        log.error("Lisans kaydetme hatası: %s", e)
 
 
 def _record_activation(code: str, ip: str = None):
-    """Aktivasyon geÃ§miÅŸine kayÄ±t ekle (kod baÅŸÄ±na tek kayÄ±t â€” gÃ¼nceller)."""
+    """Aktivasyon geçmişine kayıt ekle (kod başına tek kayıt — günceller)."""
     try:
         os.makedirs(os.path.dirname(ACTIVATIONS_FILE), exist_ok=True)
 
@@ -203,11 +203,11 @@ def _record_activation(code: str, ip: str = None):
             pass
 
     except Exception as e:
-        log.error("Aktivasyon kaydÄ± hatasÄ±: %s", e)
+        log.error("Aktivasyon kaydı hatası: %s", e)
 
 
 def get_license_status() -> dict:
-    """Mevcut lisans durumunu dÃ¶ndÃ¼r."""
+    """Mevcut lisans durumunu döndür."""
     try:
         if os.path.exists(LICENSE_FILE):
             with open(LICENSE_FILE) as f:
@@ -220,12 +220,12 @@ def get_license_status() -> dict:
                     "activated_ip": data.get("activated_ip", ""),
                 }
     except Exception as e:
-        log.warning("Lisans okuma hatasÄ±: %s", e)
+        log.warning("Lisans okuma hatası: %s", e)
     return {"active": False}
 
 
 def get_activations() -> list:
-    """TÃ¼m aktivasyon kayÄ±tlarÄ±nÄ± dÃ¶ndÃ¼r (yÃ¶netici paneli iÃ§in)."""
+    """Tüm aktivasyon kayıtlarını döndür (yönetici paneli için)."""
     try:
         if os.path.exists(ACTIVATIONS_FILE):
             with open(ACTIVATIONS_FILE) as f:
@@ -233,12 +233,12 @@ def get_activations() -> list:
             return sorted(records.values(),
                           key=lambda x: x.get("last_activated", ""), reverse=True)
     except Exception as e:
-        log.error("Aktivasyon listesi okuma hatasÄ±: %s", e)
+        log.error("Aktivasyon listesi okuma hatası: %s", e)
     return []
 
 
 def deactivate_license() -> dict:
-    """LisansÄ± deaktive et."""
+    """Lisansı deaktive et."""
     try:
         if os.path.exists(LICENSE_FILE):
             with open(LICENSE_FILE) as f:
@@ -249,9 +249,9 @@ def deactivate_license() -> dict:
         return {"success": True}
     except Exception as e:
         return {"success": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

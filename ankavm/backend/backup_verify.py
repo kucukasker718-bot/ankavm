@@ -1,15 +1,15 @@
-﻿"""
-ankavm Backup Verification â€” v2.5.7
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-mount veya boot test ile backup bÃ¼tÃ¼nlÃ¼ÄŸÃ¼nÃ¼ doÄŸrula.
+"""
+ankavm Backup Verification — v2.5.7
+─────────────────────────────────────
+mount veya boot test ile backup bütünlüğünü doğrula.
 
 API:
     verify_backup(backup_path, mode='mount'|'boot') -> dict
     list_verifications(limit=50) -> list
 
 Modes:
-    mount â€” qemu-nbd ile baÄŸla, fsck / dosya kontrol, unmount
-    boot  â€” geÃ§ici isolated libvirt VM, 60 s timeout, agent ping, destroy+undefine
+    mount — qemu-nbd ile bağla, fsck / dosya kontrol, unmount
+    boot  — geçici isolated libvirt VM, 60 s timeout, agent ping, destroy+undefine
 
 Log: /var/log/ankavm/backup_verify.jsonl
 """
@@ -40,7 +40,7 @@ except ImportError:
     _LIBVIRT_OK = False
 
 
-# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _log_result(result: dict):
     try:
@@ -96,14 +96,14 @@ def _fsck_partition(part: str) -> dict:
         return {"partition": part, "ok": False, "error": str(e)}
 
 
-# â”€â”€ mount mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── mount mode ────────────────────────────────────────────────────────────────
 
 def _verify_mount(backup_path: str, verify_id: str) -> dict:
     if not _check_qemu_nbd():
         return {
             "ok":    False,
             "mode":  "mount",
-            "error": "qemu-nbd bulunamadÄ± â€” 'apt install qemu-utils' gerekli",
+            "error": "qemu-nbd bulunamadı — 'apt install qemu-utils' gerekli",
         }
 
     dev = "/dev/nbd0"
@@ -112,7 +112,7 @@ def _verify_mount(backup_path: str, verify_id: str) -> dict:
 
     connected = _nbd_connect(backup_path, dev)
     if not connected:
-        return {"ok": False, "mode": "mount", "error": f"qemu-nbd connect baÅŸarÄ±sÄ±z: {dev}"}
+        return {"ok": False, "mode": "mount", "error": f"qemu-nbd connect başarısız: {dev}"}
 
     try:
         time.sleep(1)  # let kernel enumerate partitions
@@ -169,11 +169,11 @@ def _verify_mount(backup_path: str, verify_id: str) -> dict:
     return result
 
 
-# â”€â”€ boot mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── boot mode ─────────────────────────────────────────────────────────────────
 
 def _verify_boot(backup_path: str, verify_id: str) -> dict:
     if not _LIBVIRT_OK:
-        return {"ok": False, "mode": "boot", "error": "libvirt kurulu deÄŸil"}
+        return {"ok": False, "mode": "boot", "error": "libvirt kurulu değil"}
 
     vm_name = f"ankavm-verify-{verify_id}"
     boot_xml = f"""<domain type='qemu'>
@@ -250,7 +250,7 @@ def _verify_boot(backup_path: str, verify_id: str) -> dict:
     return result
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def verify_backup(backup_path: str, mode: str = "mount") -> dict:
     """
@@ -261,9 +261,9 @@ def verify_backup(backup_path: str, mode: str = "mount") -> dict:
     if not backup_path:
         return {"ok": False, "error": "backup_path zorunlu"}
     if not Path(backup_path).exists():
-        return {"ok": False, "error": f"Dosya bulunamadÄ±: {backup_path}"}
+        return {"ok": False, "error": f"Dosya bulunamadı: {backup_path}"}
     if mode not in ("mount", "boot"):
-        return {"ok": False, "error": "mode 'mount' veya 'boot' olmalÄ±"}
+        return {"ok": False, "error": "mode 'mount' veya 'boot' olmalı"}
 
     verify_id = str(uuid.uuid4())[:8]
     ts = int(time.time())
@@ -303,9 +303,9 @@ def list_verifications(limit: int = 50) -> list:
     except Exception as e:
         log.warning("list_verifications fail: %s", e)
         return []
-
-
-
-
-
-
+
+
+
+
+
+

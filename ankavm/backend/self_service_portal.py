@@ -1,14 +1,14 @@
-﻿"""
-ankavm Self-Service Portal â€” End-User Limited VM Operations
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Son kullanÄ±cÄ±nÄ±n (vm-user) yalnÄ±zca kendi tenant'Ä± iÃ§indeki VM'ler Ã¼zerinde
-sÄ±nÄ±rlÄ± eylemler yapabilmesi iÃ§in arayÃ¼z.
+"""
+ankavm Self-Service Portal — End-User Limited VM Operations
+─────────────────────────────────────────────────────────────
+Son kullanıcının (vm-user) yalnızca kendi tenant'ı içindeki VM'ler üzerinde
+sınırlı eylemler yapabilmesi için arayüz.
 
-  - TÃ¼m fonksiyonlar tenant_manager + user_manager ile Ã§apraz doÄŸrulanÄ±r.
-  - VM create flow'una dokunmaz â€” quota check + opsiyonel callback ile
-    vm_manager.create_vm() Ã§aÄŸrÄ±lÄ±r.
+  - Tüm fonksiyonlar tenant_manager + user_manager ile çapraz doğrulanır.
+  - VM create flow'una dokunmaz — quota check + opsiyonel callback ile
+    vm_manager.create_vm() çağrılır.
   - Audit log: /var/lib/ankavm/self_service_requests.jsonl
-  - VNC konsol token'larÄ± process-local, 10 dakika geÃ§erli.
+  - VNC konsol token'ları process-local, 10 dakika geçerli.
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ _lock = threading.RLock()
 
 ALLOWED_ACTIONS = {"start", "stop", "reboot", "snapshot", "console"}
 
-# VNC konsol token store â€” kÄ±sa Ã¶mÃ¼rlÃ¼
+# VNC konsol token store — kısa ömürlü
 _console_tokens: dict = {}   # token -> {"vm_id": str, "user": str, "expires": float}
 _CONSOLE_TTL = 600           # 10 dakika
 _token_lock = threading.Lock()
@@ -47,7 +47,7 @@ def _audit(event: str, username: str, detail: Optional[dict] = None) -> None:
         log.debug("audit write fail: %s", e)
 
 
-# â”€â”€ Lazy module loaders (circular import safe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Lazy module loaders (circular import safe) ────────────────────────────────
 def _tenant_mgr():
     try:
         import tenant_manager  # type: ignore
@@ -72,7 +72,7 @@ def _vm_mgr():
         return None
 
 
-# â”€â”€ Token cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Token cleanup ─────────────────────────────────────────────────────────────
 def _cleanup_tokens() -> None:
     now = time.time()
     with _token_lock:
@@ -80,9 +80,9 @@ def _cleanup_tokens() -> None:
             _console_tokens.pop(tok, None)
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 def list_user_vms(username: str) -> list:
-    """KullanÄ±cÄ±ya gÃ¶rÃ¼nÃ¼r VM'leri dÃ¶ner â€” tenant kapsamÄ±nda + atamasÄ± yapÄ±lmÄ±ÅŸlar."""
+    """Kullanıcıya görünür VM'leri döner — tenant kapsamında + ataması yapılmışlar."""
     out: list = []
     try:
         tm = _tenant_mgr()
@@ -95,7 +95,7 @@ def list_user_vms(username: str) -> list:
         except Exception:
             all_vms = []
 
-        # DoÄŸrudan user-VM atamasÄ± (user_manager)
+        # Doğrudan user-VM ataması (user_manager)
         direct_ids: set = set()
         if um:
             try:
@@ -104,7 +104,7 @@ def list_user_vms(username: str) -> list:
             except Exception:
                 pass
 
-        # Tenant atamasÄ±na gÃ¶re geniÅŸlet
+        # Tenant atamasına göre genişlet
         tenant_vms: set = set()
         if tm:
             try:
@@ -125,14 +125,14 @@ def list_user_vms(username: str) -> list:
 
 
 def get_user_quota(username: str) -> dict:
-    """KullanÄ±cÄ±nÄ±n tenant'Ä±nÄ±n kotasÄ± ve mevcut kullanÄ±m."""
+    """Kullanıcının tenant'ının kotası ve mevcut kullanım."""
     tm = _tenant_mgr()
     if not tm:
         return {"tenant_id": None, "quota": {}, "usage": {}}
     try:
         tid = tm.get_user_tenant(username)
         if not tid:
-            return {"tenant_id": None, "quota": {}, "usage": {}, "warning": "tenant atanmamÄ±ÅŸ"}
+            return {"tenant_id": None, "quota": {}, "usage": {}, "warning": "tenant atanmamış"}
         t = tm.get_tenant(tid) or {}
         return {
             "tenant_id": tid,
@@ -146,7 +146,7 @@ def get_user_quota(username: str) -> dict:
 
 
 def _user_owns_vm(username: str, vm_id: str) -> bool:
-    """user_manager atamasÄ± VEYA tenant atamasÄ± Ã¼zerinden sahiplik kontrolÃ¼."""
+    """user_manager ataması VEYA tenant ataması üzerinden sahiplik kontrolü."""
     vm_id = str(vm_id)
     um = _user_mgr()
     tm = _tenant_mgr()
@@ -177,8 +177,8 @@ def request_vm_create(username: str,
                       iso_path: Optional[str] = None,
                       create_callback=None) -> dict:
     """
-    Quota kontrol et + (saÄŸlanÄ±rsa) create_callback Ã§aÄŸÄ±r.
-    create_callback verilmezse vm_manager.create_vm() default ÅŸekilde Ã§aÄŸÄ±rÄ±lÄ±r.
+    Quota kontrol et + (sağlanırsa) create_callback çağır.
+    create_callback verilmezse vm_manager.create_vm() default şekilde çağırılır.
     """
     tm = _tenant_mgr()
     if not tm:
@@ -188,7 +188,7 @@ def request_vm_create(username: str,
         tid = tm.get_user_tenant(username)
         if not tid:
             _audit("vm_create_denied", username, {"reason": "no tenant"})
-            return {"ok": False, "error": "kullanÄ±cÄ± bir tenant'a atanmamÄ±ÅŸ"}
+            return {"ok": False, "error": "kullanıcı bir tenant'a atanmamış"}
 
         check = tm.check_quota(tid, {
             "vcpus":   int(vcpus or 0),
@@ -198,7 +198,7 @@ def request_vm_create(username: str,
         })
         if not check.get("allowed"):
             _audit("vm_create_denied", username, {"tenant": tid, "reason": check.get("reason")})
-            return {"ok": False, "error": check.get("reason", "kota aÅŸÄ±ldÄ±")}
+            return {"ok": False, "error": check.get("reason", "kota aşıldı")}
 
         # Create
         vm = None
@@ -222,7 +222,7 @@ def request_vm_create(username: str,
         except Exception as e:
             log.warning("self-service create_vm fail: %s", e)
             _audit("vm_create_error", username, {"error": str(e)})
-            return {"ok": False, "error": f"VM oluÅŸturulamadÄ±: {e}"}
+            return {"ok": False, "error": f"VM oluşturulamadı: {e}"}
 
         vm_id = None
         if isinstance(vm, dict):
@@ -247,13 +247,13 @@ def request_vm_create(username: str,
 
 
 def request_vm_action(username: str, vm_id: str, action: str) -> dict:
-    """start/stop/reboot/snapshot/console â€” yalnÄ±zca user'Ä±n kendi VM'inde."""
+    """start/stop/reboot/snapshot/console — yalnızca user'ın kendi VM'inde."""
     action = (action or "").lower().strip()
     if action not in ALLOWED_ACTIONS:
         return {"ok": False, "error": f"izin verilmeyen eylem: {action}"}
     if not _user_owns_vm(username, vm_id):
         _audit("action_denied", username, {"vm_id": vm_id, "action": action})
-        return {"ok": False, "error": "bu VM size ait deÄŸil"}
+        return {"ok": False, "error": "bu VM size ait değil"}
     vmm = _vm_mgr()
     if not vmm:
         return {"ok": False, "error": "vm_manager yok"}
@@ -266,7 +266,7 @@ def request_vm_action(username: str, vm_id: str, action: str) -> dict:
         elif action == "reboot":
             res = vmm.reboot_vm(vm_id)
         elif action == "snapshot":
-            # opsiyonel â€” modÃ¼l varsa kullan
+            # opsiyonel — modül varsa kullan
             snap = None
             for fn_name in ("create_snapshot", "snapshot_create", "snapshot"):
                 fn = getattr(vmm, fn_name, None)
@@ -290,10 +290,10 @@ def request_vm_action(username: str, vm_id: str, action: str) -> dict:
 
 
 def request_console(username: str, vm_id: str) -> dict:
-    """10 dakikalÄ±k tek kullanÄ±mlÄ±k konsol token Ã¼retir."""
+    """10 dakikalık tek kullanımlık konsol token üretir."""
     if not _user_owns_vm(username, vm_id):
         _audit("console_denied", username, {"vm_id": vm_id})
-        return {"ok": False, "error": "bu VM size ait deÄŸil"}
+        return {"ok": False, "error": "bu VM size ait değil"}
     _cleanup_tokens()
     tok = secrets.token_urlsafe(32)
     with _token_lock:
@@ -333,9 +333,9 @@ def list_recent_requests(limit: int = 100) -> list:
         return out
     except Exception:
         return []
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-﻿"""
+"""
 ankavm VM Lifecycle Hook Manager
 Executes local bash scripts at VM lifecycle events.
 
@@ -36,14 +36,14 @@ _NAME_RE = re.compile(r'^[a-zA-Z0-9_\-]+\.sh$')
 
 def _validate_event(event: str):
     if event not in EVENTS:
-        raise ValueError(f"GeÃ§ersiz olay: '{event}'. GeÃ§erli olaylar: {EVENTS}")
+        raise ValueError(f"Geçersiz olay: '{event}'. Geçerli olaylar: {EVENTS}")
 
 
 def _validate_name(name: str):
     if not _NAME_RE.match(name):
         raise ValueError(
-            f"GeÃ§ersiz script adÄ±: '{name}'. "
-            "Sadece harf, rakam, tire ve alt Ã§izgi kullanÄ±labilir ve .sh uzantÄ±sÄ± zorunludur."
+            f"Geçersiz script adı: '{name}'. "
+            "Sadece harf, rakam, tire ve alt çizgi kullanılabilir ve .sh uzantısı zorunludur."
         )
 
 
@@ -58,7 +58,7 @@ def _ensure_dirs():
         try:
             os.makedirs(d, exist_ok=True)
         except Exception as e:
-            log.warning("Hook dizini oluÅŸturulamadÄ±: %s â€” %s", d, e)
+            log.warning("Hook dizini oluşturulamadı: %s — %s", d, e)
 
 
 def _log_hook_output(event: str, script: str, vm_id: str, stdout: str, stderr: str,
@@ -79,7 +79,7 @@ def _log_hook_output(event: str, script: str, vm_id: str, stdout: str, stderr: s
         with open(HOOKS_LOG_FILE, "a", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
     except Exception as e:
-        log.warning("Hook log yazÄ±lamadÄ±: %s", e)
+        log.warning("Hook log yazılamadı: %s", e)
 
 
 def run_hooks(event: str, vm_id: str, vm_name: str, extra_env: dict = None) -> list:
@@ -103,7 +103,7 @@ def run_hooks(event: str, vm_id: str, vm_name: str, extra_env: dict = None) -> l
             if f.endswith(".sh") and os.path.isfile(os.path.join(hook_dir, f))
         )
     except Exception as e:
-        log.warning("Hook dizini okunamadÄ± %s: %s", hook_dir, e)
+        log.warning("Hook dizini okunamadı %s: %s", hook_dir, e)
         return results
 
     if not entries:
@@ -131,23 +131,23 @@ def run_hooks(event: str, vm_id: str, vm_name: str, extra_env: dict = None) -> l
             rc = proc.returncode
         except subprocess.TimeoutExpired:
             stdout = ""
-            stderr = "Hook zaman aÅŸÄ±mÄ±na uÄŸradÄ± (30s)"
+            stderr = "Hook zaman aşımına uğradı (30s)"
             rc = -1
-            log.warning("Hook zaman aÅŸÄ±mÄ±: %s (event=%s, vm=%s)", script_path, event, vm_id)
+            log.warning("Hook zaman aşımı: %s (event=%s, vm=%s)", script_path, event, vm_id)
         except Exception as e:
             stdout = ""
             stderr = str(e)
             rc = -1
-            log.warning("Hook Ã§alÄ±ÅŸtÄ±rma hatasÄ±: %s â€” %s", script_path, e)
+            log.warning("Hook çalıştırma hatası: %s — %s", script_path, e)
 
         _log_hook_output(event, script_name, vm_id, stdout, stderr, rc)
 
         if rc != 0:
             log.warning(
-                "Hook baÅŸarÄ±sÄ±z: %s (rc=%d, event=%s, vm=%s)", script_path, rc, event, vm_id
+                "Hook başarısız: %s (rc=%d, event=%s, vm=%s)", script_path, rc, event, vm_id
             )
         else:
-            log.debug("Hook tamamlandÄ±: %s (event=%s, vm=%s)", script_path, event, vm_id)
+            log.debug("Hook tamamlandı: %s (event=%s, vm=%s)", script_path, event, vm_id)
 
         results.append({
             "script": script_name,
@@ -185,7 +185,7 @@ def list_hooks() -> dict:
                     "executable": executable,
                 })
         except Exception as e:
-            log.warning("Hook listesi alÄ±namadÄ± (%s): %s", event, e)
+            log.warning("Hook listesi alınamadı (%s): %s", event, e)
         result[event] = scripts
     return result
 
@@ -204,7 +204,7 @@ def get_hook(event: str, name: str) -> str | None:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
     except Exception as e:
-        log.warning("Hook okunamadÄ± %s: %s", path, e)
+        log.warning("Hook okunamadı %s: %s", path, e)
         return None
 
 
@@ -244,9 +244,9 @@ def delete_hook(event: str, name: str) -> bool:
     os.remove(path)
     log.info("Hook silindi: %s", path)
     return True
-
-
-
-
-
-
+
+
+
+
+
+

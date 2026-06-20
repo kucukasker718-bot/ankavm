@@ -1,13 +1,13 @@
-﻿"""storage_bp â€” v2 storage pool + volume + ISO endpoints.
+"""storage_bp — v2 storage pool + volume + ISO endpoints.
 
 Mounted at /api/v2/storage.
 
 Endpoints:
-    GET /api/v2/storage/pools                       â€” pool list with usage
-    GET /api/v2/storage/pools/<name>                â€” pool detail
-    GET /api/v2/storage/pools/<name>/volumes        â€” volumes under pool
-    GET /api/v2/storage/pools/<name>/free-space     â€” fast free-byte query
-    GET /api/v2/storage/isos                        â€” ISO library
+    GET /api/v2/storage/pools                       — pool list with usage
+    GET /api/v2/storage/pools/<name>                — pool detail
+    GET /api/v2/storage/pools/<name>/volumes        — volumes under pool
+    GET /api/v2/storage/pools/<name>/free-space     — fast free-byte query
+    GET /api/v2/storage/isos                        — ISO library
 """
 from __future__ import annotations
 from flask import Blueprint
@@ -151,9 +151,9 @@ def _register_routes():
             return _ok(isos=light, count=len(light))
         except Exception as e:
             return _err(str(e), 400)
-
-
-
-
-
-
+
+
+
+
+
+

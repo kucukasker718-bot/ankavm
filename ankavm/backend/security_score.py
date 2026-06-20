@@ -1,4 +1,4 @@
-﻿"""ankavm Security Score â€” per-VM and host security assessment"""
+"""ankavm Security Score — per-VM and host security assessment"""
 import subprocess, logging
 from datetime import datetime, timedelta
 
@@ -18,30 +18,30 @@ def score_vm(vm_id, vm_info: dict):
 
     ssh_port = int(vm_info.get("ssh_port", 22))
     if ssh_port == 22:
-        score -= 10; issues.append("SSH varsayÄ±lan port 22 kullanÄ±yor")
-        recs.append("SSH portunu 2222-65535 arasÄ±na taÅŸÄ±yÄ±n")
+        score -= 10; issues.append("SSH varsayılan port 22 kullanıyor")
+        recs.append("SSH portunu 2222-65535 arasına taşıyın")
 
     if vm_info.get("root_login"):
-        score -= 20; issues.append("SSH root giriÅŸi etkin")
-        recs.append("PermitRootLogin no yapÄ±n, sudo kullanÄ±n")
+        score -= 20; issues.append("SSH root girişi etkin")
+        recs.append("PermitRootLogin no yapın, sudo kullanın")
 
     if vm_info.get("password_auth", True):
-        score -= 5; issues.append("SSH ÅŸifre kimlik doÄŸrulamasÄ± etkin")
-        recs.append("Anahtar tabanlÄ± auth kullanÄ±n, PasswordAuthentication no yapÄ±n")
+        score -= 5; issues.append("SSH şifre kimlik doğrulaması etkin")
+        recs.append("Anahtar tabanlı auth kullanın, PasswordAuthentication no yapın")
 
     cve_count = min(int(vm_info.get("cve_count", 0)), 6)
     if cve_count:
         deduct = cve_count * 5
         score -= deduct; issues.append(f"{cve_count} bilinen CVE tespit edildi")
-        recs.append("Sistemi gÃ¼ncelleyin: apt upgrade")
+        recs.append("Sistemi güncelleyin: apt upgrade")
 
     if not vm_info.get("has_recent_snapshot"):
-        score -= 5; issues.append("Son 30 gÃ¼nde snapshot yok")
-        recs.append("DÃ¼zenli snapshot alÄ±n")
+        score -= 5; issues.append("Son 30 günde snapshot yok")
+        recs.append("Düzenli snapshot alın")
 
     if not vm_info.get("has_firewall_rules"):
-        score -= 10; issues.append("GÃ¼venlik duvarÄ± kuralÄ± yok")
-        recs.append("VM iÃ§in firewall kurallarÄ± ekleyin")
+        score -= 10; issues.append("Güvenlik duvarı kuralı yok")
+        recs.append("VM için firewall kuralları ekleyin")
     else:
         score += 10
 
@@ -69,13 +69,13 @@ def get_host_score():
     try:
         r = subprocess.run(["which","fail2ban-client"],capture_output=True)
         if r.returncode != 0:
-            score -= 15; issues.append("fail2ban kurulu deÄŸil")
+            score -= 15; issues.append("fail2ban kurulu değil")
             recs.append("apt install fail2ban")
     except Exception: pass
     try:
         r = subprocess.run(["ufw","status"],capture_output=True,text=True,timeout=5)
         if "inactive" in r.stdout.lower():
-            score -= 20; issues.append("UFW gÃ¼venlik duvarÄ± devre dÄ±ÅŸÄ±")
+            score -= 20; issues.append("UFW güvenlik duvarı devre dışı")
             recs.append("ufw enable")
     except Exception: pass
     try:
@@ -83,17 +83,17 @@ def get_host_score():
                            timeout=30,check=False)
         upgradable = len([l for l in r.stdout.splitlines() if "/" in l])
         if upgradable > 20:
-            score -= 15; issues.append(f"{upgradable} gÃ¼ncelleme bekliyor")
+            score -= 15; issues.append(f"{upgradable} güncelleme bekliyor")
             recs.append("apt upgrade")
         elif upgradable > 0:
-            score -= 5; issues.append(f"{upgradable} gÃ¼ncelleme bekliyor")
+            score -= 5; issues.append(f"{upgradable} güncelleme bekliyor")
     except Exception: pass
     score = max(0, min(100, score))
     return {"score": score, "grade": _grade(score), "issues": issues,
             "recommendations": recs, "checked_at": datetime.now().isoformat()}
-
-
-
-
-
-
+
+
+
+
+
+

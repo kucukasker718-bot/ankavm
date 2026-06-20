@@ -1,6 +1,6 @@
-﻿"""
-ankavm Electron/Desktop Client â€” API tokens + manifest
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Electron/Desktop Client — API tokens + manifest
+────────────────────────────────────────────────────────
 Generates long-lived API tokens for registered desktop clients
 (Electron, CLI, etc.), stores client registry, and provides
 connection config + download links (placeholder release URLs).
@@ -26,7 +26,7 @@ _lock         = threading.Lock()
 # Token lifetime: 365 days (long-lived for desktop clients)
 _TOKEN_TTL_SECS = 365 * 24 * 3600
 
-# Download base URL â€” points to GitHub releases / gh-pages
+# Download base URL — points to GitHub releases / gh-pages
 _DOWNLOAD_BASE = "https://shinnasukha.github.io/ankavm/releases"
 _RELEASES = {
     "latest": "v0.1.0",
@@ -63,7 +63,7 @@ _RELEASES = {
 }
 
 
-# â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── helpers ───────────────────────────────────────────────────────────────────
 
 def _load_clients() -> dict:
     try:
@@ -92,7 +92,7 @@ def _generate_token(client_id: str) -> str:
     return "oxdt_" + hashlib.sha256(raw.encode()).hexdigest()
 
 
-# â”€â”€ public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── public API ────────────────────────────────────────────────────────────────
 
 def generate_client_config(server_url: str) -> dict:
     """
@@ -143,7 +143,7 @@ def register_client(name: str, platform: str,
         clients[client_id] = client
         _save_clients(clients)
     log.info("desktop client registered: %s (%s, %s)", client_id, name, platform)
-    # Return full token once â€” caller must store it
+    # Return full token once — caller must store it
     return client
 
 
@@ -193,9 +193,9 @@ def validate_token(token: str) -> Optional[dict]:
                 return None
             return c
     return None
-
-
-
-
-
-
+
+
+
+
+
+

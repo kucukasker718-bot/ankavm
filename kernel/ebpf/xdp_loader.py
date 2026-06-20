@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 ankavm XDP Network Filter Loader
 Attaches xdp_filter.o to each VM tap interface (vnetX).
@@ -29,7 +29,7 @@ def _run(cmd, check=True):
 
 def attach(iface: str) -> bool:
     if not os.path.exists(XDP_OBJ):
-        print(f"[ERROR] {XDP_OBJ} not found â€” compile with: clang -O2 -g -target bpf -c xdp_filter.c -o xdp_filter.o")
+        print(f"[ERROR] {XDP_OBJ} not found — compile with: clang -O2 -g -target bpf -c xdp_filter.c -o xdp_filter.o")
         return False
     try:
         _run(["ip", "link", "set", "dev", iface, "xdpgeneric", "obj", XDP_OBJ, "sec", "xdp"])
@@ -122,9 +122,9 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
+
+
+
+
+
+

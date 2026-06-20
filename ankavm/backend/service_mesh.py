@@ -1,13 +1,13 @@
-﻿"""
-service_mesh.py â€” Service Mesh Integration (Istio/Linkerd discovery + sidecar config)
+"""
+service_mesh.py — Service Mesh Integration (Istio/Linkerd discovery + sidecar config)
 ankavm v2.5.9 Network Advanced 2
 
 Features:
-  - detect_mesh() â€” istioctl/linkerd binary + kubeconfig detection
-  - register_service(name, vm_id, port, protocol) â€” mesh service registry
+  - detect_mesh() — istioctl/linkerd binary + kubeconfig detection
+  - register_service(name, vm_id, port, protocol) — mesh service registry
   - list_services(), get_service(name), delete_service(name)
-  - generate_sidecar_config(service_name) â€” Envoy/Istio sidecar YAML
-  - get_mtls_status() â€” mesh mTLS status
+  - generate_sidecar_config(service_name) — Envoy/Istio sidecar YAML
+  - get_mtls_status() — mesh mTLS status
 
 Config persisted to /var/lib/ankavm/service_mesh.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -34,7 +34,7 @@ _KUBECONFIG_PATHS = [
 ]
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -55,7 +55,7 @@ def _save(data: dict) -> None:
         log.warning("mesh save fail: %s", e)
 
 
-# â”€â”€ Binary detection helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Binary detection helpers ──────────────────────────────────────────────────
 
 def _which(binary: str) -> Optional[str]:
     try:
@@ -108,7 +108,7 @@ def _run_linkerd(*args, timeout: int = 10) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def detect_mesh() -> dict:
     """
@@ -191,7 +191,7 @@ def delete_service(name: str) -> dict:
 def generate_sidecar_config(service_name: str) -> dict:
     """
     Generate Envoy/Istio sidecar YAML for a registered service.
-    Returns YAML string â€” deploy manually via kubectl/istioctl.
+    Returns YAML string — deploy manually via kubectl/istioctl.
     """
     svc = get_service(service_name)
     if not svc:
@@ -210,7 +210,7 @@ def generate_sidecar_config(service_name: str) -> dict:
     }.get(protocol, "TCP")
 
     yaml_str = f"""\
-# ankavm v2.5.9 â€” Generated Sidecar Config for '{service_name}'
+# ankavm v2.5.9 — Generated Sidecar Config for '{service_name}'
 # Deploy: kubectl apply -f sidecar-{service_name}.yaml
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -289,7 +289,7 @@ def get_mtls_status() -> dict:
             "raw":  r.get("stdout", ""),
         }
 
-    # No live mesh â€” return registry summary
+    # No live mesh — return registry summary
     svcs = list_services()
     return {
         "ok":            True,
@@ -298,9 +298,9 @@ def get_mtls_status() -> dict:
         "services_count": len(svcs),
         "note":          "No active service mesh detected; mTLS status unavailable.",
     }
-
-
-
-
-
-
+
+
+
+
+
+

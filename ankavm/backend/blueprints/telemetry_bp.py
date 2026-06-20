@@ -1,16 +1,16 @@
-﻿"""telemetry_bp â€” opt-in anonymous usage telemetry endpoints.
+"""telemetry_bp — opt-in anonymous usage telemetry endpoints.
 
 Mounted at /api/v2/telemetry. Lets the operator inspect, enable, disable,
 and trigger an immediate ping. Default state is DISABLED and no data
 leaves the host until enable() is called.
 
 Endpoints:
-    GET  /api/v2/telemetry/status      â€” current state + preview payload
-    GET  /api/v2/telemetry/preview     â€” exact JSON we would send right now
-    POST /api/v2/telemetry/enable      â€” turn it on (mints installation_id)
-    POST /api/v2/telemetry/disable     â€” turn it off (wipes installation_id)
-    POST /api/v2/telemetry/send-now    â€” fire one ping (debug/test)
-    GET  /api/v2/telemetry/history     â€” local audit copy of past sends
+    GET  /api/v2/telemetry/status      — current state + preview payload
+    GET  /api/v2/telemetry/preview     — exact JSON we would send right now
+    POST /api/v2/telemetry/enable      — turn it on (mints installation_id)
+    POST /api/v2/telemetry/disable     — turn it off (wipes installation_id)
+    POST /api/v2/telemetry/send-now    — fire one ping (debug/test)
+    GET  /api/v2/telemetry/history     — local audit copy of past sends
 """
 from __future__ import annotations
 import json
@@ -130,9 +130,9 @@ def _register_routes():
             return _ok(history=entries, count=len(entries))
         except Exception as e:
             return _err(str(e), 400)
-
-
-
-
-
-
+
+
+
+
+
+

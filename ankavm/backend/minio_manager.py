@@ -1,8 +1,8 @@
-﻿"""
+"""
 ankavm MinIO Manager
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-MinIO / S3-uyumlu depolama entegrasyonu (boto3 tabanlÄ±).
-boto3 kurulu deÄŸilse: tÃ¼m iÅŸlemler hata dÃ¶ndÃ¼rÃ¼r.
+─────────────────────
+MinIO / S3-uyumlu depolama entegrasyonu (boto3 tabanlı).
+boto3 kurulu değilse: tüm işlemler hata döndürür.
 """
 
 import json
@@ -17,18 +17,18 @@ try:
     import boto3
     from botocore.exceptions import ClientError
     BOTO3_AVAILABLE = True
-    log.debug("boto3 yÃ¼klendi.")
+    log.debug("boto3 yüklendi.")
 except ImportError:
     boto3 = None
     ClientError = Exception
     BOTO3_AVAILABLE = False
-    log.warning("boto3 bulunamadÄ±. MinIO iÅŸlemleri devre dÄ±ÅŸÄ±.")
+    log.warning("boto3 bulunamadı. MinIO işlemleri devre dışı.")
 
 CONFIG_FILE = "/etc/ankavm/minio_config.json"
 _lock = threading.Lock()
 
 
-# â”€â”€ YardÄ±mcÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Yardımcı ──────────────────────────────────────────────────────────────────
 
 def _ensure_dir(path: str):
     try:
@@ -38,11 +38,11 @@ def _ensure_dir(path: str):
 
 
 def _err_no_boto() -> dict:
-    return {"success": False, "error": "boto3 kurulu deÄŸil. 'pip install boto3' ile yÃ¼kleyin."}
+    return {"success": False, "error": "boto3 kurulu değil. 'pip install boto3' ile yükleyin."}
 
 
 def _bytes_to_human(size_bytes: int) -> str:
-    """Byte deÄŸerini okunabilir formata Ã§evir."""
+    """Byte değerini okunabilir formata çevir."""
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if size_bytes < 1024:
             return f"{size_bytes:.2f} {unit}"
@@ -50,10 +50,10 @@ def _bytes_to_human(size_bytes: int) -> str:
     return f"{size_bytes:.2f} PB"
 
 
-# â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Config ────────────────────────────────────────────────────────────────────
 
 def get_config() -> dict:
-    """MinIO baÄŸlantÄ± yapÄ±landÄ±rmasÄ±nÄ± dÃ¶ndÃ¼r (secret key gizlenir)."""
+    """MinIO bağlantı yapılandırmasını döndür (secret key gizlenir)."""
     try:
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE) as f:
@@ -69,7 +69,7 @@ def get_config() -> dict:
             }
             return result
     except Exception as e:
-        log.warning("Config yÃ¼kleme hatasÄ±: %s", e)
+        log.warning("Config yükleme hatası: %s", e)
     return {
         "endpoint": "",
         "access_key": "",
@@ -88,7 +88,7 @@ def _load_full_config() -> dict:
             with open(CONFIG_FILE) as f:
                 return json.load(f)
     except Exception as e:
-        log.warning("Config yÃ¼kleme hatasÄ±: %s", e)
+        log.warning("Config yükleme hatası: %s", e)
     return {}
 
 
@@ -99,7 +99,7 @@ def save_config(
     bucket: str,
     region: str = "us-east-1",
 ) -> dict:
-    """MinIO baÄŸlantÄ± yapÄ±landÄ±rmasÄ±nÄ± kaydet."""
+    """MinIO bağlantı yapılandırmasını kaydet."""
     try:
         cfg = {
             "endpoint":   endpoint,
@@ -121,19 +121,19 @@ def save_config(
         log.info("MinIO config kaydedildi. Endpoint: %s", endpoint)
         return {"success": True, "endpoint": endpoint, "bucket": bucket}
     except Exception as e:
-        log.error("save_config hatasÄ±: %s", e)
+        log.error("save_config hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
-# â”€â”€ BaÄŸlantÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Bağlantı ──────────────────────────────────────────────────────────────────
 
 def _get_client():
-    """boto3 S3 client oluÅŸtur."""
+    """boto3 S3 client oluştur."""
     if not BOTO3_AVAILABLE:
-        raise RuntimeError("boto3 kurulu deÄŸil.")
+        raise RuntimeError("boto3 kurulu değil.")
     cfg = _load_full_config()
     if not cfg:
-        raise RuntimeError("MinIO yapÄ±landÄ±rmasÄ± bulunamadÄ±.")
+        raise RuntimeError("MinIO yapılandırması bulunamadı.")
     return boto3.client(
         "s3",
         endpoint_url=cfg.get("endpoint"),
@@ -144,22 +144,22 @@ def _get_client():
 
 
 def test_connection() -> dict:
-    """BaÄŸlantÄ±yÄ± test et."""
+    """Bağlantıyı test et."""
     try:
         if not BOTO3_AVAILABLE:
             return _err_no_boto()
         client = _get_client()
         client.list_buckets()
-        return {"success": True, "message": "BaÄŸlantÄ± baÅŸarÄ±lÄ±."}
+        return {"success": True, "message": "Bağlantı başarılı."}
     except Exception as e:
-        log.warning("BaÄŸlantÄ± testi baÅŸarÄ±sÄ±z: %s", e)
+        log.warning("Bağlantı testi başarısız: %s", e)
         return {"success": False, "message": str(e)}
 
 
-# â”€â”€ Bucket Ä°ÅŸlemleri â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Bucket İşlemleri ─────────────────────────────────────────────────────────
 
 def list_buckets() -> list:
-    """TÃ¼m bucket'larÄ± listele."""
+    """Tüm bucket'ları listele."""
     try:
         if not BOTO3_AVAILABLE:
             return []
@@ -170,12 +170,12 @@ def list_buckets() -> list:
             for b in response.get("Buckets", [])
         ]
     except Exception as e:
-        log.error("list_buckets hatasÄ±: %s", e)
+        log.error("list_buckets hatası: %s", e)
         return []
 
 
 def create_bucket(name: str) -> dict:
-    """Yeni bucket oluÅŸtur."""
+    """Yeni bucket oluştur."""
     try:
         if not BOTO3_AVAILABLE:
             return _err_no_boto()
@@ -189,24 +189,24 @@ def create_bucket(name: str) -> dict:
                 Bucket=name,
                 CreateBucketConfiguration={"LocationConstraint": region}
             )
-        log.info("Bucket oluÅŸturuldu: %s", name)
+        log.info("Bucket oluşturuldu: %s", name)
         return {"success": True, "bucket": name}
     except ClientError as e:
         log.warning("create_bucket ClientError: %s", e)
         return {"success": False, "error": str(e)}
     except Exception as e:
-        log.error("create_bucket hatasÄ±: %s", e)
+        log.error("create_bucket hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
-# â”€â”€ Nesne Ä°ÅŸlemleri â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Nesne İşlemleri ───────────────────────────────────────────────────────────
 
 def _default_bucket() -> str:
     return _load_full_config().get("bucket", "")
 
 
 def list_objects(bucket: str = None, prefix: str = "") -> list:
-    """Bucket iÃ§indeki nesneleri listele."""
+    """Bucket içindeki nesneleri listele."""
     try:
         if not BOTO3_AVAILABLE:
             return []
@@ -224,7 +224,7 @@ def list_objects(bucket: str = None, prefix: str = "") -> list:
                 })
         return objects
     except Exception as e:
-        log.error("list_objects hatasÄ±: %s", e)
+        log.error("list_objects hatası: %s", e)
         return []
 
 
@@ -233,12 +233,12 @@ def upload_file(
     remote_key: str,
     bucket: str = None,
 ) -> dict:
-    """DosyayÄ± MinIO'ya yÃ¼kle."""
+    """Dosyayı MinIO'ya yükle."""
     try:
         if not BOTO3_AVAILABLE:
             return _err_no_boto()
         if not os.path.exists(local_path):
-            return {"success": False, "error": f"Dosya bulunamadÄ±: {local_path}"}
+            return {"success": False, "error": f"Dosya bulunamadı: {local_path}"}
 
         client = _get_client()
         bucket = bucket or _default_bucket()
@@ -249,10 +249,10 @@ def upload_file(
         def _progress(chunk):
             uploaded_bytes[0] += chunk
             pct = (uploaded_bytes[0] / max(file_size, 1)) * 100
-            log.debug("YÃ¼kleniyor: %s %d%%", remote_key, int(pct))
+            log.debug("Yükleniyor: %s %d%%", remote_key, int(pct))
 
         client.upload_file(local_path, bucket, remote_key, Callback=_progress)
-        log.info("YÃ¼klendi: %s â†’ s3://%s/%s", local_path, bucket, remote_key)
+        log.info("Yüklendi: %s → s3://%s/%s", local_path, bucket, remote_key)
         return {
             "success": True,
             "local_path": local_path,
@@ -264,7 +264,7 @@ def upload_file(
         log.warning("upload_file ClientError: %s", e)
         return {"success": False, "error": str(e)}
     except Exception as e:
-        log.error("upload_file hatasÄ±: %s", e)
+        log.error("upload_file hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
@@ -273,7 +273,7 @@ def download_file(
     local_path: str,
     bucket: str = None,
 ) -> dict:
-    """DosyayÄ± MinIO'dan indir."""
+    """Dosyayı MinIO'dan indir."""
     try:
         if not BOTO3_AVAILABLE:
             return _err_no_boto()
@@ -282,7 +282,7 @@ def download_file(
         _ensure_dir(local_path)
         client.download_file(bucket, remote_key, local_path)
         size = os.path.getsize(local_path) if os.path.exists(local_path) else 0
-        log.info("Ä°ndirildi: s3://%s/%s â†’ %s", bucket, remote_key, local_path)
+        log.info("İndirildi: s3://%s/%s → %s", bucket, remote_key, local_path)
         return {
             "success": True,
             "remote_key": remote_key,
@@ -293,7 +293,7 @@ def download_file(
         log.warning("download_file ClientError: %s", e)
         return {"success": False, "error": str(e)}
     except Exception as e:
-        log.error("download_file hatasÄ±: %s", e)
+        log.error("download_file hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
@@ -310,7 +310,7 @@ def delete_object(remote_key: str, bucket: str = None) -> dict:
     except ClientError as e:
         return {"success": False, "error": str(e)}
     except Exception as e:
-        log.error("delete_object hatasÄ±: %s", e)
+        log.error("delete_object hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
@@ -319,7 +319,7 @@ def get_object_url(
     expires: int = 3600,
     bucket: str = None,
 ) -> dict:
-    """GeÃ§ici (presigned) URL oluÅŸtur."""
+    """Geçici (presigned) URL oluştur."""
     try:
         if not BOTO3_AVAILABLE:
             return _err_no_boto()
@@ -339,7 +339,7 @@ def get_object_url(
     except ClientError as e:
         return {"success": False, "error": str(e)}
     except Exception as e:
-        log.error("get_object_url hatasÄ±: %s", e)
+        log.error("get_object_url hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
@@ -358,11 +358,11 @@ def get_storage_stats(bucket: str = None) -> dict:
             "bucket": bucket or _default_bucket(),
         }
     except Exception as e:
-        log.error("get_storage_stats hatasÄ±: %s", e)
+        log.error("get_storage_stats hatası: %s", e)
         return {"total_objects": 0, "total_size_bytes": 0, "total_size_human": "0 B", "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

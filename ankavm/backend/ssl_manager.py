@@ -1,5 +1,5 @@
-﻿"""
-ssl_manager.py â€” SSL certificate management (Let's Encrypt + custom certs)
+"""
+ssl_manager.py — SSL certificate management (Let's Encrypt + custom certs)
 ankavm Hypervisor backend module
 """
 
@@ -163,11 +163,11 @@ def request_letsencrypt(domain, email):
     Returns:
         dict: success, cert_path, message
     """
-    # Certbot binary â€” try common paths
+    # Certbot binary — try common paths
     _certbot = shutil.which("certbot") or "/usr/bin/certbot" or "/usr/local/bin/certbot"
     if not os.path.isfile(_certbot):
         return {"success": False, "cert_path": None,
-                "message": "certbot bulunamadÄ± â€” 'apt install certbot' ile kurun"}
+                "message": "certbot bulunamadı — 'apt install certbot' ile kurun"}
 
     try:
         result = subprocess.run(
@@ -196,7 +196,7 @@ def request_letsencrypt(domain, email):
             _found = _copy_letsencrypt_certs()
             if not _found:
                 return {"success": False, "cert_path": None,
-                        "message": f"Sertifika kopyalanamadÄ±: {le_dir} bulunamadÄ±"}
+                        "message": f"Sertifika kopyalanamadı: {le_dir} bulunamadı"}
         else:
             with _lock:
                 shutil.copy2(src_cert, CERT_PATH)
@@ -214,11 +214,11 @@ def request_letsencrypt(domain, email):
             log.warning("ankavm restart failed after certbot: %s", _ex)
 
         return {"success": True, "cert_path": CERT_PATH,
-                "message": "Sertifika alÄ±ndÄ± ve yÃ¼klendi. Sayfa birkaÃ§ saniye iÃ§inde yenileniyorâ€¦"}
+                "message": "Sertifika alındı ve yüklendi. Sayfa birkaç saniye içinde yenileniyor…"}
 
     except FileNotFoundError:
         return {"success": False, "cert_path": None,
-                "message": "certbot bulunamadÄ± â€” 'apt install certbot' ile kurun"}
+                "message": "certbot bulunamadı — 'apt install certbot' ile kurun"}
     except Exception as exc:
         log.exception("request_letsencrypt error: %s", exc)
         return {"success": False, "cert_path": None, "message": str(exc)}
@@ -227,7 +227,7 @@ def request_letsencrypt(domain, email):
 def renew_cert():
     """
     Renew the certificate via ``certbot renew``.
-    BaÅŸarÄ±lÄ±ysa yenilenen certÄ± /etc/ankavm/ssl/ altÄ±na kopyalar ve
+    Başarılıysa yenilenen certı /etc/ankavm/ssl/ altına kopyalar ve
     ankavm servisini restart eder.
 
     Returns:
@@ -242,9 +242,9 @@ def renew_cert():
         output  = (result.stdout + result.stderr).strip()
         if success:
             log.info("certbot renew succeeded")
-            # Yenilenen certÄ± kopyala
+            # Yenilenen certı kopyala
             _copy_letsencrypt_certs()
-            # ankavm'i yeniden baÅŸlat (yeni cert aktif olsun)
+            # ankavm'i yeniden başlat (yeni cert aktif olsun)
             try:
                 subprocess.run(
                     ["systemctl", "restart", "ankavm"],
@@ -252,7 +252,7 @@ def renew_cert():
                 )
                 log.info("ankavm servisi yenilenen cert ile restart edildi")
             except Exception as ex:
-                log.warning("ankavm restart baÅŸarÄ±sÄ±z: %s", ex)
+                log.warning("ankavm restart başarısız: %s", ex)
         else:
             log.warning("certbot renew failed: %s", output)
         return {"success": success, "output": output}
@@ -265,8 +265,8 @@ def renew_cert():
 
 def _copy_letsencrypt_certs():
     """
-    /etc/letsencrypt/live/ altÄ±ndaki ilk geÃ§erli domain certÄ±nÄ±
-    /etc/ankavm/ssl/ altÄ±na kopyalar.
+    /etc/letsencrypt/live/ altındaki ilk geçerli domain certını
+    /etc/ankavm/ssl/ altına kopyalar.
     """
     le_base = "/etc/letsencrypt/live"
     if not os.path.isdir(le_base):
@@ -280,15 +280,15 @@ def _copy_letsencrypt_certs():
                 shutil.copy2(src_cert, CERT_PATH)
                 shutil.copy2(src_key,  KEY_PATH)
             os.chmod(KEY_PATH, 0o600)
-            log.info("Cert kopyalandÄ±: %s â†’ %s", domain, SSL_DIR)
+            log.info("Cert kopyalandı: %s → %s", domain, SSL_DIR)
             return True
     return False
 
 
 def setup_systemd_timer():
     """
-    certbot yenilemesi iÃ§in systemd timer kur (gÃ¼nde iki kez Ã§alÄ±ÅŸÄ±r).
-    BaÅŸarÄ±yla yenilenince ankavm/ssl'e kopyalar ve servisi restart eder.
+    certbot yenilemesi için systemd timer kur (günde iki kez çalışır).
+    Başarıyla yenilenince ankavm/ssl'e kopyalar ve servisi restart eder.
 
     Returns:
         dict: success, message
@@ -332,7 +332,7 @@ WantedBy=timers.target
                        check=True, capture_output=True, timeout=15)
         log.info("ankavm-certbot.timer kuruldu")
         return {"success": True,
-                "message": "Systemd timer kuruldu â€” certbot 00:00 ve 12:00'da Ã§alÄ±ÅŸÄ±r, sertifika otomatik kopyalanÄ±r ve servis restart edilir"}
+                "message": "Systemd timer kuruldu — certbot 00:00 ve 12:00'da çalışır, sertifika otomatik kopyalanır ve servis restart edilir"}
     except Exception as exc:
         log.exception("setup_systemd_timer error: %s", exc)
         return {"success": False, "message": str(exc)}
@@ -353,7 +353,7 @@ def get_timer_status():
                  "--property=NextElapseUSecRealtime"],
                 capture_output=True, text=True, timeout=10
             )
-            # Basit parse â€” deÄŸer varsa dÃ¶ndÃ¼r
+            # Basit parse — değer varsa döndür
             val = r2.stdout.strip().split("=", 1)[-1] if "=" in r2.stdout else ""
             next_run = val if val and val != "0" else None
         return {"active": active, "next_run": next_run}
@@ -461,7 +461,7 @@ def check_and_alert():
     if days < 0:
         _alert(f"SSL certificate is EXPIRED ({abs(days)} days ago)", "critical")
     elif days < 7:
-        _alert(f"SSL certificate expires in {days} days â€” attempting auto-renew",
+        _alert(f"SSL certificate expires in {days} days — attempting auto-renew",
                "critical")
         result = renew_cert()
         if result["success"]:
@@ -501,8 +501,8 @@ def generate_self_signed(common_name: str = "ankavm-hypervisor",
                          cert_path: str = None,
                          key_path: str = None) -> dict:
     """
-    openssl ile self-signed sertifika Ã¼ret.
-    DÃ¶ner: {success, cert_path, key_path, message}
+    openssl ile self-signed sertifika üret.
+    Döner: {success, cert_path, key_path, message}
     """
     cp = cert_path or CERT_PATH
     kp = key_path or KEY_PATH
@@ -522,12 +522,12 @@ def generate_self_signed(common_name: str = "ankavm-hypervisor",
         )
         if r.returncode == 0:
             os.chmod(kp, 0o600)
-            log.info("generate_self_signed: %s oluÅŸturuldu (%d gÃ¼n).", cp, days)
+            log.info("generate_self_signed: %s oluşturuldu (%d gün).", cp, days)
             return {"success": True, "cert_path": cp, "key_path": kp,
-                    "message": f"Self-signed sertifika oluÅŸturuldu ({days} gÃ¼n)."}
+                    "message": f"Self-signed sertifika oluşturuldu ({days} gün)."}
         else:
             msg = r.stderr.strip() or r.stdout.strip()
-            log.error("generate_self_signed hatasÄ±: %s", msg)
+            log.error("generate_self_signed hatası: %s", msg)
             return {"success": False, "cert_path": cp, "key_path": kp, "message": msg}
     except Exception as e:
         log.error("generate_self_signed exception: %s", e)
@@ -536,8 +536,8 @@ def generate_self_signed(common_name: str = "ankavm-hypervisor",
 
 def set_https_enforce(enabled: bool) -> dict:
     """
-    HTTPS zorunluluk bayraÄŸÄ±nÄ± yaz/sil.
-    nginx_manager.py bu bayraÄŸÄ± okuyarak redirect uygular.
+    HTTPS zorunluluk bayrağını yaz/sil.
+    nginx_manager.py bu bayrağı okuyarak redirect uygular.
     """
     try:
         if enabled:
@@ -548,7 +548,7 @@ def set_https_enforce(enabled: bool) -> dict:
         else:
             if os.path.exists(HTTPS_ENFORCE_FLAG):
                 os.remove(HTTPS_ENFORCE_FLAG)
-            log.info("HTTPS enforce devre dÄ±ÅŸÄ±.")
+            log.info("HTTPS enforce devre dışı.")
         return {"success": True, "https_enforced": enabled}
     except Exception as e:
         return {"success": False, "message": str(e)}
@@ -563,9 +563,9 @@ def get_full_status() -> dict:
     status = get_status()
     status["https_enforced"] = is_https_enforced()
     return status
-
-
-
-
-
-
+
+
+
+
+
+

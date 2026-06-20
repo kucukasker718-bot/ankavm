@@ -1,10 +1,10 @@
-﻿"""
-ankavm Cloud Export â€” Workload Mobility (AWS / Azure / GCP)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Cloud Export — Workload Mobility (AWS / Azure / GCP)
+────────────────────────────────────────────────────────────
 Prepares VM disk images for cloud import:
-  - AWS  â†’ VMDK + import manifest (AMI prep)
-  - Azure â†’ VHD + manifest
-  - GCP  â†’ raw disk, tar.gz + manifest
+  - AWS  → VMDK + import manifest (AMI prep)
+  - Azure → VHD + manifest
+  - GCP  → raw disk, tar.gz + manifest
 
 Actual upload to cloud APIs is a stub (requires cloud SDK credentials
 outside ankavm's scope). This module handles qemu-img conversion and
@@ -32,7 +32,7 @@ _SUPPORTED_TARGETS = {
     "aws": {
         "name":        "Amazon Web Services",
         "format":      "vmdk",
-        "description": "VM Disk â†’ VMDK â†’ S3 â†’ AMI import",
+        "description": "VM Disk → VMDK → S3 → AMI import",
         "required_credentials": [
             "AWS_ACCESS_KEY_ID",
             "AWS_SECRET_ACCESS_KEY",
@@ -44,7 +44,7 @@ _SUPPORTED_TARGETS = {
     "azure": {
         "name":        "Microsoft Azure",
         "format":      "vhd",
-        "description": "VM Disk â†’ VHD â†’ Azure Blob â†’ Managed Image",
+        "description": "VM Disk → VHD → Azure Blob → Managed Image",
         "required_credentials": [
             "AZURE_SUBSCRIPTION_ID",
             "AZURE_RESOURCE_GROUP",
@@ -56,7 +56,7 @@ _SUPPORTED_TARGETS = {
     "gcp": {
         "name":        "Google Cloud Platform",
         "format":      "raw.tar.gz",
-        "description": "VM Disk â†’ raw â†’ disk.raw.tar.gz â†’ GCS â†’ Custom Image",
+        "description": "VM Disk → raw → disk.raw.tar.gz → GCS → Custom Image",
         "required_credentials": [
             "GCP_PROJECT_ID",
             "GCS_BUCKET",
@@ -67,7 +67,7 @@ _SUPPORTED_TARGETS = {
 }
 
 
-# â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── helpers ───────────────────────────────────────────────────────────────────
 
 def _load_exports() -> list:
     try:
@@ -176,7 +176,7 @@ def _qemu_convert(src: str, dst: str, fmt: str, export_id: str) -> bool:
         return False
 
 
-# â”€â”€ public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── public API ────────────────────────────────────────────────────────────────
 
 def export_to_aws(vm_id: str, region: str = "us-east-1") -> dict:
     """
@@ -225,7 +225,7 @@ def export_to_aws(vm_id: str, region: str = "us-east-1") -> dict:
     )
     _add_step(export_id, "write manifest", True, manifest_path)
     _add_step(export_id, "stub: s3 upload", False,
-              "Upload stub â€” provide AWS credentials and run next_steps")
+              "Upload stub — provide AWS credentials and run next_steps")
 
     _update_export(export_id, status="ready_for_upload",
                    output_path=out_vmdk, manifest=manifest)
@@ -276,7 +276,7 @@ def export_to_azure(vm_id: str) -> dict:
     )
     _add_step(export_id, "write manifest", True, manifest_path)
     _add_step(export_id, "stub: blob upload", False,
-              "Upload stub â€” provide Azure credentials and run next_steps")
+              "Upload stub — provide Azure credentials and run next_steps")
 
     _update_export(export_id, status="ready_for_upload",
                    output_path=out_vhd, manifest=manifest)
@@ -344,7 +344,7 @@ def export_to_gcp(vm_id: str) -> dict:
     )
     _add_step(export_id, "write manifest", True, manifest_path)
     _add_step(export_id, "stub: gcs upload", False,
-              "Upload stub â€” provide GCP credentials and run next_steps")
+              "Upload stub — provide GCP credentials and run next_steps")
 
     _update_export(export_id, status="ready_for_upload",
                    output_path=out_tar, manifest=manifest)
@@ -373,9 +373,9 @@ def get_export_status(export_id: str) -> Optional[dict]:
 
 def get_supported_targets() -> dict:
     return _SUPPORTED_TARGETS
-
-
-
-
-
-
+
+
+
+
+
+

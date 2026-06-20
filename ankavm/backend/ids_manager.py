@@ -1,8 +1,8 @@
-﻿"""
+"""
 ankavm IDS Manager
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Suricata tabanlÄ± IDS/IPS yÃ¶netimi.
-Suricata kurulu deÄŸilse: get_status {"available": False} dÃ¶ndÃ¼rÃ¼r.
+──────────────────
+Suricata tabanlı IDS/IPS yönetimi.
+Suricata kurulu değilse: get_status {"available": False} döndürür.
 """
 
 import json
@@ -25,7 +25,7 @@ CUSTOM_RULES  = os.path.join(RULES_DIR, "custom.rules")
 _lock = threading.Lock()
 
 
-# â”€â”€ YardÄ±mcÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Yardımcı ──────────────────────────────────────────────────────────────────
 
 def _ensure_dir(path: str):
     try:
@@ -35,7 +35,7 @@ def _ensure_dir(path: str):
 
 
 def _run(*cmd, timeout: int = 30) -> tuple:
-    """subprocess.run. (stdout, stderr, returncode) dÃ¶ndÃ¼r."""
+    """subprocess.run. (stdout, stderr, returncode) döndür."""
     try:
         r = subprocess.run(
             list(cmd),
@@ -43,7 +43,7 @@ def _run(*cmd, timeout: int = 30) -> tuple:
         )
         return r.stdout.strip(), r.stderr.strip(), r.returncode
     except FileNotFoundError:
-        return "", f"Komut bulunamadÄ±: {cmd[0]}", 127
+        return "", f"Komut bulunamadı: {cmd[0]}", 127
     except Exception as e:
         return "", str(e), -1
 
@@ -78,7 +78,7 @@ def _get_version() -> str:
 
 
 def _count_rules() -> int:
-    """Kural dosyalarÄ±ndaki toplam kural sayÄ±sÄ±nÄ± say."""
+    """Kural dosyalarındaki toplam kural sayısını say."""
     try:
         total = 0
         if os.path.isdir(RULES_DIR):
@@ -107,10 +107,10 @@ def _is_active() -> bool:
         return False
 
 
-# â”€â”€ Durum ve Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Durum ve Config ───────────────────────────────────────────────────────────
 
 def get_status() -> dict:
-    """IDS genel durumunu dÃ¶ndÃ¼r."""
+    """IDS genel durumunu döndür."""
     try:
         avail = is_available()
         if not avail:
@@ -143,12 +143,12 @@ def get_status() -> dict:
             "interface": cfg.get("interface", "any"),
         }
     except Exception as e:
-        log.error("get_status hatasÄ±: %s", e)
+        log.error("get_status hatası: %s", e)
         return {"available": False, "error": str(e)}
 
 
 def get_config() -> dict:
-    """IDS yapÄ±landÄ±rmasÄ±nÄ± oku."""
+    """IDS yapılandırmasını oku."""
     try:
         if os.path.exists(IDS_CONFIG):
             with open(IDS_CONFIG) as f:
@@ -158,7 +158,7 @@ def get_config() -> dict:
             cfg.setdefault("enabled", True)
             return cfg
     except Exception as e:
-        log.warning("IDS config yÃ¼kleme hatasÄ±: %s", e)
+        log.warning("IDS config yükleme hatası: %s", e)
     return {"interface": "any", "home_net": "192.168.0.0/16", "enabled": True}
 
 
@@ -167,7 +167,7 @@ def update_config(
     home_net: str = None,
     enabled: bool = None,
 ) -> dict:
-    """IDS yapÄ±landÄ±rmasÄ±nÄ± gÃ¼ncelle."""
+    """IDS yapılandırmasını güncelle."""
     try:
         cfg = get_config()
         if interface is not None:
@@ -183,66 +183,66 @@ def update_config(
                 json.dump(cfg, f, ensure_ascii=False, indent=2)
         return cfg
     except Exception as e:
-        log.error("update_config hatasÄ±: %s", e)
+        log.error("update_config hatası: %s", e)
         return {"error": str(e)}
 
 
-# â”€â”€ Servis KontrolÃ¼ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Servis Kontrolü ───────────────────────────────────────────────────────────
 
 def start() -> dict:
-    """Suricata'yÄ± baÅŸlat."""
+    """Suricata'yı başlat."""
     try:
         if not is_available():
-            return {"success": False, "error": "Suricata kurulu deÄŸil."}
+            return {"success": False, "error": "Suricata kurulu değil."}
         stdout, stderr, rc = _systemctl("start")
         success = rc == 0
         if success:
-            log.info("Suricata baÅŸlatÄ±ldÄ±.")
+            log.info("Suricata başlatıldı.")
         else:
-            log.error("Suricata baÅŸlatÄ±lamadÄ±: %s", stderr)
-        return {"success": success, "message": stderr or "BaÅŸlatÄ±ldÄ±."}
+            log.error("Suricata başlatılamadı: %s", stderr)
+        return {"success": success, "message": stderr or "Başlatıldı."}
     except Exception as e:
-        log.error("start hatasÄ±: %s", e)
+        log.error("start hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
 def stop() -> dict:
-    """Suricata'yÄ± durdur."""
+    """Suricata'yı durdur."""
     try:
         if not is_available():
-            return {"success": False, "error": "Suricata kurulu deÄŸil."}
+            return {"success": False, "error": "Suricata kurulu değil."}
         _, stderr, rc = _systemctl("stop")
         success = rc == 0
-        log.info("Suricata durduruldu." if success else "Suricata durdurulamadÄ±.")
+        log.info("Suricata durduruldu." if success else "Suricata durdurulamadı.")
         return {"success": success, "message": stderr or "Durduruldu."}
     except Exception as e:
-        log.error("stop hatasÄ±: %s", e)
+        log.error("stop hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
 def restart() -> dict:
-    """Suricata'yÄ± yeniden baÅŸlat."""
+    """Suricata'yı yeniden başlat."""
     try:
         if not is_available():
-            return {"success": False, "error": "Suricata kurulu deÄŸil."}
+            return {"success": False, "error": "Suricata kurulu değil."}
         _, stderr, rc = _systemctl("restart")
         success = rc == 0
-        return {"success": success, "message": stderr or "Yeniden baÅŸlatÄ±ldÄ±."}
+        return {"success": success, "message": stderr or "Yeniden başlatıldı."}
     except Exception as e:
-        log.error("restart hatasÄ±: %s", e)
+        log.error("restart hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
 def reload_rules() -> dict:
-    """KurallarÄ± gÃ¼ncelle ve Suricata'yÄ± yeniden yÃ¼kle."""
+    """Kuralları güncelle ve Suricata'yı yeniden yükle."""
     try:
         if not is_available():
-            return {"success": False, "error": "Suricata kurulu deÄŸil."}
+            return {"success": False, "error": "Suricata kurulu değil."}
 
         # suricata-update
         out, err, rc = _run("suricata-update", timeout=120)
         if rc != 0:
-            log.warning("suricata-update baÅŸarÄ±sÄ±z: %s", err)
+            log.warning("suricata-update başarısız: %s", err)
 
         # reload
         _, err2, rc2 = _systemctl("reload")
@@ -253,11 +253,11 @@ def reload_rules() -> dict:
             "reload_error": err2 if not success else None,
         }
     except Exception as e:
-        log.error("reload_rules hatasÄ±: %s", e)
+        log.error("reload_rules hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
-# â”€â”€ Alert Okuma â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Alert Okuma ───────────────────────────────────────────────────────────────
 
 def get_alerts(
     limit: int = 100,
@@ -305,12 +305,12 @@ def get_alerts(
 
         return list(reversed(alerts))[:limit]
     except Exception as e:
-        log.error("get_alerts hatasÄ±: %s", e)
+        log.error("get_alerts hatası: %s", e)
         return []
 
 
 def get_alert_summary() -> dict:
-    """Son 24 saatteki alert Ã¶zeti."""
+    """Son 24 saatteki alert özeti."""
     try:
         alerts = get_alerts(limit=10000, since_hours=24)
         by_severity: dict = {}
@@ -330,22 +330,22 @@ def get_alert_summary() -> dict:
             "top_signatures": [{"signature": s, "count": c} for s, c in top_sigs],
         }
     except Exception as e:
-        log.error("get_alert_summary hatasÄ±: %s", e)
+        log.error("get_alert_summary hatası: %s", e)
         return {"total_24h": 0, "by_severity": {}, "top_signatures": [], "error": str(e)}
 
 
-# â”€â”€ Ã–zel Kurallar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Özel Kurallar ─────────────────────────────────────────────────────────────
 
 def add_custom_rule(rule_text: str) -> dict:
-    """Ã–zel kural ekle."""
+    """Özel kural ekle."""
     try:
         rule_text = rule_text.strip()
         if not rule_text:
-            return {"success": False, "error": "Kural metni boÅŸ."}
+            return {"success": False, "error": "Kural metni boş."}
 
         _ensure_dir(CUSTOM_RULES)
         with _lock:
-            # Mevcut kurallarÄ± oku, yineleme kontrolÃ¼
+            # Mevcut kuralları oku, yineleme kontrolü
             existing_rules = []
             if os.path.exists(CUSTOM_RULES):
                 with open(CUSTOM_RULES) as f:
@@ -357,15 +357,15 @@ def add_custom_rule(rule_text: str) -> dict:
             with open(CUSTOM_RULES, "a") as f:
                 f.write(rule_text + "\n")
 
-        log.info("Ã–zel kural eklendi: %.60s...", rule_text)
+        log.info("Özel kural eklendi: %.60s...", rule_text)
         return {"success": True, "rule": rule_text}
     except Exception as e:
-        log.error("add_custom_rule hatasÄ±: %s", e)
+        log.error("add_custom_rule hatası: %s", e)
         return {"success": False, "error": str(e)}
 
 
 def list_custom_rules() -> list:
-    """TÃ¼m Ã¶zel kurallarÄ± listele."""
+    """Tüm özel kuralları listele."""
     try:
         if not os.path.exists(CUSTOM_RULES):
             return []
@@ -377,21 +377,21 @@ def list_custom_rules() -> list:
                     rules.append({"rule_id": i, "rule": line})
             return rules
     except Exception as e:
-        log.error("list_custom_rules hatasÄ±: %s", e)
+        log.error("list_custom_rules hatası: %s", e)
         return []
 
 
 def delete_custom_rule(rule_id: int) -> dict:
-    """rule_id numaralÄ± satÄ±rÄ± (1-indexed) sil."""
+    """rule_id numaralı satırı (1-indexed) sil."""
     try:
         if not os.path.exists(CUSTOM_RULES):
-            return {"success": False, "error": "Kural dosyasÄ± yok."}
+            return {"success": False, "error": "Kural dosyası yok."}
 
         with _lock:
             with open(CUSTOM_RULES) as f:
                 lines = f.readlines()
 
-            # rule_id gerÃ§ek satÄ±r numarasÄ± deÄŸil, yorum olmayan satÄ±rlarÄ±n sÄ±rasÄ±
+            # rule_id gerçek satır numarası değil, yorum olmayan satırların sırası
             non_comment_idx = []
             for i, line in enumerate(lines):
                 stripped = line.strip()
@@ -399,7 +399,7 @@ def delete_custom_rule(rule_id: int) -> dict:
                     non_comment_idx.append(i)
 
             if rule_id < 1 or rule_id > len(non_comment_idx):
-                return {"success": False, "error": f"GeÃ§ersiz rule_id: {rule_id}"}
+                return {"success": False, "error": f"Geçersiz rule_id: {rule_id}"}
 
             target_line_idx = non_comment_idx[rule_id - 1]
             deleted_rule = lines[target_line_idx].strip()
@@ -408,14 +408,14 @@ def delete_custom_rule(rule_id: int) -> dict:
             with open(CUSTOM_RULES, "w") as f:
                 f.writelines(lines)
 
-        log.info("Ã–zel kural silindi: rule_id=%d", rule_id)
+        log.info("Özel kural silindi: rule_id=%d", rule_id)
         return {"success": True, "deleted_rule": deleted_rule}
     except Exception as e:
-        log.error("delete_custom_rule hatasÄ±: %s", e)
+        log.error("delete_custom_rule hatası: %s", e)
         return {"success": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ankavm Hypervisor â€“ GiriÅŸ</title>
-  <link rel="icon" type="image/png" href="/static/img/sadeceikon.png">
+  <title>Ankavm Hypervisor – Giriş</title>
+  <link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -15,7 +15,7 @@
       overflow: hidden;
     }
 
-    /* â”€â”€ Background â”€â”€ */
+    /* ── Background ── */
     .bg-wrap {
       position: fixed;
       inset: 0;
@@ -63,7 +63,7 @@
       opacity: 0.09;
     }
 
-    /* â”€â”€ Layout: left form | right brand â”€â”€ */
+    /* ── Layout: left form | right brand ── */
     .page {
       position: relative;
       z-index: 1;
@@ -311,7 +311,7 @@
       .ver-footer { width: 100%; }
     }
 
-    /* â”€â”€ Login Splash (shown after successful login) â”€â”€ */
+    /* ── Login Splash (shown after successful login) ── */
     #login-splash {
       position: fixed;
       inset: 0;
@@ -435,14 +435,14 @@
 </head>
 <body>
 
-  <!-- â”€â”€ Login Splash (hidden until login success) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- ── Login Splash (hidden until login success) ────────────────────────── -->
   <div id="login-splash">
     <div class="s-geo s-geo-1"></div>
     <div class="s-geo s-geo-2"></div>
     <div class="s-geo s-geo-3"></div>
     <div class="splash-bar"></div>
     <div class="splash-logo-wrap">
-      <img class="splash-logo-img" src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a366fd2&is=6a351e52&hm=3637a9d7e8c532276df3e65e8203306d492a152236b77d8d3bfc0fd9c18458c2&" alt="Ankavm"
+      <img class="splash-logo-img" src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&" alt="Ankavm"
            onerror="this.style.display='none'">
     </div>
     <div class="splash-tagline">Hypervisor Management System</div>
@@ -459,7 +459,7 @@
   <div class="page">
     <!-- Brand top-left -->
     <div class="brand-top">
-      <img src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a366fd2&is=6a351e52&hm=3637a9d7e8c532276df3e65e8203306d492a152236b77d8d3bfc0fd9c18458c2&" alt="Ankavm"
+      <img src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&" alt="Ankavm"
            onerror="this.style.display='none'">
     </div>
 
@@ -499,14 +499,14 @@
         </div>
         <button onclick="doVerify2fa()" class="btn-login" id="verifyBtn">Verify</button>
         <div class="error-msg" id="twofa-errorMsg"></div>
-        <a class="back-link" onclick="cancelTwofa()">â† Back</a>
+        <a class="back-link" onclick="cancelTwofa()">← Back</a>
       </div>
     </div>
 
     <!-- Right: brand -->
     <div class="right-panel">
       <div class="brand-center">
-        <img class="brand-logo" src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a366fd2&is=6a351e52&hm=3637a9d7e8c532276df3e65e8203306d492a152236b77d8d3bfc0fd9c18458c2&" alt="Ankavm"
+        <img class="brand-logo" src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&" alt="Ankavm"
              onerror="this.style.display='none'; document.querySelector('.brand-logo-fallback').style.display='flex';">
         <div class="brand-logo-fallback">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -515,9 +515,9 @@
           <div class="brand-logo-fallback-text">Ankavm</div>
         </div>
         <div class="brand-product">
-          <strong>Ankavm</strong><sup>Â®</sup> Hypervisor<sup>â„¢</sup>
+          <strong>Ankavm</strong><sup>®</sup> Hypervisor<sup>™</sup>
         </div>
-        <div class="brand-edition">KVM / QEMU Â· v2.8.0</div>
+        <div class="brand-edition">KVM / QEMU · v2.8.0</div>
       </div>
     </div>
 
@@ -527,11 +527,11 @@
   <script>
     let _tempToken = null;
 
-    // â”€â”€ Login Splash â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Login Splash ─────────────────────────────────────────────────────────
     function showSplash(dest) {
       dest = dest || "/";
       const s = document.getElementById("login-splash");
-      // Make visible first (opacity:0 â†’ starts transition)
+      // Make visible first (opacity:0 → starts transition)
       s.style.display = "flex";
       requestAnimationFrame(() => {
         requestAnimationFrame(() => { s.classList.add("splash-in"); });

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AnkaVM â€” Connect</title>
+<title>AnkaVM — Connect</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -161,7 +161,7 @@
       if (!res.ok && res.reason !== 'duplicate') {
         showErr('Could not save server: ' + (res.reason || 'unknown error'));
       }
-      // addServer â†’ main process switch â†’ page navigates automatically
+      // addServer → main process switch → page navigates automatically
     } else {
       // dev-mode fallback
       window.location.href = url;

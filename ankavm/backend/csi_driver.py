@@ -1,4 +1,4 @@
-﻿"""ankavm CSI Driver Control Plane (v2.9).
+"""ankavm CSI Driver Control Plane (v2.9).
 
 Exposes ankavm storage pools as Kubernetes PersistentVolumes via a
 CSI-compatible bridge running on each k8s node. This module is the
@@ -104,7 +104,7 @@ def provision(pool: str, size_gb: int, k8s_namespace: str,
             vol["state"] = "error"
             vol["error"] = str(e)[:300]
     else:
-        # No qemu-img on this host â€” record intent, sidecar provisions later.
+        # No qemu-img on this host — record intent, sidecar provisions later.
         vol["state"] = "pending"
         vol["note"] = "qemu-img not found; volume recorded, awaiting CSI sidecar"
     with _LOCK:
@@ -183,9 +183,9 @@ def driver_info() -> dict:
         "volume_root": str(_VOL_ROOT),
         "maturity": "beta",
     }
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,5 +1,5 @@
-﻿"""
-SR-IOV Manager â€” PF discovery, VF creation, VM assignment via libvirt hostdev.
+"""
+SR-IOV Manager — PF discovery, VF creation, VM assignment via libvirt hostdev.
 """
 import os
 import re
@@ -164,9 +164,9 @@ def assign_vf_to_vm(vm_id: str, vf_pci_addr: str) -> dict:
     except Exception as e:
         log.error("assign_vf_to_vm: %s", e)
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

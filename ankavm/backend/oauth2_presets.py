@@ -1,4 +1,4 @@
-﻿"""ankavm OAuth2 provider presets â€” Keycloak, Authentik, Okta, etc.
+"""ankavm OAuth2 provider presets — Keycloak, Authentik, Okta, etc.
 
 One-click presets fill the discovery URL, scopes, and claim mappings for
 common identity providers. The operator then just plugs in the client_id
@@ -109,9 +109,9 @@ def render_discovery_url(preset_id: str, params: dict) -> str | None:
     if "{" in out and "}" in out:
         raise ValueError(f"unfilled placeholders in discovery URL for {preset_id!r}")
     return out
-
-
-
-
-
-
+
+
+
+
+
+

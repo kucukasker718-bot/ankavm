@@ -1,4 +1,4 @@
-﻿"""ankavm v2.7.2 + v2.8 + v2.9 + v3.0 Flask Blueprint.
+"""ankavm v2.7.2 + v2.8 + v2.9 + v3.0 Flask Blueprint.
 
 Wires the new feature modules to REST routes under /api/v2/ and /api/v3/.
 Like bp_v270, dependencies (auth decorators, response helpers) are
@@ -36,7 +36,7 @@ def _safe_import(name):
 
 
 def _register_routes():
-    # â”€â”€ CSI driver â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── CSI driver ───────────────────────────────────────────────────────
     csi = _safe_import("csi_driver")
 
     @bp_v272.route("/api/v2/csi/info", methods=["GET"])
@@ -71,7 +71,7 @@ def _register_routes():
         r = csi.delete(vol_id)
         return (_ok(**r) if r.get("ok") else _err(r.get("error"), 404))
 
-    # â”€â”€ KubeVirt bridge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── KubeVirt bridge ──────────────────────────────────────────────────
     kv = _safe_import("kubevirt_bridge")
 
     @bp_v272.route("/api/v2/kubevirt/clusters", methods=["GET", "POST"])
@@ -101,7 +101,7 @@ def _register_routes():
         r = kv.unregister(name)
         return (_ok(**r) if r.get("ok") else _err(r.get("error"), 404))
 
-    # â”€â”€ GitOps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── GitOps ───────────────────────────────────────────────────────────
     go = _safe_import("gitops_manager")
 
     @bp_v272.route("/api/v2/gitops/repos", methods=["GET", "POST"])
@@ -137,7 +137,7 @@ def _register_routes():
         r = go.sync_now(name)
         return (_ok(**r) if r.get("ok") else _err(r.get("error"), 404))
 
-    # â”€â”€ Firecracker microVMs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Firecracker microVMs ─────────────────────────────────────────────
     fc = _safe_import("firecracker_runtime")
 
     @bp_v272.route("/api/v3/firecracker/vms", methods=["GET", "POST"])
@@ -164,7 +164,7 @@ def _register_routes():
         r = fc.stop(vm_id)
         return (_ok(**r) if r.get("ok") else _err(r.get("error"), 404))
 
-    # â”€â”€ OAuth2 presets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── OAuth2 presets ───────────────────────────────────────────────────
     op = _safe_import("oauth2_presets")
 
     @bp_v272.route("/api/v2/auth/oauth2/presets", methods=["GET"])
@@ -188,7 +188,7 @@ def _register_routes():
         except ValueError as e:
             return _err(str(e), 400)
 
-    # â”€â”€ Audit log retention â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Audit log retention ──────────────────────────────────────────────
     ar = _safe_import("audit_retention")
 
     @bp_v272.route("/api/v2/audit/retention", methods=["GET", "POST"])
@@ -210,7 +210,7 @@ def _register_routes():
             return _err("module unavailable", 503)
         return _ok(**ar.run_rotation_pass())
 
-    # â”€â”€ SBOM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── SBOM ─────────────────────────────────────────────────────────────
     sb = _safe_import("sbom_generator")
 
     @bp_v272.route("/api/v2/sbom", methods=["GET"])
@@ -229,7 +229,7 @@ def _register_routes():
             return _err("module unavailable", 503)
         return _ok(**sb.generate())
 
-    # â”€â”€ PWA offline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── PWA offline ──────────────────────────────────────────────────────
     pwa = _safe_import("pwa_offline")
 
     @bp_v272.route("/api/v3/pwa/manifest", methods=["GET"])
@@ -251,7 +251,7 @@ def _register_routes():
             return _ok(**pwa.set_enabled(bool(d["enabled"])))
         return _ok(**pwa.bump_cache_version())
 
-    # â”€â”€ SSH known-hosts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── SSH known-hosts ──────────────────────────────────────────────────
     kh = _safe_import("ssh_known_hosts")
 
     @bp_v272.route("/api/v2/security/known-hosts/pending", methods=["GET"])
@@ -281,9 +281,9 @@ def _register_routes():
             return _err("module unavailable", 503)
         r = kh.reject(prompt_id)
         return (_ok(**r) if r.get("ok") else _err(r.get("error"), 404))
-
-
-
-
-
-
+
+
+
+
+
+

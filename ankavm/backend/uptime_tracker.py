@@ -1,5 +1,5 @@
-﻿"""
-uptime_tracker.py â€” Per-VM uptime tracking
+"""
+uptime_tracker.py — Per-VM uptime tracking
 ankavm Hypervisor backend module
 """
 
@@ -211,7 +211,7 @@ def sync_from_virsh():
     Synchronise state from ``virsh list --all``.
 
     VMs reported as *running* that are not already tracked are added;
-    runningâ†’stopped transitions are recorded.
+    running→stopped transitions are recorded.
     """
     try:
         r = subprocess.run(
@@ -222,7 +222,7 @@ def sync_from_virsh():
             log.warning("virsh list failed: %s", r.stderr.strip())
             return
     except FileNotFoundError:
-        log.debug("virsh not found â€” skipping sync")
+        log.debug("virsh not found — skipping sync")
         return
     except Exception as exc:
         log.exception("sync_from_virsh error: %s", exc)
@@ -254,7 +254,7 @@ def sync_from_virsh():
     for name in running_vms:
         entry = next((v for v in data.values() if v.get("name") == name), None)
         if entry is None:
-            # New VM â€” start tracking
+            # New VM — start tracking
             record_start(name, name)
         elif entry.get("state") != "running":
             record_start(name, name)
@@ -302,7 +302,7 @@ def get_availability(vm_id, days=30):
         days  (int): Lookback window in days.
 
     Returns:
-        float: Availability percentage (0â€“100), or None if unknown.
+        float: Availability percentage (0–100), or None if unknown.
     """
     with _lock:
         data = _load()
@@ -331,9 +331,9 @@ def get_availability(vm_id, days=30):
 
     avail = (uptime_in_window / window) * 100 if window > 0 else 0
     return round(min(avail, 100.0), 2)
-
-
-
-
-
-
+
+
+
+
+
+

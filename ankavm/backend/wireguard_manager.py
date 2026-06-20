@@ -1,5 +1,5 @@
-﻿"""
-wireguard_manager.py â€” WireGuard VPN yÃ¶netimi (ankavm Hypervisor)
+"""
+wireguard_manager.py — WireGuard VPN yönetimi (ankavm Hypervisor)
 Root yetkisi gerekir.
 """
 
@@ -18,11 +18,11 @@ PEERS_FILE = "/var/lib/ankavm/wg_peers.json"
 _lock = threading.Lock()
 
 # ---------------------------------------------------------------------------
-# Ä°Ã§ yardÄ±mcÄ±lar
+# İç yardımcılar
 # ---------------------------------------------------------------------------
 
 def _run(*cmd, input_data=None):
-    """subprocess.run Ã§alÄ±ÅŸtÄ±rÄ±r; hata fÄ±rlatmaz."""
+    """subprocess.run çalıştırır; hata fırlatmaz."""
     try:
         result = subprocess.run(
             list(cmd),
@@ -33,24 +33,24 @@ def _run(*cmd, input_data=None):
             check=False,
         )
         if result.returncode != 0:
-            log.warning("Komut baÅŸarÄ±sÄ±z [%d]: %s | stderr: %s",
+            log.warning("Komut başarısız [%d]: %s | stderr: %s",
                         result.returncode, " ".join(cmd), result.stderr.strip())
         return result
     except FileNotFoundError:
-        log.error("Komut bulunamadÄ±: %s", cmd[0])
+        log.error("Komut bulunamadı: %s", cmd[0])
         return None
     except Exception as exc:
-        log.exception("_run hatasÄ±: %s", exc)
+        log.exception("_run hatası: %s", exc)
         return None
 
 
 def _wg_conf_path(interface):
-    """WireGuard config dosyasÄ± yolunu dÃ¶ner."""
+    """WireGuard config dosyası yolunu döner."""
     return os.path.join(WG_DIR, f"{interface}.conf")
 
 
 def _generate_keypair():
-    """(private_key, public_key) tuple dÃ¶ner."""
+    """(private_key, public_key) tuple döner."""
     try:
         priv_result = subprocess.run(
             ["wg", "genkey"],
@@ -68,22 +68,22 @@ def _generate_keypair():
         public_key = pub_result.stdout.strip()
         return private_key, public_key
     except subprocess.CalledProcessError as exc:
-        log.error("Keypair oluÅŸturma hatasÄ±: %s", exc.stderr)
+        log.error("Keypair oluşturma hatası: %s", exc.stderr)
         raise
     except FileNotFoundError:
-        log.error("wg komutu bulunamadÄ±. WireGuard kurulu mu?")
+        log.error("wg komutu bulunamadı. WireGuard kurulu mu?")
         raise
 
 
 def _load_peers():
-    """PEERS_FILE'dan peer listesini yÃ¼kler."""
+    """PEERS_FILE'dan peer listesini yükler."""
     try:
         if not os.path.exists(PEERS_FILE):
             return {}
         with open(PEERS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except (OSError, json.JSONDecodeError) as exc:
-        log.error("Peers dosyasÄ± okunamadÄ±: %s", exc)
+        log.error("Peers dosyası okunamadı: %s", exc)
         return {}
 
 
@@ -94,7 +94,7 @@ def _save_peers(peers):
         with open(PEERS_FILE, "w", encoding="utf-8") as f:
             json.dump(peers, f, indent=2, ensure_ascii=False)
     except OSError as exc:
-        log.error("Peers dosyasÄ± yazÄ±lamadÄ±: %s", exc)
+        log.error("Peers dosyası yazılamadı: %s", exc)
         raise
 
 # ---------------------------------------------------------------------------
@@ -103,13 +103,13 @@ def _save_peers(peers):
 
 def get_status(interface="wg0"):
     """
-    WireGuard arayÃ¼zÃ¼nÃ¼n durumunu dÃ¶ner.
+    WireGuard arayüzünün durumunu döner.
     {"active": bool, "public_key": str, "listen_port": int, "peers": [...]}
     """
     try:
         result = _run("wg", "show", interface)
         if result is None:
-            return {"active": False, "error": "wg bulunamadÄ±"}
+            return {"active": False, "error": "wg bulunamadı"}
 
         if result.returncode != 0:
             return {"active": False, "interface": interface,
@@ -147,14 +147,14 @@ def get_status(interface="wg0"):
 
         return info
     except Exception as exc:
-        log.exception("get_status hatasÄ±: %s", exc)
+        log.exception("get_status hatası: %s", exc)
         return {"active": False, "error": str(exc)}
 
 
 def init_server(interface="wg0", address="10.8.0.1/24", listen_port=51820):
     """
-    WireGuard sunucu arayÃ¼zÃ¼nÃ¼ baÅŸlatÄ±r.
-    Config dosyasÄ± oluÅŸturur, arayÃ¼zÃ¼ ayaÄŸa kaldÄ±rÄ±r.
+    WireGuard sunucu arayüzünü başlatır.
+    Config dosyası oluşturur, arayüzü ayağa kaldırır.
     """
     with _lock:
         try:
@@ -163,7 +163,7 @@ def init_server(interface="wg0", address="10.8.0.1/24", listen_port=51820):
 
             private_key, public_key = _generate_keypair()
 
-            # Keypair dosyalarÄ±nÄ± kaydet
+            # Keypair dosyalarını kaydet
             priv_path = os.path.join(WG_DIR, f"{interface}_private.key")
             pub_path = os.path.join(WG_DIR, f"{interface}_public.key")
             with open(priv_path, "w", encoding="utf-8") as f:
@@ -172,7 +172,7 @@ def init_server(interface="wg0", address="10.8.0.1/24", listen_port=51820):
             with open(pub_path, "w", encoding="utf-8") as f:
                 f.write(public_key + "\n")
 
-            # wg0.conf oluÅŸtur
+            # wg0.conf oluştur
             conf_content = (
                 f"[Interface]\n"
                 f"Address = {address}\n"
@@ -187,9 +187,9 @@ def init_server(interface="wg0", address="10.8.0.1/24", listen_port=51820):
                 f.write(conf_content)
             os.chmod(conf_path, 0o600)
 
-            log.info("WireGuard config oluÅŸturuldu: %s", conf_path)
+            log.info("WireGuard config oluşturuldu: %s", conf_path)
 
-            # ArayÃ¼zÃ¼ ayaÄŸa kaldÄ±r
+            # Arayüzü ayağa kaldır
             _run("ip", "link", "add", interface, "type", "wireguard")
             _run("ip", "addr", "add", address, "dev", interface)
             _run("wg", "setconf", interface, conf_path)
@@ -204,28 +204,28 @@ def init_server(interface="wg0", address="10.8.0.1/24", listen_port=51820):
                 "conf_path": conf_path,
             }
         except Exception as exc:
-            log.exception("init_server hatasÄ±: %s", exc)
+            log.exception("init_server hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def get_server_config(interface="wg0"):
-    """wg0.conf dosyasÄ±nÄ±n iÃ§eriÄŸini dÃ¶ner."""
+    """wg0.conf dosyasının içeriğini döner."""
     try:
         conf_path = _wg_conf_path(interface)
         if not os.path.exists(conf_path):
-            return {"success": False, "error": f"{conf_path} bulunamadÄ±"}
+            return {"success": False, "error": f"{conf_path} bulunamadı"}
         with open(conf_path, "r", encoding="utf-8") as f:
             content = f.read()
         return {"success": True, "content": content, "path": conf_path}
     except OSError as exc:
-        log.error("Config okunamadÄ±: %s", exc)
+        log.error("Config okunamadı: %s", exc)
         return {"success": False, "error": str(exc)}
 
 
 def add_peer(peer_name, allowed_ips=None, endpoint=None, interface="wg0"):
     """
     Yeni bir WireGuard peer ekler.
-    Keypair oluÅŸturur, config'e ekler ve wg set ile anÄ±nda uygular.
+    Keypair oluşturur, config'e ekler ve wg set ile anında uygular.
     """
     with _lock:
         try:
@@ -234,7 +234,7 @@ def add_peer(peer_name, allowed_ips=None, endpoint=None, interface="wg0"):
 
             private_key, public_key = _generate_keypair()
 
-            # Config dosyasÄ±na [Peer] bloÄŸu ekle
+            # Config dosyasına [Peer] bloğu ekle
             conf_path = _wg_conf_path(interface)
             peer_block = (
                 f"\n[Peer]\n"
@@ -249,7 +249,7 @@ def add_peer(peer_name, allowed_ips=None, endpoint=None, interface="wg0"):
                 with open(conf_path, "a", encoding="utf-8") as f:
                     f.write(peer_block)
 
-            # wg set ile anÄ±nda uygula
+            # wg set ile anında uygula
             wg_set_cmd = ["wg", "set", interface, "peer", public_key,
                           "allowed-ips", allowed_ips]
             if endpoint:
@@ -276,17 +276,17 @@ def add_peer(peer_name, allowed_ips=None, endpoint=None, interface="wg0"):
                 "allowed_ips": allowed_ips,
             }
         except Exception as exc:
-            log.exception("add_peer hatasÄ±: %s", exc)
+            log.exception("add_peer hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def remove_peer(peer_name_or_pubkey, interface="wg0"):
-    """Peer'Ä± arayÃ¼zden ve config dosyasÄ±ndan kaldÄ±rÄ±r."""
+    """Peer'ı arayüzden ve config dosyasından kaldırır."""
     with _lock:
         try:
             peers = _load_peers()
 
-            # Ä°sim mi public key mi?
+            # İsim mi public key mi?
             target_pubkey = None
             target_name = None
             if peer_name_or_pubkey in peers:
@@ -301,26 +301,26 @@ def remove_peer(peer_name_or_pubkey, interface="wg0"):
                         break
 
             if not target_pubkey:
-                return {"success": False, "error": "Peer bulunamadÄ±"}
+                return {"success": False, "error": "Peer bulunamadı"}
 
-            # wg set ile kaldÄ±r
+            # wg set ile kaldır
             _run("wg", "set", interface, "peer", target_pubkey, "remove")
 
-            # peers.json'dan kaldÄ±r
+            # peers.json'dan kaldır
             if target_name:
                 peers.pop(target_name, None)
                 _save_peers(peers)
 
-            log.info("Peer kaldÄ±rÄ±ldÄ±: %s", peer_name_or_pubkey)
+            log.info("Peer kaldırıldı: %s", peer_name_or_pubkey)
             return {"success": True, "removed": peer_name_or_pubkey}
         except Exception as exc:
-            log.exception("remove_peer hatasÄ±: %s", exc)
+            log.exception("remove_peer hatası: %s", exc)
             return {"success": False, "error": str(exc)}
 
 
 def list_peers(interface="wg0"):
     """
-    Peer listesini dÃ¶ner; aktif olanlarÄ± wg show ile iÅŸaretler.
+    Peer listesini döner; aktif olanları wg show ile işaretler.
     """
     try:
         peers = _load_peers()
@@ -331,23 +331,23 @@ def list_peers(interface="wg0"):
         for name, info in peers.items():
             entry = dict(info)
             entry["active"] = info.get("public_key") in active_keys
-            entry.pop("private_key", None)  # private key'i dÄ±ÅŸarÄ± verme
+            entry.pop("private_key", None)  # private key'i dışarı verme
             result.append(entry)
 
         return result
     except Exception as exc:
-        log.exception("list_peers hatasÄ±: %s", exc)
+        log.exception("list_peers hatası: %s", exc)
         return []
 
 
 def get_peer_config(peer_name, server_public_key="", server_endpoint="", interface="wg0"):
     """
-    Client .conf dosyasÄ± iÃ§eriÄŸini dÃ¶ner.
+    Client .conf dosyası içeriğini döner.
     """
     try:
         peers = _load_peers()
         if peer_name not in peers:
-            return {"success": False, "error": "Peer bulunamadÄ±"}
+            return {"success": False, "error": "Peer bulunamadı"}
 
         peer = peers[peer_name]
         client_conf = (
@@ -363,16 +363,16 @@ def get_peer_config(peer_name, server_public_key="", server_endpoint="", interfa
         )
         return {"success": True, "config": client_conf, "peer_name": peer_name}
     except Exception as exc:
-        log.exception("get_peer_config hatasÄ±: %s", exc)
+        log.exception("get_peer_config hatası: %s", exc)
         return {"success": False, "error": str(exc)}
 
 
 def start(interface="wg0"):
-    """wg-quick up ile arayÃ¼zÃ¼ baÅŸlatÄ±r."""
-    log.info("WireGuard baÅŸlatÄ±lÄ±yor: %s", interface)
+    """wg-quick up ile arayüzü başlatır."""
+    log.info("WireGuard başlatılıyor: %s", interface)
     result = _run("wg-quick", "up", interface)
     if result is None:
-        return {"success": False, "error": "wg-quick bulunamadÄ±"}
+        return {"success": False, "error": "wg-quick bulunamadı"}
     return {
         "success": result.returncode == 0,
         "stderr": result.stderr.strip(),
@@ -380,18 +380,18 @@ def start(interface="wg0"):
 
 
 def stop(interface="wg0"):
-    """wg-quick down ile arayÃ¼zÃ¼ durdurur."""
+    """wg-quick down ile arayüzü durdurur."""
     log.info("WireGuard durduruluyor: %s", interface)
     result = _run("wg-quick", "down", interface)
     if result is None:
-        return {"success": False, "error": "wg-quick bulunamadÄ±"}
+        return {"success": False, "error": "wg-quick bulunamadı"}
     return {
         "success": result.returncode == 0,
         "stderr": result.stderr.strip(),
     }
-
-
-
-
-
-
+
+
+
+
+
+

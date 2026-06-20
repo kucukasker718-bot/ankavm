@@ -1,8 +1,8 @@
-﻿"""
-ankavm DLP at Hypervisor â€” pattern-based outbound traffic inspection
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm DLP at Hypervisor — pattern-based outbound traffic inspection
+─────────────────────────────────────────────────────────────────────
 Lightweight regex-based DLP for VM egress traffic.
-Hooks into nftables NFLOG group â†’ libpcap reader â†’ match â†’ block/alert.
+Hooks into nftables NFLOG group → libpcap reader → match → block/alert.
 
 DOES NOT inline-block (would require kernel module). Instead:
   - Periodic scan of recent NFLOG buffer
@@ -160,9 +160,9 @@ def get_stats() -> dict:
     except Exception:
         pass
     return {"total_events": total, "by_severity": by_sev, "rules_count": len(_load_rules())}
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,7 +1,7 @@
-﻿"""
+"""
 ankavm Network I/O Control (NIOC)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-VM baÅŸÄ± bant garantisi ve sÄ±nÄ±rÄ± (tc + libvirt QoS).
+─────────────────────────────────
+VM başı bant garantisi ve sınırı (tc + libvirt QoS).
 
 API:
     set_vm_bandwidth(vm_id, inbound_kbps, outbound_kbps, burst_kbps) -> dict
@@ -65,8 +65,8 @@ def delete_profile(name: str) -> bool:
 def set_vm_bandwidth(vm_id: str, in_kbps: int = 0, out_kbps: int = 0,
                       burst_kbps: int = 1024) -> dict:
     """
-    virsh domiftune ile bant ayarÄ±.
-    in/out = average kbps (1000 bps), 0 = sÄ±nÄ±rsÄ±z.
+    virsh domiftune ile bant ayarı.
+    in/out = average kbps (1000 bps), 0 = sınırsız.
     """
     # Get first interface
     try:
@@ -74,7 +74,7 @@ def set_vm_bandwidth(vm_id: str, in_kbps: int = 0, out_kbps: int = 0,
                            capture_output=True, text=True, timeout=10)
         lines = r.stdout.strip().split("\n")
         if len(lines) < 3:
-            return {"ok": False, "error": "VM aÄŸ arabirimi yok"}
+            return {"ok": False, "error": "VM ağ arabirimi yok"}
         # Skip header (2 lines), pick first interface name
         iface = lines[2].split()[0]
     except Exception as e:
@@ -84,7 +84,7 @@ def set_vm_bandwidth(vm_id: str, in_kbps: int = 0, out_kbps: int = 0,
     if in_kbps > 0:
         args += ["--inbound", f"{in_kbps},{burst_kbps},{burst_kbps}"]
     else:
-        args += ["--inbound", "0,0,0"]   # 0 = sÄ±nÄ±rsÄ±z
+        args += ["--inbound", "0,0,0"]   # 0 = sınırsız
     if out_kbps > 0:
         args += ["--outbound", f"{out_kbps},{burst_kbps},{burst_kbps}"]
     else:
@@ -134,16 +134,16 @@ def get_vm_bandwidth(vm_id: str) -> dict:
 def apply_profile_to_vm(vm_id: str, profile_name: str) -> dict:
     p = next((p for p in _load_profiles() if p["name"] == profile_name), None)
     if not p:
-        raise KeyError(f"Profil bulunamadÄ±: {profile_name}")
+        raise KeyError(f"Profil bulunamadı: {profile_name}")
     return set_vm_bandwidth(vm_id, p["in_kbps"], p["out_kbps"], p.get("burst", 1024))
 
 
 def remove_vm_bandwidth(vm_id: str) -> dict:
-    """SÄ±nÄ±rÄ± kaldÄ±r (0,0,0 = unlimited)."""
+    """Sınırı kaldır (0,0,0 = unlimited)."""
     return set_vm_bandwidth(vm_id, 0, 0, 0)
-
-
-
-
-
-
+
+
+
+
+
+

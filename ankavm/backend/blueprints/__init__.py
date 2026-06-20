@@ -1,8 +1,8 @@
-﻿"""ankavm backend blueprints package (v2.8 modularization).
+"""ankavm backend blueprints package (v2.8 modularization).
 
 The historic `app.py` ships ~270 routes in a single 30k-line file. v2.8
 introduces a `blueprints/` package that hosts domain-scoped Flask
-blueprints â€” auth, vms, networks, storage, monitoring â€” each exposing
+blueprints — auth, vms, networks, storage, monitoring — each exposing
 new `/api/v2/{domain}/*` endpoints.
 
 Legacy `/api/*` routes in `app.py` are kept for backward compatibility.
@@ -25,9 +25,9 @@ __all__ = [
     "monitoring_bp",
     "telemetry_bp",
 ]
-
-
-
-
-
-
+
+
+
+
+
+

@@ -1,5 +1,5 @@
-﻿"""
-Hash-chained audit log â€” each line links to previous via sha256.
+"""
+Hash-chained audit log — each line links to previous via sha256.
 Tamper-evident: any line modification invalidates every subsequent hash.
 """
 import json
@@ -158,9 +158,9 @@ def get_stats() -> dict:
     except Exception as e:
         log.error("get_stats: %s", e)
         return {"total": 0, "by_user": {}, "by_event": {}, "file_size": 0}
-
-
-
-
-
-
+
+
+
+
+
+

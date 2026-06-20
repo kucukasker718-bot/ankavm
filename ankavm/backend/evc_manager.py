@@ -1,10 +1,10 @@
-﻿"""
-ankavm EVC â€” Enhanced vMotion Compatibility
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-CPU model maskeleme: Eski CPU Ã¶zelliklerini saklayarak yeni nesil host'tan
-eski nesil host'a live migrate'i mÃ¼mkÃ¼n kÄ±lar.
+"""
+ankavm EVC — Enhanced vMotion Compatibility
+───────────────────────────────────────────
+CPU model maskeleme: Eski CPU özelliklerini saklayarak yeni nesil host'tan
+eski nesil host'a live migrate'i mümkün kılar.
 
-VMware EVC mantÄ±ÄŸÄ±: cluster'da en eski CPU'ya gÃ¶re tÃ¼m VM'ler kÄ±sÄ±tlanÄ±r.
+VMware EVC mantığı: cluster'da en eski CPU'ya göre tüm VM'ler kısıtlanır.
 
 API:
     list_baselines() -> list           (Intel/AMD nesil seviyeleri)
@@ -82,7 +82,7 @@ def _read_cpu_flags() -> list:
 
 
 def detect_host_capability() -> dict:
-    """Host'un destekleyebileceÄŸi max baseline."""
+    """Host'un destekleyebileceği max baseline."""
     flags = set(_read_cpu_flags())
     best = None
     for name, info in _BASELINES.items():
@@ -113,18 +113,18 @@ def get_vm_cpu_features(vm_id: str) -> dict:
 
 def apply_baseline_to_vm(vm_id: str, baseline: str = None) -> dict:
     """
-    VM'in CPU model'ini baseline'a gÃ¶re deÄŸiÅŸtir.
-    NOT: VM kapalÄ± olmalÄ±. virsh edit ile XML modify.
+    VM'in CPU model'ini baseline'a göre değiştir.
+    NOT: VM kapalı olmalı. virsh edit ile XML modify.
     """
     baseline = baseline or get_current_baseline().get("baseline")
     if not baseline or baseline not in _BASELINES:
-        raise ValueError(f"GeÃ§ersiz baseline: {baseline}")
+        raise ValueError(f"Geçersiz baseline: {baseline}")
 
     # VM state check
     state = subprocess.run(["virsh", "domstate", vm_id],
                            capture_output=True, text=True, timeout=5)
     if "shut off" not in state.stdout:
-        return {"ok": False, "error": "VM Ã§alÄ±ÅŸÄ±yor â€” Ã¶nce durdur"}
+        return {"ok": False, "error": "VM çalışıyor — önce durdur"}
 
     # CPU model belirleme (libvirt qemu64/Westmere/etc)
     cpu_model_map = {
@@ -176,9 +176,9 @@ def apply_baseline_to_vm(vm_id: str, baseline: str = None) -> dict:
     finally:
         try: tmp.unlink()
         except Exception: pass
-
-
-
-
-
-
+
+
+
+
+
+

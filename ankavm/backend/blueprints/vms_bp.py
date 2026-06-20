@@ -1,14 +1,14 @@
-﻿"""vms_bp â€” v2 read-only VM endpoints.
+"""vms_bp — v2 read-only VM endpoints.
 
 Mounted at /api/v2/vms. Mirrors the legacy /api/vms* shape but returns a
 trimmed payload tailored to panel dashboards (no XML, no internal IDs).
 
 Endpoints:
-    GET /api/v2/vms                      â€” list with light fields
-    GET /api/v2/vms/<id>                 â€” detail with quick stats
-    GET /api/v2/vms/<id>/state           â€” power state + uptime
-    GET /api/v2/vms/<id>/snapshots/count â€” snapshot count (fast)
-    GET /api/v2/vms/by-tag/<tag>         â€” filter helper used by panel
+    GET /api/v2/vms                      — list with light fields
+    GET /api/v2/vms/<id>                 — detail with quick stats
+    GET /api/v2/vms/<id>/state           — power state + uptime
+    GET /api/v2/vms/<id>/snapshots/count — snapshot count (fast)
+    GET /api/v2/vms/by-tag/<tag>         — filter helper used by panel
 """
 from __future__ import annotations
 from flask import Blueprint
@@ -132,9 +132,9 @@ def _register_routes():
             return _ok(tag=tag, vms=tagged, count=len(tagged))
         except Exception as e:
             return _err(str(e), 400)
-
-
-
-
-
-
+
+
+
+
+
+

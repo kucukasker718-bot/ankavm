@@ -1,13 +1,13 @@
-﻿"""
-gitops_sync.py â€” GitOps Sync (ArgoCD / Flux) for ankavm
+"""
+gitops_sync.py — GitOps Sync (ArgoCD / Flux) for ankavm
 ankavm v2.5.10 Cloud/K8s
 
 Features:
-  - configure_gitops(repo_url, branch, path, provider, ssh_key) â€” save GitOps config
-  - get_config() â€” return current GitOps configuration
-  - sync_now() â€” git pull + YAML diff + apply (manifest-based, no external Git lib)
-  - get_sync_status() â€” last sync result, last commit, diff summary
-  - generate_app_manifest() â€” ArgoCD Application or Flux GitRepository + Kustomization YAML
+  - configure_gitops(repo_url, branch, path, provider, ssh_key) — save GitOps config
+  - get_config() — return current GitOps configuration
+  - sync_now() — git pull + YAML diff + apply (manifest-based, no external Git lib)
+  - get_sync_status() — last sync result, last commit, diff summary
+  - generate_app_manifest() — ArgoCD Application or Flux GitRepository + Kustomization YAML
 
 Config persisted to /var/lib/ankavm/gitops.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -32,7 +32,7 @@ _lock         = threading.Lock()
 _VALID_PROVIDERS = ("argocd", "flux")
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -64,7 +64,7 @@ def _save(data: dict) -> None:
         log.warning("gitops save fail: %s", e)
 
 
-# â”€â”€ Git helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Git helpers ───────────────────────────────────────────────────────────────
 
 def _git(args: list, cwd: Optional[str] = None, env: Optional[dict] = None, timeout: int = 60) -> tuple[int, str, str]:
     """Run a git command."""
@@ -122,7 +122,7 @@ def _get_yaml_files(repo_dir: str, path: str) -> list:
     return sorted(yaml_files)
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def configure_gitops(
     repo_url: str,
@@ -380,9 +380,9 @@ spec:
         "repo_url":      repo_url,
         "branch":        branch,
     }
-
-
-
-
-
-
+
+
+
+
+
+

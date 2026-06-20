@@ -1,10 +1,10 @@
-﻿"""
+"""
 ankavm Alert Correlation Engine
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Ã‡ok sayÄ±da alert â†’ tek incident. Same VM/host/category 5 dk window'da grupla.
+───────────────────────────────
+Çok sayıda alert → tek incident. Same VM/host/category 5 dk window'da grupla.
 
 API:
-    correlate(alerts) -> list  (gruplandÄ±rÄ±lmÄ±ÅŸ incidents)
+    correlate(alerts) -> list  (gruplandırılmış incidents)
     add_rule(pattern, group_by, window_sec) -> dict
     list_incidents(active_only=True) -> list
     resolve_incident(incident_id) -> bool
@@ -102,7 +102,7 @@ def correlate(alerts: list) -> list:
             # Window check
             ts_list = [a.get("ts", 0) for _, a in items]
             if max(ts_list) - min(ts_list) > rule["window_sec"]:
-                # Window dÄ±ÅŸÄ± â€” alt-grupla
+                # Window dışı — alt-grupla
                 items.sort(key=lambda x: x[1].get("ts", 0))
                 window_groups = []
                 current = [items[0]]
@@ -135,7 +135,7 @@ def correlate(alerts: list) -> list:
                 })
                 matched_indexes.update(i for i, _ in grp)
 
-    # EÅŸleÅŸmeyen alert'leri tek alert incident olarak ekle
+    # Eşleşmeyen alert'leri tek alert incident olarak ekle
     for i, a in enumerate(alerts):
         if i not in matched_indexes:
             incidents.append({
@@ -185,9 +185,9 @@ def resolve_incident(incident_id: str) -> bool:
                 _save(_INCIDENTS, items)
                 return True
     return False
-
-
-
-
-
-
+
+
+
+
+
+

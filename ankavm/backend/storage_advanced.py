@@ -1,6 +1,6 @@
-﻿"""
-ankavm Storage Advanced â€” Dedup, Tiering, SPBM, iSCSI
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+ankavm Storage Advanced — Dedup, Tiering, SPBM, iSCSI
+─────────────────────────────────────────────────────
 ZFS/btrfs dedup + storage tier policy + iSCSI target/initiator + SPBM.
 
 API: dedup_status, tier_policy_*, iscsi_*, spbm_*
@@ -15,7 +15,7 @@ _TIER_POLICY = Path("/var/lib/ankavm/storage_tiers.json")
 _SPBM_POLICY = Path("/var/lib/ankavm/spbm_policies.json")
 
 
-# â”€â”€ ZFS Dedup + Compression â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── ZFS Dedup + Compression ─────────────────────────────────────────────────
 def zfs_pools() -> list:
     try:
         r = subprocess.run(["zpool", "list", "-H", "-o",
@@ -47,7 +47,7 @@ def zfs_set_property(dataset: str, prop: str, value: str) -> dict:
     """zfs set dedup=on|off compress=lz4|zstd"""
     allowed = {"dedup", "compression", "atime", "sync", "recordsize", "quota"}
     if prop not in allowed:
-        return {"ok": False, "error": f"Ä°zin verilmeyen property: {prop}"}
+        return {"ok": False, "error": f"İzin verilmeyen property: {prop}"}
     try:
         r = subprocess.run(["zfs", "set", f"{prop}={value}", dataset],
                            capture_output=True, text=True, timeout=10)
@@ -58,7 +58,7 @@ def zfs_set_property(dataset: str, prop: str, value: str) -> dict:
 
 
 def btrfs_dedup_status() -> dict:
-    """duperemove / btrfs-dedupe Ã§Ä±ktÄ±sÄ± â€” minimal."""
+    """duperemove / btrfs-dedupe çıktısı — minimal."""
     try:
         r = subprocess.run(["btrfs", "filesystem", "show"],
                            capture_output=True, text=True, timeout=10)
@@ -70,7 +70,7 @@ def btrfs_dedup_status() -> dict:
         return {"available": False, "error": str(e)}
 
 
-# â”€â”€ Storage Tier Policy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Storage Tier Policy ─────────────────────────────────────────────────────
 def list_tier_policies() -> list:
     if not _TIER_POLICY.exists():
         return _default_tiers()
@@ -82,9 +82,9 @@ def list_tier_policies() -> list:
 
 def _default_tiers() -> list:
     return [
-        {"name": "hot",  "description": "SSD/NVMe â€” kritik VM'ler", "pools": [], "priority": 1},
-        {"name": "warm", "description": "SATA SSD â€” orta Ã¶ncelik",  "pools": [], "priority": 2},
-        {"name": "cold", "description": "HDD â€” arÅŸiv, backup",      "pools": [], "priority": 3},
+        {"name": "hot",  "description": "SSD/NVMe — kritik VM'ler", "pools": [], "priority": 1},
+        {"name": "warm", "description": "SATA SSD — orta öncelik",  "pools": [], "priority": 2},
+        {"name": "cold", "description": "HDD — arşiv, backup",      "pools": [], "priority": 3},
     ]
 
 
@@ -96,7 +96,7 @@ def save_tier_policies(tiers: list) -> dict:
 
 def assign_pool_to_tier(pool_name: str, tier_name: str) -> dict:
     tiers = list_tier_policies()
-    # Ã–nce diÄŸer tier'lardan Ã§Ä±kar
+    # Önce diğer tier'lardan çıkar
     for t in tiers:
         if pool_name in t["pools"]:
             t["pools"].remove(pool_name)
@@ -109,7 +109,7 @@ def assign_pool_to_tier(pool_name: str, tier_name: str) -> dict:
     return {"ok": True, "pool": pool_name, "tier": tier_name}
 
 
-# â”€â”€ SPBM (Storage Policy Based Management) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── SPBM (Storage Policy Based Management) ──────────────────────────────────
 def list_spbm_policies() -> list:
     if not _SPBM_POLICY.exists():
         return _default_spbm()
@@ -123,7 +123,7 @@ def _default_spbm() -> list:
     return [
         {
             "name":        "tier-1-production",
-            "description": "YÃ¼ksek performans + gÃ¼nlÃ¼k yedek + 3 snapshot",
+            "description": "Yüksek performans + günlük yedek + 3 snapshot",
             "tier":        "hot",
             "iops_min":    5000,
             "thin_provision": False,
@@ -133,7 +133,7 @@ def _default_spbm() -> list:
         },
         {
             "name":        "tier-2-staging",
-            "description": "Orta performans + haftalÄ±k yedek",
+            "description": "Orta performans + haftalık yedek",
             "tier":        "warm",
             "iops_min":    1000,
             "thin_provision": True,
@@ -161,7 +161,7 @@ def save_spbm_policies(policies: list) -> dict:
 
 
 def select_pool_for_policy(policy_name: str) -> dict:
-    """Policy'ye gÃ¶re uygun pool Ã¶ner (en boÅŸ + uygun tier)."""
+    """Policy'ye göre uygun pool öner (en boş + uygun tier)."""
     policy = next((p for p in list_spbm_policies() if p["name"] == policy_name), None)
     if not policy:
         return {"ok": False, "error": f"Policy yok: {policy_name}"}
@@ -172,15 +172,15 @@ def select_pool_for_policy(policy_name: str) -> dict:
             tier_pools = t["pools"]
             break
     if not tier_pools:
-        return {"ok": False, "error": f"Tier '{tier}' iÃ§in pool atanmamÄ±ÅŸ"}
+        return {"ok": False, "error": f"Tier '{tier}' için pool atanmamış"}
     return {"ok": True, "policy": policy_name, "tier": tier,
             "candidate_pools": tier_pools,
             "suggestion": tier_pools[0]}
 
 
-# â”€â”€ iSCSI Target/Initiator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── iSCSI Target/Initiator ──────────────────────────────────────────────────
 def iscsi_initiator_sessions() -> list:
-    """Mevcut iSCSI baÄŸlantÄ±larÄ±nÄ± listele."""
+    """Mevcut iSCSI bağlantılarını listele."""
     try:
         r = subprocess.run(["iscsiadm", "-m", "session"],
                            capture_output=True, text=True, timeout=5)
@@ -233,7 +233,7 @@ def iscsi_login(portal: str, iqn: str) -> dict:
 
 
 def iscsi_target_status() -> dict:
-    """LIO/tgtd target servisi Ã§alÄ±ÅŸÄ±yor mu."""
+    """LIO/tgtd target servisi çalışıyor mu."""
     out = {"tgtd": False, "lio": False}
     try:
         r = subprocess.run(["systemctl", "is-active", "tgt"],
@@ -248,9 +248,9 @@ def iscsi_target_status() -> dict:
     except Exception:
         pass
     return out
-
-
-
-
-
-
+
+
+
+
+
+

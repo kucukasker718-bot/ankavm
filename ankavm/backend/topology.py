@@ -1,6 +1,6 @@
-﻿"""
-ankavm Topoloji HaritasÄ± Veri ToplayÄ±cÄ±
-Hypervisor â†’ AÄŸlar â†’ VM'ler hiyerarÅŸik yapÄ±sÄ±nÄ± dÃ¶ndÃ¼rÃ¼r.
+"""
+ankavm Topoloji Haritası Veri Toplayıcı
+Hypervisor → Ağlar → VM'ler hiyerarşik yapısını döndürür.
 """
 
 import subprocess
@@ -126,9 +126,9 @@ STATE_MAP = {
 
 
 def get_topology() -> dict:
-    """Tam topoloji haritasÄ±nÄ± dÃ¶ndÃ¼r."""
+    """Tam topoloji haritasını döndür."""
 
-    # â”€â”€ Host bilgisi â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Host bilgisi ──────────────────────────────────────────────────────────
     host = system_monitor.get_host_info()
     stats = system_monitor.get_system_stats()
 
@@ -160,8 +160,8 @@ def get_topology() -> dict:
         return node
 
     try:
-        # â”€â”€ AÄŸlar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        all_networks = {}  # network_name â†’ network_node
+        # ── Ağlar ─────────────────────────────────────────────────────────────
+        all_networks = {}  # network_name → network_node
 
         for net in conn.listAllNetworks():
             xml_str = net.XMLDesc()
@@ -198,7 +198,7 @@ def get_topology() -> dict:
 
             all_networks[net.name()] = net_node
 
-        # â”€â”€ VM'ler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ── VM'ler ────────────────────────────────────────────────────────────
         for dom in conn.listAllDomains():
             try:
                 state, _ = dom.state()
@@ -209,7 +209,7 @@ def get_topology() -> dict:
                 vm_state = STATE_MAP.get(state, "unknown")
                 vm_id    = dom.UUIDString()
 
-                # IP adresini bul (Ã¶ncelik sÄ±rasÄ±)
+                # IP adresini bul (öncelik sırası)
                 ip_addr = _get_vm_ip_from_pool(vm_id)
 
                 if not ip_addr and parsed["nics"]:
@@ -219,7 +219,7 @@ def get_topology() -> dict:
                         _get_vm_ip_from_arp(primary_mac)
                     )
 
-                # CPU kullanÄ±m yÃ¼zdesi
+                # CPU kullanım yüzdesi
                 cpu_pct = 0.0
                 try:
                     if dom.isActive():
@@ -246,7 +246,7 @@ def get_topology() -> dict:
                     "autostart":  bool(dom.autostart()),
                 }
 
-                # Bu VM'i aÄŸÄ±na ekle
+                # Bu VM'i ağına ekle
                 placed = False
                 for nic in parsed["nics"]:
                     net_name = nic.get("network", "")
@@ -256,14 +256,14 @@ def get_topology() -> dict:
                         break
 
                 if not placed:
-                    # AÄŸ bulunamadÄ±ysa "default"a ekle ya da yeni bir "unknown" aÄŸÄ± yarat
+                    # Ağ bulunamadıysa "default"a ekle ya da yeni bir "unknown" ağı yarat
                     if "default" in all_networks:
                         all_networks["default"]["vms"].append(vm_node)
                     else:
                         if "_unassigned" not in all_networks:
                             all_networks["_unassigned"] = {
                                 "type": "network", "id": "_unassigned",
-                                "name": "AÄŸsÄ±z VM'ler", "bridge": "",
+                                "name": "Ağsız VM'ler", "bridge": "",
                                 "active": False, "autostart": False,
                                 "forward_mode": "none", "gateway": "",
                                 "vms": [],
@@ -278,7 +278,7 @@ def get_topology() -> dict:
     finally:
         conn.close()
 
-    # â”€â”€ IP HavuzlarÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── IP Havuzları ──────────────────────────────────────────────────────────
     try:
         node["ip_pools"] = ip_pool_mgr.list_pools()
     except Exception:
@@ -286,9 +286,9 @@ def get_topology() -> dict:
 
     node["timestamp"] = time.time()
     return node
-
-
-
-
-
-
+
+
+
+
+
+

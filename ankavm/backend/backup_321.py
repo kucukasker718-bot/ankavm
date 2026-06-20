@@ -1,7 +1,7 @@
-﻿"""
-ankavm 3-2-1 Backup â€” v2.5.7
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-3 kopya / 2 farklÄ± medya / 1 offsite.
+"""
+ankavm 3-2-1 Backup — v2.5.7
+──────────────────────────────
+3 kopya / 2 farklı medya / 1 offsite.
 
 API:
     set_321_policy(vm_id, policy) -> dict
@@ -41,7 +41,7 @@ except ImportError:
     _BOTO3_OK = False
 
 
-# â”€â”€ I/O helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── I/O helpers ──────────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -62,7 +62,7 @@ def _save(data: dict):
         log.warning("save fail: %s", e)
 
 
-# â”€â”€ Offsite transfer helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Offsite transfer helpers ──────────────────────────────────────────────────
 
 def _copy_to_secondary(src: str, secondary_path: str) -> dict:
     """Local copy to secondary path."""
@@ -80,7 +80,7 @@ def _copy_to_secondary(src: str, secondary_path: str) -> dict:
 def _offsite_s3(src: str, config: dict) -> dict:
     """Upload to S3/MinIO via boto3."""
     if not _BOTO3_OK:
-        return {"ok": False, "error": "boto3 kurulu deÄŸil"}
+        return {"ok": False, "error": "boto3 kurulu değil"}
     try:
         endpoint   = config.get("endpoint_url")
         bucket     = config.get("bucket", "ankavm-backups")
@@ -114,7 +114,7 @@ def _offsite_rsync(src: str, config: dict) -> dict:
         port   = int(config.get("port", 22))
         key    = config.get("ssh_key_path", "")
         if not host:
-            return {"ok": False, "error": "rsync host tanÄ±msÄ±z"}
+            return {"ok": False, "error": "rsync host tanımsız"}
         cmd = ["rsync", "-az", "--progress"]
         if key:
             cmd += ["-e", f"ssh -p {port} -i {key} -o StrictHostKeyChecking=no"]
@@ -144,15 +144,15 @@ def _offsite_minio_mgr(src: str, config: dict):
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def set_321_policy(vm_id: str, policy: dict) -> dict:
     """
     policy keys:
-      local_path      str   â€” primary backup directory
-      secondary_path  str   â€” secondary local dir (2nd media)
-      offsite         dict  â€” {type: s3|rsync|minio, config: {...}}
-      retention       int   â€” keep N copies per location (default 7)
+      local_path      str   — primary backup directory
+      secondary_path  str   — secondary local dir (2nd media)
+      offsite         dict  — {type: s3|rsync|minio, config: {...}}
+      retention       int   — keep N copies per location (default 7)
     """
     if not vm_id:
         return {"ok": False, "error": "vm_id zorunlu"}
@@ -213,7 +213,7 @@ def run_321_backup(vm_id: str) -> dict:
     try:
         lp = Path(local_path)
         if not lp.exists():
-            return {"ok": False, "error": f"local_path bulunamadÄ±: {local_path}"}
+            return {"ok": False, "error": f"local_path bulunamadı: {local_path}"}
         candidates = sorted(
             [f for f in lp.iterdir()
              if f.is_file() and vm_id in f.name and
@@ -222,11 +222,11 @@ def run_321_backup(vm_id: str) -> dict:
             reverse=True,
         )
         if not candidates:
-            return {"ok": False, "error": f"Backup dosyasÄ± bulunamadÄ±: {local_path}"}
+            return {"ok": False, "error": f"Backup dosyası bulunamadı: {local_path}"}
         src_file = str(candidates[0])
         results["source"] = src_file
     except Exception as e:
-        return {"ok": False, "error": f"Dosya tarama hatasÄ±: {e}"}
+        return {"ok": False, "error": f"Dosya tarama hatası: {e}"}
 
     copies_ok = 1  # local is copy #1
     media_set = {str(lp)}
@@ -241,7 +241,7 @@ def run_321_backup(vm_id: str) -> dict:
         # Retention on secondary
         _enforce_retention(secondary_path, vm_id, retention)
     else:
-        results["secondary"] = {"ok": False, "error": "secondary_path tanÄ±msÄ±z"}
+        results["secondary"] = {"ok": False, "error": "secondary_path tanımsız"}
 
     # Copy 3: offsite
     offsite_result: dict = {}
@@ -252,7 +252,7 @@ def run_321_backup(vm_id: str) -> dict:
     elif offsite_type == "minio":
         offsite_result = _offsite_minio_mgr(src_file, offsite_cfg.get("config") or {})
     else:
-        offsite_result = {"ok": False, "error": "offsite type tanÄ±msÄ±z (s3|rsync|minio)"}
+        offsite_result = {"ok": False, "error": "offsite type tanımsız (s3|rsync|minio)"}
     results["offsite"] = offsite_result
     if offsite_result.get("ok"):
         copies_ok += 1
@@ -316,9 +316,9 @@ def get_321_status(vm_id: str) -> dict:
         "last_run_ts": last.get("ts"),
         "run_id":      last.get("run_id"),
     }
-
-
-
-
-
-
+
+
+
+
+
+

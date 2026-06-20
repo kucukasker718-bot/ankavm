@@ -1,9 +1,9 @@
-﻿"""
+"""
 ankavm MFA Enforcement per Role
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+────────────────────────────────
 Enforce mandatory 2FA for selected roles.
 Default policy: admin = required, operator = optional, vm-user = optional.
-Login flow checks this â€” if role policy=required and user has no TOTP secret,
+Login flow checks this — if role policy=required and user has no TOTP secret,
 reject login (force enrollment).
 
 Config: /var/lib/ankavm/mfa_policy.json
@@ -66,11 +66,11 @@ def check_login_allowed(role: str, has_totp_secret: bool) -> dict:
     if pol == "required" and not has_totp_secret:
         return {"allowed": False,
                 "force_enroll": True,
-                "reason": f"2FA zorunlu ({role} rolÃ¼) â€” TOTP kurulumu yapÄ±n"}
+                "reason": f"2FA zorunlu ({role} rolü) — TOTP kurulumu yapın"}
     return {"allowed": True, "force_enroll": False, "reason": ""}
-
-
-
-
-
-
+
+
+
+
+
+

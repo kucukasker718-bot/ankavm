@@ -1,5 +1,5 @@
-﻿"""
-HugePages Manager â€” host-level config + per-VM libvirt memoryBacking.
+"""
+HugePages Manager — host-level config + per-VM libvirt memoryBacking.
 """
 import os
 import subprocess
@@ -54,7 +54,7 @@ def get_status() -> dict:
         thp = "unknown"
         try:
             txt = Path(THP_PATH).read_text().strip()
-            # format: "always [madvise] never" â€” bracketed is active
+            # format: "always [madvise] never" — bracketed is active
             for token in txt.split():
                 if token.startswith("["):
                     thp = token.strip("[]")
@@ -148,9 +148,9 @@ def remove_from_vm(vm_id: str) -> dict:
     except Exception as e:
         log.error("remove_from_vm: %s", e)
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

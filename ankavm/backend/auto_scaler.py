@@ -1,8 +1,8 @@
-﻿"""
+"""
 ankavm Auto Scaler
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Otomatik VM kaynak Ã¶lÃ§eklendirme (CPU & RAM).
-Policy tabanlÄ±, cooldown korumalÄ±.
+──────────────────
+Otomatik VM kaynak ölçeklendirme (CPU & RAM).
+Policy tabanlı, cooldown korumalı.
 """
 
 import json
@@ -29,7 +29,7 @@ except Exception:
     NOTIF_AVAILABLE = False
 
 
-# â”€â”€ YardÄ±mcÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Yardımcı ──────────────────────────────────────────────────────────────────
 
 def _ensure_dir(path: str):
     try:
@@ -39,7 +39,7 @@ def _ensure_dir(path: str):
 
 
 def _virsh(args: list, timeout: int = 15) -> tuple:
-    """virsh komutu Ã§alÄ±ÅŸtÄ±r. (stdout, stderr, returncode) dÃ¶ndÃ¼r."""
+    """virsh komutu çalıştır. (stdout, stderr, returncode) döndür."""
     try:
         r = subprocess.run(
             ["virsh"] + args,
@@ -47,11 +47,11 @@ def _virsh(args: list, timeout: int = 15) -> tuple:
         )
         return r.stdout.strip(), r.stderr.strip(), r.returncode
     except Exception as e:
-        log.debug("virsh hatasÄ±: %s", e)
+        log.debug("virsh hatası: %s", e)
         return "", str(e), -1
 
 
-# â”€â”€ Politika CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Politika CRUD ─────────────────────────────────────────────────────────────
 
 def _load() -> list:
     try:
@@ -59,7 +59,7 @@ def _load() -> list:
             with open(POLICIES_FILE) as f:
                 return json.load(f)
     except Exception as e:
-        log.warning("Policy yÃ¼kleme hatasÄ±: %s", e)
+        log.warning("Policy yükleme hatası: %s", e)
     return []
 
 
@@ -69,11 +69,11 @@ def _save(data: list):
         with open(POLICIES_FILE, "w") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
-        log.error("Policy kaydetme hatasÄ±: %s", e)
+        log.error("Policy kaydetme hatası: %s", e)
 
 
 def create_policy(vm_id: str, vm_name: str, **kwargs) -> dict:
-    """Yeni Ã¶lÃ§eklendirme politikasÄ± oluÅŸtur."""
+    """Yeni ölçeklendirme politikası oluştur."""
     try:
         policy = {
             "id": str(uuid.uuid4()),
@@ -98,38 +98,38 @@ def create_policy(vm_id: str, vm_name: str, **kwargs) -> dict:
             policies = _load()
             policies.append(policy)
             _save(policies)
-        log.info("Policy oluÅŸturuldu: %s (%s)", policy["id"], vm_name)
+        log.info("Policy oluşturuldu: %s (%s)", policy["id"], vm_name)
         return policy
     except Exception as e:
-        log.error("create_policy hatasÄ±: %s", e)
+        log.error("create_policy hatası: %s", e)
         return {"error": str(e)}
 
 
 def list_policies() -> list:
-    """TÃ¼m politikalarÄ± listele."""
+    """Tüm politikaları listele."""
     try:
         with _lock:
             return _load()
     except Exception as e:
-        log.error("list_policies hatasÄ±: %s", e)
+        log.error("list_policies hatası: %s", e)
         return []
 
 
 def get_policy(policy_id: str) -> dict:
-    """Belirli bir politikayÄ± getir."""
+    """Belirli bir politikayı getir."""
     try:
         with _lock:
             for p in _load():
                 if p["id"] == policy_id:
                     return p
-        return {"error": "Policy bulunamadÄ±."}
+        return {"error": "Policy bulunamadı."}
     except Exception as e:
-        log.error("get_policy hatasÄ±: %s", e)
+        log.error("get_policy hatası: %s", e)
         return {"error": str(e)}
 
 
 def update_policy(policy_id: str, **kwargs) -> dict:
-    """PolitikayÄ± gÃ¼ncelle."""
+    """Politikayı güncelle."""
     try:
         with _lock:
             policies = _load()
@@ -141,29 +141,29 @@ def update_policy(policy_id: str, **kwargs) -> dict:
                     policies[i]["updated_at"] = datetime.now().isoformat()
                     _save(policies)
                     return policies[i]
-        return {"error": "Policy bulunamadÄ±."}
+        return {"error": "Policy bulunamadı."}
     except Exception as e:
-        log.error("update_policy hatasÄ±: %s", e)
+        log.error("update_policy hatası: %s", e)
         return {"error": str(e)}
 
 
 def delete_policy(policy_id: str) -> dict:
-    """PolitikayÄ± sil."""
+    """Politikayı sil."""
     try:
         with _lock:
             policies = _load()
             new_list = [p for p in policies if p["id"] != policy_id]
             if len(new_list) == len(policies):
-                return {"error": "Policy bulunamadÄ±."}
+                return {"error": "Policy bulunamadı."}
             _save(new_list)
         log.info("Policy silindi: %s", policy_id)
         return {"success": True, "deleted_id": policy_id}
     except Exception as e:
-        log.error("delete_policy hatasÄ±: %s", e)
+        log.error("delete_policy hatası: %s", e)
         return {"error": str(e)}
 
 
-# â”€â”€ VM Metrik ve Ã–lÃ§eklendirme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── VM Metrik ve Ölçeklendirme ────────────────────────────────────────────────
 
 def _get_vm_metrics(vm_id: str) -> dict:
     """virsh domstats ile VM CPU ve bellek metrikleri al."""
@@ -181,14 +181,14 @@ def _get_vm_metrics(vm_id: str) -> dict:
 
         cpu_time  = float(stats.get("cpu.time", 0))
         cpu_user  = float(stats.get("cpu.user", 0))
-        # Basit CPU yÃ¼zdesi tahmini (gerÃ§ek ortamda zaman farkÄ± hesaplanmalÄ±)
+        # Basit CPU yüzdesi tahmini (gerçek ortamda zaman farkı hesaplanmalı)
         cpu_pct   = min((cpu_user / max(cpu_time, 1)) * 100, 100) if cpu_time else 0
 
         balloon_cur = float(stats.get("balloon.current", 0))  # KB
         balloon_max = float(stats.get("balloon.maximum", 1))  # KB
         mem_pct = (balloon_cur / max(balloon_max, 1)) * 100 if balloon_max else 0
 
-        # Mevcut vCPU sayÄ±sÄ±
+        # Mevcut vCPU sayısı
         vcpu_out, _, _ = _virsh(["vcpucount", vm_id, "--current"])
         try:
             vcpus = int(vcpu_out.strip())
@@ -202,7 +202,7 @@ def _get_vm_metrics(vm_id: str) -> dict:
             "current_memory_mb": int(balloon_cur / 1024),
         }
     except Exception as e:
-        log.debug("_get_vm_metrics hatasÄ± (%s): %s", vm_id, e)
+        log.debug("_get_vm_metrics hatası (%s): %s", vm_id, e)
         return {}
 
 
@@ -211,7 +211,7 @@ def _scale_up_cpu(vm_id: str, current_vcpus: int, step: int) -> int:
     new_vcpus = current_vcpus + step
     stdout, stderr, rc = _virsh(["setvcpus", vm_id, str(new_vcpus), "--live", "--config"])
     if rc != 0:
-        log.warning("setvcpus baÅŸarÄ±sÄ±z (%s): %s", vm_id, stderr)
+        log.warning("setvcpus başarısız (%s): %s", vm_id, stderr)
     return new_vcpus if rc == 0 else current_vcpus
 
 
@@ -220,7 +220,7 @@ def _scale_down_cpu(vm_id: str, current_vcpus: int, step: int) -> int:
     new_vcpus = max(1, current_vcpus - step)
     stdout, stderr, rc = _virsh(["setvcpus", vm_id, str(new_vcpus), "--live", "--config"])
     if rc != 0:
-        log.warning("setvcpus baÅŸarÄ±sÄ±z (%s): %s", vm_id, stderr)
+        log.warning("setvcpus başarısız (%s): %s", vm_id, stderr)
     return new_vcpus if rc == 0 else current_vcpus
 
 
@@ -230,7 +230,7 @@ def _scale_up_mem(vm_id: str, current_mem_mb: int, step: int) -> int:
     new_mem_kb = new_mem_mb * 1024
     stdout, stderr, rc = _virsh(["setmem", vm_id, str(new_mem_kb), "--live", "--config"])
     if rc != 0:
-        log.warning("setmem baÅŸarÄ±sÄ±z (%s): %s", vm_id, stderr)
+        log.warning("setmem başarısız (%s): %s", vm_id, stderr)
     return new_mem_mb if rc == 0 else current_mem_mb
 
 
@@ -240,12 +240,12 @@ def _scale_down_mem(vm_id: str, current_mem_mb: int, step: int) -> int:
     new_mem_kb = new_mem_mb * 1024
     stdout, stderr, rc = _virsh(["setmem", vm_id, str(new_mem_kb), "--live", "--config"])
     if rc != 0:
-        log.warning("setmem baÅŸarÄ±sÄ±z (%s): %s", vm_id, stderr)
+        log.warning("setmem başarısız (%s): %s", vm_id, stderr)
     return new_mem_mb if rc == 0 else current_mem_mb
 
 
 def _log_event(policy_id: str, vm_id: str, action: str, old_val, new_val, reason: str):
-    """Ã–lÃ§eklendirme olayÄ±nÄ± SCALE_LOG'a kaydet."""
+    """Ölçeklendirme olayını SCALE_LOG'a kaydet."""
     event = {
         "ts": datetime.now().isoformat(),
         "policy_id": policy_id,
@@ -260,12 +260,12 @@ def _log_event(policy_id: str, vm_id: str, action: str, old_val, new_val, reason
         with open(SCALE_LOG, "a") as f:
             f.write(json.dumps(event, ensure_ascii=False) + "\n")
     except Exception as e:
-        log.error("Scale log yazma hatasÄ±: %s", e)
+        log.error("Scale log yazma hatası: %s", e)
 
     if NOTIF_AVAILABLE:
         try:
             _notif.send_alert(
-                message=f"Auto-scale: {action} â€” VM {vm_id} | {old_val} â†’ {new_val}",
+                message=f"Auto-scale: {action} — VM {vm_id} | {old_val} → {new_val}",
                 level="INFO",
                 category="auto_scaler",
                 details={"policy_id": policy_id, "reason": reason},
@@ -275,10 +275,10 @@ def _log_event(policy_id: str, vm_id: str, action: str, old_val, new_val, reason
             pass
 
 
-# â”€â”€ Kontrol DÃ¶ngÃ¼sÃ¼ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Kontrol Döngüsü ───────────────────────────────────────────────────────────
 
 def check_and_scale():
-    """TÃ¼m aktif politikalarÄ± kontrol et ve gerekirse Ã¶lÃ§eklendir."""
+    """Tüm aktif politikaları kontrol et ve gerekirse ölçeklendir."""
     try:
         with _lock:
             policies = _load()
@@ -294,7 +294,7 @@ def check_and_scale():
             vm_id = policy["vm_id"]
             vm_name = policy.get("vm_name", vm_id)
 
-            # Cooldown kontrolÃ¼
+            # Cooldown kontrolü
             last_action = policy.get("last_action")
             if last_action:
                 try:
@@ -325,37 +325,37 @@ def check_and_scale():
                 )
                 actual = _scale_up_cpu(vm_id, cur_vcpus, policy["scale_step_vcpus"])
                 _log_event(policy["id"], vm_id, "cpu_scale_up", cur_vcpus, actual,
-                           f"CPU %{cpu_pct:.1f} >= eÅŸik %{policy['cpu_scale_up_threshold']}")
+                           f"CPU %{cpu_pct:.1f} >= eşik %{policy['cpu_scale_up_threshold']}")
                 policy["last_action"] = datetime.now().isoformat()
                 scaled = True
-                log.info("CPU scale-up: %s %dâ†’%d", vm_name, cur_vcpus, actual)
+                log.info("CPU scale-up: %s %d→%d", vm_name, cur_vcpus, actual)
 
             # CPU Scale Down
             elif cpu_pct <= policy["cpu_scale_down_threshold"] and cur_vcpus > policy["min_vcpus"]:
                 actual = _scale_down_cpu(vm_id, cur_vcpus, policy["scale_step_vcpus"])
                 _log_event(policy["id"], vm_id, "cpu_scale_down", cur_vcpus, actual,
-                           f"CPU %{cpu_pct:.1f} <= eÅŸik %{policy['cpu_scale_down_threshold']}")
+                           f"CPU %{cpu_pct:.1f} <= eşik %{policy['cpu_scale_down_threshold']}")
                 policy["last_action"] = datetime.now().isoformat()
                 scaled = True
-                log.info("CPU scale-down: %s %dâ†’%d", vm_name, cur_vcpus, actual)
+                log.info("CPU scale-down: %s %d→%d", vm_name, cur_vcpus, actual)
 
             # Mem Scale Up
             if mem_pct >= policy["mem_scale_up_threshold"] and cur_mem_mb < policy["max_memory_mb"]:
                 actual = _scale_up_mem(vm_id, cur_mem_mb, policy["scale_step_memory_mb"])
                 _log_event(policy["id"], vm_id, "mem_scale_up", cur_mem_mb, actual,
-                           f"MEM %{mem_pct:.1f} >= eÅŸik %{policy['mem_scale_up_threshold']}")
+                           f"MEM %{mem_pct:.1f} >= eşik %{policy['mem_scale_up_threshold']}")
                 policy["last_action"] = datetime.now().isoformat()
                 scaled = True
-                log.info("MEM scale-up: %s %dMBâ†’%dMB", vm_name, cur_mem_mb, actual)
+                log.info("MEM scale-up: %s %dMB→%dMB", vm_name, cur_mem_mb, actual)
 
             # Mem Scale Down
             elif mem_pct <= policy["mem_scale_down_threshold"] and cur_mem_mb > policy["min_memory_mb"]:
                 actual = _scale_down_mem(vm_id, cur_mem_mb, policy["scale_step_memory_mb"])
                 _log_event(policy["id"], vm_id, "mem_scale_down", cur_mem_mb, actual,
-                           f"MEM %{mem_pct:.1f} <= eÅŸik %{policy['mem_scale_down_threshold']}")
+                           f"MEM %{mem_pct:.1f} <= eşik %{policy['mem_scale_down_threshold']}")
                 policy["last_action"] = datetime.now().isoformat()
                 scaled = True
-                log.info("MEM scale-down: %s %dMBâ†’%dMB", vm_name, cur_mem_mb, actual)
+                log.info("MEM scale-down: %s %dMB→%dMB", vm_name, cur_mem_mb, actual)
 
             updated.append(policy)
 
@@ -363,11 +363,11 @@ def check_and_scale():
             _save(updated)
 
     except Exception as e:
-        log.error("check_and_scale hatasÄ±: %s", e)
+        log.error("check_and_scale hatası: %s", e)
 
 
 def get_scaling_events(vm_id: str = None, limit: int = 50) -> list:
-    """Ã–lÃ§eklendirme olaylarÄ±nÄ± SCALE_LOG'dan oku."""
+    """Ölçeklendirme olaylarını SCALE_LOG'dan oku."""
     try:
         if not os.path.exists(SCALE_LOG):
             return []
@@ -385,27 +385,27 @@ def get_scaling_events(vm_id: str = None, limit: int = 50) -> list:
                     pass
         return list(reversed(events))[:limit]
     except Exception as e:
-        log.error("get_scaling_events hatasÄ±: %s", e)
+        log.error("get_scaling_events hatası: %s", e)
         return []
 
 
 def start_auto_scaler(interval: int = 60):
-    """Auto-scaler'Ä± daemon thread olarak baÅŸlat."""
+    """Auto-scaler'ı daemon thread olarak başlat."""
     def _worker():
         while True:
             try:
                 check_and_scale()
             except Exception as e:
-                log.error("Auto-scaler dÃ¶ngÃ¼ hatasÄ±: %s", e)
+                log.error("Auto-scaler döngü hatası: %s", e)
             time.sleep(interval)
 
     t = threading.Thread(target=_worker, daemon=True, name="auto-scaler")
     t.start()
-    log.info("Auto-scaler baÅŸlatÄ±ldÄ±. AralÄ±k: %ds", interval)
+    log.info("Auto-scaler başlatıldı. Aralık: %ds", interval)
     return t
-
-
-
-
-
-
+
+
+
+
+
+

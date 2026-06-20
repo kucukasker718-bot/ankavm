@@ -1,5 +1,5 @@
-﻿"""
-NUMA Manager â€” Custom NUMA topology for KVM/libvirt VMs.
+"""
+NUMA Manager — Custom NUMA topology for KVM/libvirt VMs.
 """
 import xml.etree.ElementTree as ET
 import libvirt
@@ -94,9 +94,9 @@ def remove_vm_numa(vm_id: str) -> dict:
         return {"ok": True}
     finally:
         conn.close()
-
-
-
-
-
-
+
+
+
+
+
+

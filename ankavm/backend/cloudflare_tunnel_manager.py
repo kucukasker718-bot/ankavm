@@ -1,5 +1,5 @@
-﻿"""
-Cloudflare Tunnel Manager â€” per-VM cloudflared tunnel management.
+"""
+Cloudflare Tunnel Manager — per-VM cloudflared tunnel management.
 Manages tunnel config files and systemd services per VM.
 """
 import subprocess
@@ -10,24 +10,24 @@ import stat
 import yaml
 
 TUNNEL_DIR = "/etc/ankavm/cf-tunnels"
-# rapor #58 fix: dizin izinlerini kÄ±sÄ±tla (token dosyalarÄ± burada)
+# rapor #58 fix: dizin izinlerini kısıtla (token dosyaları burada)
 os.makedirs(TUNNEL_DIR, exist_ok=True)
 try:
     os.chmod(TUNNEL_DIR, 0o700)
 except Exception:
     pass
 
-# rapor #58 fix: vm_id sanitize â€” yalnÄ±zca UUID benzeri karakterler
+# rapor #58 fix: vm_id sanitize — yalnızca UUID benzeri karakterler
 _VM_ID_RE = re.compile(r'^[a-zA-Z0-9\-]{1,64}$')
 
 def _sanitize_vm_id(vm_id: str) -> str:
-    """Path traversal ve servis adÄ± injection Ã¶nle."""
+    """Path traversal ve servis adı injection önle."""
     if not vm_id or not _VM_ID_RE.match(vm_id):
-        raise ValueError(f"GeÃ§ersiz vm_id: {vm_id!r}")
+        raise ValueError(f"Geçersiz vm_id: {vm_id!r}")
     return vm_id
 
 def _write_secure(path: str, content: str):
-    """DosyayÄ± 0600 izniyle yaz (token/kimlik bilgisi koruma)."""
+    """Dosyayı 0600 izniyle yaz (token/kimlik bilgisi koruma)."""
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     try:
         os.write(fd, content.encode())
@@ -49,7 +49,7 @@ def list_tunnels() -> list:
             try:
                 with open(os.path.join(TUNNEL_DIR, fname)) as f:
                     cfg = json.load(f)
-                # Tunnel ID'yi API yanÄ±tÄ±ndan Ã§Ä±kar (hassas bilgi gizle)
+                # Tunnel ID'yi API yanıtından çıkar (hassas bilgi gizle)
                 cfg.pop("tunnel_id", None)
                 svc = f"ankavm-tunnel-{vm_id}"
                 r = subprocess.run(["systemctl", "is-active", svc],
@@ -96,7 +96,7 @@ def create_tunnel(vm_id: str, vm_name: str, hostname: str,
                     tunnel_id = part
                     break
 
-    # Write config (YAML â€” no credentials embedded here)
+    # Write config (YAML — no credentials embedded here)
     config = {
         "tunnel": tunnel_name,
         "credentials-file": f"/root/.cloudflared/{tunnel_id}.json" if tunnel_id else "",
@@ -110,7 +110,7 @@ def create_tunnel(vm_id: str, vm_name: str, hostname: str,
     # rapor #58 fix: 0600 perms on config file (contains credentials-file path)
     _write_secure(cfg_path, yaml.dump(config))
 
-    # Save metadata (no tunnel_id in plaintext â€” only reference)
+    # Save metadata (no tunnel_id in plaintext — only reference)
     meta = {
         "vm_id": vm_id, "vm_name": vm_name, "hostname": hostname,
         "target": f"{target_ip}:{target_port}", "protocol": protocol,
@@ -205,9 +205,9 @@ def stop_tunnel(vm_id: str) -> dict:
     svc_name = f"ankavm-tunnel-{vm_id}"
     r = subprocess.run(["systemctl", "stop", svc_name], capture_output=True, text=True)
     return {"ok": r.returncode == 0}
-
-
-
-
-
-
+
+
+
+
+
+

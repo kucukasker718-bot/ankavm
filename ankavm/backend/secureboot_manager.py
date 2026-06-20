@@ -1,5 +1,5 @@
-﻿"""
-SecureBoot Manager â€” UEFI Secure Boot enforcement for libvirt VMs.
+"""
+SecureBoot Manager — UEFI Secure Boot enforcement for libvirt VMs.
 
 Uses OVMF_CODE.secboot.fd + OVMF_VARS.secboot.fd and enables SMM, which is
 required for Secure Boot variable protection.
@@ -50,7 +50,7 @@ def enable_secureboot(vm_id: str) -> dict:
     try:
         code = _find(OVMF_CODE_SECBOOT_CANDIDATES)
         if not code:
-            return {"ok": False, "error": "OVMF_CODE.secboot.fd not found â€” install ovmf/edk2-ovmf"}
+            return {"ok": False, "error": "OVMF_CODE.secboot.fd not found — install ovmf/edk2-ovmf"}
         vars_template = _find(OVMF_VARS_SECBOOT_CANDIDATES)
         if not vars_template:
             return {"ok": False, "error": "OVMF_VARS template not found"}
@@ -177,9 +177,9 @@ def list_secureboot_vms() -> list:
     except Exception as e:
         log.error("list_secureboot_vms: %s", e)
         return []
-
-
-
-
-
-
+
+
+
+
+
+

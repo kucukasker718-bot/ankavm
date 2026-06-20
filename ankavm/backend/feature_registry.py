@@ -1,14 +1,14 @@
-﻿"""
+"""
 ankavm Feature Registry
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-TÃ¼m enterprise Ã¶zelliklerin merkezi kaydÄ±:
-  - Her Ã¶zellik: id, ad, kategori, modÃ¼l, endpoint sayÄ±sÄ±, durum
-  - KalÄ±cÄ± state: /var/lib/ankavm/features.json
-  - Audit-friendly: tÃ¼m enable/disable iÅŸlemleri kayÄ±tlÄ±
-  - Dependency check: baÄŸÄ±mlÄ± Ã¶zellikler birbirini koparmaz
+───────────────────────
+Tüm enterprise özelliklerin merkezi kaydı:
+  - Her özellik: id, ad, kategori, modül, endpoint sayısı, durum
+  - Kalıcı state: /var/lib/ankavm/features.json
+  - Audit-friendly: tüm enable/disable işlemleri kayıtlı
+  - Dependency check: bağımlı özellikler birbirini koparmaz
 
-Her feature 'capability flag' â€” runtime'da open/closed. Ã‡akÄ±ÅŸma yok,
-Ã§Ã¼nkÃ¼ her feature kendi namespace'inde + endpoint'leri register edilir.
+Her feature 'capability flag' — runtime'da open/closed. Çakışma yok,
+çünkü her feature kendi namespace'inde + endpoint'leri register edilir.
 """
 
 from __future__ import annotations
@@ -27,13 +27,13 @@ _AUDIT_FILE    = Path("/var/log/ankavm/feature_audit.jsonl")
 _lock          = threading.RLock()
 
 
-# â”€â”€ TÃ¼m bilinen feature'larÄ±n manifest'i â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-# Yeni feature eklerken: bu listeye satÄ±r ekle, MODULE_NAME = backend modÃ¼l adÄ±.
+# ── Tüm bilinen feature'ların manifest'i ──────────────────────────────────────
+# Yeni feature eklerken: bu listeye satır ekle, MODULE_NAME = backend modül adı.
 # CATEGORY: 'compute' | 'storage' | 'network' | 'security' | 'observability' |
 #           'dr' | 'automation' | 'multi-tenancy' | 'lifecycle' | 'modern'
 # STATUS: 'stable' | 'beta' | 'experimental' | 'planned'
 FEATURE_MANIFEST = [
-    # â”€â”€ v2.5.3 â€” Stable (shipped, proven in production) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.3 — Stable (shipped, proven in production) ──────────────────────────
     {"id": "drs",            "name": "DRS Cluster",            "category": "compute",      "module": "drs_manager",         "status": "stable", "version": "2.5.3"},
     {"id": "affinity",       "name": "Affinity Rules",         "category": "compute",      "module": "affinity_manager",    "status": "stable", "version": "2.5.3"},
     {"id": "maintenance",    "name": "Maintenance Mode",       "category": "lifecycle",    "module": "maintenance_mode",    "status": "stable", "version": "2.5.3"},
@@ -58,7 +58,7 @@ FEATURE_MANIFEST = [
     {"id": "compute_tune",   "name": "Compute Tuning (KSM)",   "category": "compute",      "module": "compute_tuning",      "status": "stable", "version": "2.5.3"},
     {"id": "ldap",           "name": "LDAP/AD Integration",    "category": "security",     "module": "ldap_manager",        "status": "stable", "version": "2.5.3"},
 
-    # â”€â”€ v2.5.4 â€” Stable (hardware security, shipped 6+ months) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.4 — Stable (hardware security, shipped 6+ months) ──────────────────
     {"id": "vtpm",           "name": "Virtual TPM 2.0",        "category": "security",     "module": "vtpm_manager",        "status": "stable", "version": "2.5.4"},
     {"id": "secure_boot",    "name": "Secure Boot",            "category": "security",     "module": "secureboot_manager",  "status": "stable", "version": "2.5.4"},
     {"id": "vault",          "name": "HashiCorp Vault",        "category": "security",     "module": "vault_integration",   "status": "stable", "version": "2.5.4"},
@@ -70,7 +70,7 @@ FEATURE_MANIFEST = [
     {"id": "boot_order",     "name": "DR Boot Order",          "category": "dr",           "module": "boot_order_manager",  "status": "stable", "version": "2.5.4"},
     {"id": "geo_dns",        "name": "Geo-DNS Failover",       "category": "dr",           "module": "geo_dns_manager",     "status": "beta",   "version": "2.5.4"},
 
-    # â”€â”€ v2.5.5 â€” Stable (security & compliance, production-hardened) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.5 — Stable (security & compliance, production-hardened) ─────────────
     {"id": "sev_tdx",        "name": "AMD SEV / Intel TDX",    "category": "security",     "module": "confidential_vm",     "status": "stable", "version": "2.5.5"},
     {"id": "live_encrypt",   "name": "Live Disk Encryption",   "category": "security",     "module": "disk_encryption",     "status": "stable", "version": "2.5.5"},
     {"id": "compliance",     "name": "CIS/NIST/PCI-DSS",       "category": "security",     "module": "compliance_scanner",  "status": "stable", "version": "2.5.5"},
@@ -79,7 +79,7 @@ FEATURE_MANIFEST = [
     {"id": "mfa_per_role",   "name": "MFA per Role",           "category": "security",     "module": "mfa_enforcement",     "status": "stable", "version": "2.5.5"},
     {"id": "saml_oidc",      "name": "SAML / OIDC SSO",        "category": "security",     "module": "sso_manager",         "status": "stable", "version": "2.5.5"},
 
-    # â”€â”€ v2.5.6 â€” Stable (multi-tenancy, billing) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.6 — Stable (multi-tenancy, billing) ──────────────────────────────────
     {"id": "tenant_iso",     "name": "Hard Tenant Isolation",  "category": "multi-tenancy","module": "tenant_manager",      "status": "stable", "version": "2.5.6"},
     {"id": "self_service",   "name": "Self-Service Portal",    "category": "multi-tenancy","module": "self_service_portal", "status": "stable", "version": "2.5.6"},
     {"id": "chargeback",     "name": "Chargeback / Showback",  "category": "multi-tenancy","module": "chargeback_engine",   "status": "stable", "version": "2.5.6"},
@@ -87,13 +87,13 @@ FEATURE_MANIFEST = [
     {"id": "service_catalog","name": "Service Catalog",        "category": "multi-tenancy","module": "service_catalog",     "status": "stable", "version": "2.5.6"},
     {"id": "api_rate_limit", "name": "API Rate Limit per Tenant","category": "multi-tenancy","module": "tenant_rate_limit", "status": "stable", "version": "2.5.6"},
 
-    # â”€â”€ v2.5.7 â€” Stable (backup advanced) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.7 — Stable (backup advanced) ────────────────────────────────────────
     {"id": "app_consistent", "name": "App-Consistent Snapshots","category": "storage",     "module": "app_consistent_snapshot", "status": "stable", "version": "2.5.7"},
     {"id": "backup_321",     "name": "3-2-1 Backup",           "category": "storage",      "module": "backup_321",              "status": "stable", "version": "2.5.7"},
     {"id": "backup_verify",  "name": "Backup Verification",    "category": "storage",      "module": "backup_verify",           "status": "stable", "version": "2.5.7"},
     {"id": "cross_replicate","name": "Cross-Site Replication", "category": "dr",           "module": "cross_replication",       "status": "stable", "version": "2.5.7"},
 
-    # â”€â”€ v2.5.8 â€” Stable (observability) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.8 — Stable (observability) ──────────────────────────────────────────
     {"id": "otel",           "name": "Distributed Tracing",    "category": "observability","module": "otel_tracing",        "status": "stable", "version": "2.5.8"},
     {"id": "grafana_embed",  "name": "Grafana Embed",          "category": "observability","module": "grafana_embed",       "status": "stable", "version": "2.5.8"},
     {"id": "topology_viz",   "name": "Topology Visualization", "category": "observability","module": "topology_viz",        "status": "stable", "version": "2.5.8"},
@@ -101,33 +101,33 @@ FEATURE_MANIFEST = [
     {"id": "config_drift",   "name": "Config Drift Detection", "category": "lifecycle",    "module": "drift_capacity",      "status": "stable", "version": "2.5.8"},
     {"id": "capacity_plan",  "name": "Capacity Planning",      "category": "observability","module": "drift_capacity",      "status": "stable", "version": "2.5.8"},
 
-    # â”€â”€ v2.5.9 â€” Stable (network advanced 2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.9 — Stable (network advanced 2) ─────────────────────────────────────
     {"id": "microseg",       "name": "Microsegmentation (L7 nftables)", "category": "network", "module": "microsegmentation", "status": "stable", "version": "2.5.9"},
     {"id": "bfd",            "name": "BFD (Bidirectional Forwarding)",  "category": "network", "module": "bfd_manager",       "status": "stable", "version": "2.5.9"},
     {"id": "service_chain",  "name": "Service Chaining (IDS/WAF/LB)",  "category": "network", "module": "service_chain",     "status": "stable", "version": "2.5.9"},
     {"id": "service_mesh",   "name": "Service Mesh (Istio/Linkerd)",   "category": "network", "module": "service_mesh",      "status": "stable", "version": "2.5.9"},
 
-    # â”€â”€ v2.5.10 â€” Beta (cloud/k8s â€” environment dependent) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.10 — Beta (cloud/k8s — environment dependent) ───────────────────────
     {"id": "k8s_csi",        "name": "Kubernetes CSI",         "category": "automation",   "module": "k8s_csi",             "status": "beta",   "version": "2.5.10"},
     {"id": "k8s_operator",   "name": "Kubernetes Operator",    "category": "automation",   "module": "k8s_operator",        "status": "beta",   "version": "2.5.10"},
     {"id": "kubevirt",       "name": "KubeVirt",               "category": "automation",   "module": "kubevirt_integration","status": "beta",   "version": "2.5.10"},
     {"id": "gitops",         "name": "GitOps (ArgoCD/Flux)",   "category": "automation",   "module": "gitops_sync",         "status": "beta",   "version": "2.5.10"},
     {"id": "pulumi",         "name": "Pulumi Provider",        "category": "automation",   "module": "pulumi_provider",     "status": "stable", "version": "2.5.10"},
 
-    # â”€â”€ v2.5.11 â€” Beta (modern workloads â€” runtime dependent) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.11 — Beta (modern workloads — runtime dependent) ────────────────────
     {"id": "firecracker",    "name": "microVM (Firecracker)",  "category": "modern",       "module": "firecracker_mgr",     "status": "beta",   "version": "2.5.11"},
     {"id": "kata",           "name": "Kata Containers",        "category": "modern",       "module": "kata_runtime",        "status": "beta",   "version": "2.5.11"},
     {"id": "wasm",           "name": "WASM Runtime",           "category": "modern",       "module": "wasm_runtime",        "status": "beta",   "version": "2.5.11"},
     {"id": "edge",           "name": "Edge Deployment",        "category": "modern",       "module": "edge_mode",           "status": "beta",   "version": "2.5.11"},
 
-    # â”€â”€ v2.5.12 â€” Beta (IaC + clients, newly shipped) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.5.12 — Beta (IaC + clients, newly shipped) ────────────────────────────
     {"id": "workflow_engine","name": "Workflow Engine",        "category": "automation",   "module": "workflow_engine",     "status": "stable", "version": "2.5.12"},
     {"id": "opa",            "name": "Policy as Code (OPA)",   "category": "automation",   "module": "opa_policy",          "status": "stable", "version": "2.5.12"},
     {"id": "cloudevents",    "name": "CloudEvents",            "category": "automation",   "module": "cloudevents",         "status": "stable", "version": "2.5.12"},
     {"id": "electron",       "name": "Desktop Client",         "category": "modern",       "module": "electron_client",     "status": "beta",   "version": "2.5.12"},
     {"id": "workload_mob",   "name": "Workload Mobility (Cloud)","category": "modern",     "module": "cloud_export",        "status": "stable", "version": "2.5.12"},
 
-    # â”€â”€ v2.6.1 â€” New (added this release) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.6.1 — New (added this release) ────────────────────────────────────────
     {"id": "fault_tolerance","name": "Fault Tolerance",        "category": "dr",           "module": "fault_tolerance",     "status": "beta",   "version": "2.6.1"},
     {"id": "storage_drs",   "name": "Storage DRS",            "category": "storage",      "module": "storage_drs",         "status": "beta",   "version": "2.6.1"},
     {"id": "console_rec",   "name": "VM Console Recording",   "category": "compute",      "module": "console_recorder",    "status": "beta",   "version": "2.6.1"},
@@ -136,18 +136,18 @@ FEATURE_MANIFEST = [
     {"id": "disk_hot_ext",  "name": "VM Disk Hot-Extend",     "category": "compute",      "module": "vm_hot_extend",       "status": "stable", "version": "2.6.1"},
     {"id": "bulk_vm_ops",   "name": "Bulk VM Operations",     "category": "compute",      "module": "bulk_vm_ops",         "status": "stable", "version": "2.6.1"},
 
-    # â”€â”€ v2.6.2 â€” Green Mode + OS branding + web installer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── v2.6.2 — Green Mode + OS branding + web installer ────────────────────────
     {"id": "green_mode",    "name": "Green Mode (Power AI)",  "category": "automation",   "module": "green_mode",          "status": "beta",   "version": "2.6.2"},
     {"id": "os_branding",   "name": "OS Rebranding",          "category": "lifecycle",    "module": "_script",             "status": "beta",   "version": "2.6.2"},
 
-    # â”€â”€ v2.6.3 â€” Multi-Region, Marketplace, Cloud Burst, Bare-Metal, OAuth2 â”€â”€
+    # ── v2.6.3 — Multi-Region, Marketplace, Cloud Burst, Bare-Metal, OAuth2 ──
     {"id": "multi_region",  "name": "Multi-Region Placement", "category": "automation",   "module": "multi_region",        "status": "beta",   "version": "2.6.3"},
     {"id": "marketplace",   "name": "App Marketplace",        "category": "automation",   "module": "app_marketplace",     "status": "beta",   "version": "2.6.3"},
     {"id": "cloud_burst",   "name": "Cloud Bursting",         "category": "automation",   "module": "cloud_burst",         "status": "beta",   "version": "2.6.3"},
     {"id": "bare_metal",    "name": "Bare-Metal Provisioning","category": "lifecycle",    "module": "bare_metal",          "status": "beta",   "version": "2.6.3"},
     {"id": "oauth2_sso",    "name": "OAuth 2.0 SSO",          "category": "security",     "module": "oauth2_sso",          "status": "beta",   "version": "2.6.3"},
 
-    # â”€â”€ v2.7.0 â€” Confidential VM ext, Runbook Executor, Cluster Federation â”€â”€
+    # ── v2.7.0 — Confidential VM ext, Runbook Executor, Cluster Federation ──
     {"id": "vtpm_secboot",  "name": "vTPM + Secure Boot",     "category": "security",     "module": "confidential_vm",     "status": "beta",   "version": "2.7.0"},
     {"id": "attestation",   "name": "Confidential Attestation","category":"security",     "module": "confidential_vm",     "status": "beta",   "version": "2.7.0"},
     {"id": "runbook_exec",  "name": "Auto-Remediation Runbooks","category":"automation",  "module": "runbook_executor",    "status": "beta",   "version": "2.7.0"},
@@ -155,10 +155,10 @@ FEATURE_MANIFEST = [
 ]
 
 
-# â”€â”€ Persistent state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent state ──────────────────────────────────────────────────────────
 # High-risk features: large attack surface, run arbitrary code or attach foreign
-# binaries to the host. Default DISABLED â€” admin must opt-in explicitly via the
-# Settings â†’ Features panel or `oxctl feature enable <id>`.
+# binaries to the host. Default DISABLED — admin must opt-in explicitly via the
+# Settings → Features panel or `oxctl feature enable <id>`.
 HIGH_RISK_FEATURES = {
     "plugin_sdk",       # Loads arbitrary Python into the controller process
     "marketplace",      # Pulls remote packages
@@ -182,7 +182,7 @@ def _load() -> dict:
     except Exception as e:
         log.warning("registry load fail: %s", e)
     # Defaults: stable+beta enabled, experimental+planned disabled,
-    # HIGH_RISK_FEATURES disabled regardless of status â€” explicit opt-in required.
+    # HIGH_RISK_FEATURES disabled regardless of status — explicit opt-in required.
     state = {}
     for f in FEATURE_MANIFEST:
         default_on = f["status"] in ("stable", "beta") and f["id"] not in HIGH_RISK_FEATURES
@@ -216,9 +216,9 @@ def _audit(event: str, feature_id: str, details: Optional[dict] = None):
         pass
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 def list_features(category: Optional[str] = None, status: Optional[str] = None) -> list:
-    """TÃ¼m feature'larÄ± dÃ¶ndÃ¼r (state merged)."""
+    """Tüm feature'ları döndür (state merged)."""
     with _lock:
         state = _load()
         out = []
@@ -259,7 +259,7 @@ def enable(feature_id: str, by_user: str = "system") -> dict:
         if not f:
             return {"ok": False, "error": f"Unknown feature: {feature_id}"}
         if f["status"] == "planned":
-            return {"ok": False, "error": "HenÃ¼z uygulanmamÄ±ÅŸ (planned)"}
+            return {"ok": False, "error": "Henüz uygulanmamış (planned)"}
         state.setdefault(feature_id, {})["enabled"] = True
         _save(state)
         _audit("enable", feature_id, {"user": by_user})
@@ -292,7 +292,7 @@ def get_config(feature_id: str) -> dict:
 
 
 def get_categories() -> dict:
-    """Kategori baÅŸÄ±na Ã¶zet (toplam, etkin, planlanan)."""
+    """Kategori başına özet (toplam, etkin, planlanan)."""
     with _lock:
         state = _load()
         cats: dict = {}
@@ -307,7 +307,7 @@ def get_categories() -> dict:
 
 
 def get_audit_log(limit: int = 100) -> list:
-    """Son N audit kaydÄ±nÄ± dÃ¶ndÃ¼r."""
+    """Son N audit kaydını döndür."""
     try:
         if not _AUDIT_FILE.exists():
             return []
@@ -325,7 +325,7 @@ def get_audit_log(limit: int = 100) -> list:
 
 
 def summary() -> dict:
-    """Genel Ã¶zet â€” kaÃ§ feature stable/beta/planned, kaÃ§ enabled."""
+    """Genel özet — kaç feature stable/beta/planned, kaç enabled."""
     with _lock:
         state = _load()
         total      = len(FEATURE_MANIFEST)
@@ -353,7 +353,7 @@ if __name__ == "__main__":
         print(json.dumps(summary(), indent=2, ensure_ascii=False))
     elif cmd == "list":
         for f in list_features(category=sys.argv[2] if len(sys.argv) > 2 else None):
-            mark = "âœ“" if f["enabled"] else "âœ—"
+            mark = "✓" if f["enabled"] else "✗"
             print(f"  [{mark}] {f['id']:20s} {f['name']:40s} {f['status']:12s} v{f['version']}")
     elif cmd == "enable":
         print(enable(sys.argv[2], by_user="cli"))
@@ -361,9 +361,9 @@ if __name__ == "__main__":
         print(disable(sys.argv[2], by_user="cli"))
     else:
         print("Usage: feature_registry.py [summary|list [category]|enable <id>|disable <id>]")
-
-
-
-
-
-
+
+
+
+
+
+

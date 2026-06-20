@@ -1,8 +1,8 @@
-﻿"""
-Geo-DNS failover â€” Cloudflare / Route53 record management + health checks.
+"""
+Geo-DNS failover — Cloudflare / Route53 record management + health checks.
 
 Cloudflare uses bearer token + zone API; Route53 uses AWS sigv4 (not pure
-stdlib) â€” for Route53 we shell out to `aws` CLI if available, otherwise
+stdlib) — for Route53 we shell out to `aws` CLI if available, otherwise
 fall back to local "would update" simulation. Cloudflare path is fully
 implemented via urllib.
 """
@@ -208,7 +208,7 @@ def _switch_active(rec: dict, new_ip: str) -> bool:
 
 
 def health_check_run_once() -> dict:
-    """One pass â€” flip records whose primary is unhealthy."""
+    """One pass — flip records whose primary is unhealthy."""
     try:
         results = {}
         with _lock:
@@ -267,9 +267,9 @@ def health_status() -> dict:
     return {"last_run": _health.get("last_run", 0),
             "results": _health.get("results", {}),
             "running": bool(_health["thread"] and _health["thread"].is_alive())}
-
-
-
-
-
-
+
+
+
+
+
+

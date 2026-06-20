@@ -1,12 +1,12 @@
-﻿"""
-ankavm Chargeback Engine â€” Per-Tenant Cost Tracking
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Ä°cra anlÄ±k (on-demand) â€” periodic job YOK; sunucuya yÃ¼k yapmaz.
+"""
+ankavm Chargeback Engine — Per-Tenant Cost Tracking
+─────────────────────────────────────────────────────
+İcra anlık (on-demand) — periodic job YOK; sunucuya yük yapmaz.
 
-  - FiyatlandÄ±rma: /var/lib/ankavm/chargeback_config.json
+  - Fiyatlandırma: /var/lib/ankavm/chargeback_config.json
   - Faturalar:    /var/lib/ankavm/invoices/<tenant>/<YYYY-MM>.json
-  - Veri kaynaÄŸÄ±: tenant_manager.get_tenant_usage()
-                  perf_history (varsa) â†’ ortalama CPU yÃ¼klemesi
+  - Veri kaynağı: tenant_manager.get_tenant_usage()
+                  perf_history (varsa) → ortalama CPU yüklemesi
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ _CFG_FILE     = Path("/var/lib/ankavm/chargeback_config.json")
 _INVOICE_DIR  = Path("/var/lib/ankavm/invoices")
 _lock         = threading.RLock()
 
-# Default fiyatlandÄ±rma â€” operatÃ¶r override eder
+# Default fiyatlandırma — operatör override eder
 DEFAULT_PRICING = {
     "currency":             "EUR",
     "vcpu_per_hour":        0.01,
@@ -37,12 +37,12 @@ DEFAULT_PRICING = {
 }
 
 
-# â”€â”€ Pricing config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Pricing config ────────────────────────────────────────────────────────────
 def _load_cfg() -> dict:
     try:
         if _CFG_FILE.exists():
             cfg = json.loads(_CFG_FILE.read_text(encoding="utf-8"))
-            # Eksik anahtarlar default'a dÃ¼ÅŸsÃ¼n
+            # Eksik anahtarlar default'a düşsün
             out = dict(DEFAULT_PRICING)
             for k, v in cfg.items():
                 if k in out:
@@ -70,20 +70,20 @@ def get_pricing() -> dict:
 
 def set_pricing(config: dict) -> dict:
     if not isinstance(config, dict):
-        return {"ok": False, "error": "geÃ§ersiz config"}
+        return {"ok": False, "error": "geçersiz config"}
     with _lock:
         cur = _load_cfg()
         for k, v in (config or {}).items():
             if k in DEFAULT_PRICING:
                 cur[k] = v
-        # currency tip kontrolÃ¼
+        # currency tip kontrolü
         if "currency" in cur:
             cur["currency"] = str(cur["currency"]).upper()
         _save_cfg(cur)
         return {"ok": True, "pricing": cur}
 
 
-# â”€â”€ Lazy modules â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Lazy modules ──────────────────────────────────────────────────────────────
 def _tm():
     try:
         import tenant_manager  # type: ignore
@@ -92,7 +92,7 @@ def _tm():
         return None
 
 
-# â”€â”€ Hesaplama â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Hesaplama ─────────────────────────────────────────────────────────────────
 _PERIOD_HOURS = {
     "daily":   24,
     "weekly":  24 * 7,
@@ -106,14 +106,14 @@ def _hours_in_period(period: str) -> int:
 
 
 def _month_fraction(period: str) -> float:
-    """AylÄ±k Ã¼cretler iÃ§in periyod ne kadar ay tutar."""
+    """Aylık ücretler için periyod ne kadar ay tutar."""
     h = _hours_in_period(period)
     return h / (24.0 * 30.0)
 
 
 def calculate_tenant_cost(tenant_id: str, period: str = "monthly") -> dict:
     """
-    AnlÄ±k hesap: kullanÄ±m Ã— fiyat Ã— sÃ¼re. Periodic job yok â€” request-time.
+    Anlık hesap: kullanım × fiyat × süre. Periodic job yok — request-time.
     """
     pricing = get_pricing()
     tm = _tm()
@@ -194,17 +194,17 @@ def calculate_tenant_cost(tenant_id: str, period: str = "monthly") -> dict:
 
 def generate_invoice(tenant_id: str, year: int, month: int) -> dict:
     """
-    Belirli ay iÃ§in fatura dosyasÄ± Ã¼ret. Re-generate her zaman gÃ¼ncel kullanÄ±ma gÃ¶re.
+    Belirli ay için fatura dosyası üret. Re-generate her zaman güncel kullanıma göre.
     """
     try:
         year  = int(year)
         month = int(month)
         if month < 1 or month > 12:
-            return {"ok": False, "error": "month 1-12 arasÄ± olmalÄ±"}
+            return {"ok": False, "error": "month 1-12 arası olmalı"}
     except Exception:
-        return {"ok": False, "error": "geÃ§ersiz tarih"}
+        return {"ok": False, "error": "geçersiz tarih"}
 
-    # Aydaki saat sayÄ±sÄ±
+    # Aydaki saat sayısı
     days_in_month = monthrange(year, month)[1]
     hours = days_in_month * 24
 
@@ -287,7 +287,7 @@ def list_tenant_invoices(tenant_id: str) -> list:
 
 
 def get_all_tenants_billing(period: str = "monthly") -> list:
-    """TÃ¼m tenant'lar iÃ§in anlÄ±k maliyet Ã¶zeti."""
+    """Tüm tenant'lar için anlık maliyet özeti."""
     tm = _tm()
     out = []
     if not tm:
@@ -311,9 +311,9 @@ def get_all_tenants_billing(period: str = "monthly") -> list:
     except Exception:
         pass
     return out
-
-
-
-
-
-
+
+
+
+
+
+

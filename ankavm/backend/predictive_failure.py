@@ -1,7 +1,7 @@
-﻿"""
+"""
 ankavm Predictive Failure Analysis
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-SMART disk + ECC RAM + thermal + uptime â†’ arÄ±za tahmini.
+──────────────────────────────────
+SMART disk + ECC RAM + thermal + uptime → arıza tahmini.
 
 API:
     scan_all_disks() -> list
@@ -98,7 +98,7 @@ def scan_all_disks() -> list:
 
 
 def get_predictions(threshold: int = 40) -> list:
-    """Risk skoru threshold'un Ã¼stÃ¼ndeki diskler."""
+    """Risk skoru threshold'un üstündeki diskler."""
     results = scan_all_disks()
     risky = [r for r in results
              if r.get("available") and r.get("risk_score", 0) >= threshold]
@@ -116,9 +116,9 @@ def get_summary() -> dict:
         "critical": sum(1 for d in available if d.get("risk_level") == "critical"),
         "disks":    available,
     }
-
-
-
-
-
-
+
+
+
+
+
+

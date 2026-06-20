@@ -1,6 +1,6 @@
-﻿"""
+"""
 ankavm Olay Defteri (Event Logger)
-Her hypervisor'Ä±n olaylarÄ±nÄ± JSON formatÄ±nda kaydeder.
+Her hypervisor'ın olaylarını JSON formatında kaydeder.
 """
 
 import os
@@ -19,12 +19,12 @@ LEVELS = {"DEBUG": 0, "INFO": 1, "WARNING": 2, "ERROR": 3, "CRITICAL": 4}
 
 CATEGORIES = {
     "vm":      "Sanal Makine",
-    "network": "AÄŸ",
+    "network": "Ağ",
     "storage": "Depolama",
     "system":  "Sistem",
-    "auth":    "Kimlik DoÄŸrulama",
+    "auth":    "Kimlik Doğrulama",
     "ai":      "Yapay Zeka",
-    "alert":   "UyarÄ±",
+    "alert":   "Uyarı",
     "provision":"Otomatik Kurulum",
 }
 
@@ -37,7 +37,7 @@ def log_event(
     vm_id: str = None,
     source: str = "ankavm",
 ):
-    """OlayÄ± kaydet."""
+    """Olayı kaydet."""
     entry = {
         "id":        f"{int(time.time()*1000)}-{os.getpid()}",
         "timestamp": time.time(),
@@ -57,7 +57,7 @@ def log_event(
         with open(EVENT_FILE, "a") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
-    # Konsol Ã§Ä±ktÄ±sÄ±
+    # Konsol çıktısı
     ts = datetime.now().strftime("%H:%M:%S")
     print(f"[{ts}] [{level.upper():8s}] [{category}] {message}")
 
@@ -72,7 +72,7 @@ def get_events(
     since: float = None,
     offset: int = 0,
 ) -> list:
-    """OlaylarÄ± filtreli getir."""
+    """Olayları filtreli getir."""
     if not os.path.exists(EVENT_FILE):
         return []
 
@@ -98,13 +98,13 @@ def get_events(
 
             events.append(e)
 
-    # En yeni Ã¶nce
+    # En yeni önce
     events.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
     return events[offset:offset + limit]
 
 
 def get_event_stats() -> dict:
-    """Kategori/seviye bazÄ±nda istatistikler."""
+    """Kategori/seviye bazında istatistikler."""
     if not os.path.exists(EVENT_FILE):
         return {}
 
@@ -140,7 +140,7 @@ def get_event_stats() -> dict:
 
 
 def clear_old_events(keep_days: int = 30):
-    """Eski olaylarÄ± temizle."""
+    """Eski olayları temizle."""
     if not os.path.exists(EVENT_FILE):
         return 0
 
@@ -166,16 +166,16 @@ def clear_old_events(keep_days: int = 30):
     return removed
 
 
-# KÄ±sayol fonksiyonlar
+# Kısayol fonksiyonlar
 def info(msg, **kw):     log_event(msg, "INFO",     **kw)
 def warn(msg, **kw):     log_event(msg, "WARNING",  **kw)
 def error(msg, **kw):    log_event(msg, "ERROR",    **kw)
 def critical(msg, **kw): log_event(msg, "CRITICAL", **kw)
 def vm_event(msg, vm_id, level="INFO", **kw):
     log_event(msg, level, category="vm", vm_id=vm_id, **kw)
-
-
-
-
-
-
+
+
+
+
+
+

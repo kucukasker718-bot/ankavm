@@ -1,12 +1,12 @@
-﻿"""
-wasm_runtime.py â€” WebAssembly Runtime Manager for ankavm
+"""
+wasm_runtime.py — WebAssembly Runtime Manager for ankavm
 ankavm v2.5.11 Modern Workloads
 
 Features:
-  - detect_wasm() â€” wasmtime/wasmedge/wasmer binary {available, runtime, version}
-  - run_wasm_module(wasm_path, args, env) â€” run a .wasm module via detected runtime
-  - list_wasm_modules() â€” list registered .wasm modules
-  - register_module(name, path, description) â€” register a .wasm module in the registry
+  - detect_wasm() — wasmtime/wasmedge/wasmer binary {available, runtime, version}
+  - run_wasm_module(wasm_path, args, env) — run a .wasm module via detected runtime
+  - list_wasm_modules() — list registered .wasm modules
+  - register_module(name, path, description) — register a .wasm module in the registry
 
 Config persisted to /var/lib/ankavm/wasm_modules.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -42,7 +42,7 @@ _WASM_RUNTIMES = [
 _WASM_RUN_TIMEOUT = 30  # seconds default timeout for wasm execution
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -63,7 +63,7 @@ def _save(data: dict) -> None:
         log.warning("wasm save fail: %s", e)
 
 
-# â”€â”€ Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Detection ─────────────────────────────────────────────────────────────────
 
 def detect_wasm() -> dict:
     """Detect available WASM runtime. Returns first found (wasmtime > wasmedge > wasmer)."""
@@ -111,7 +111,7 @@ def detect_wasm() -> dict:
     return result
 
 
-# â”€â”€ Module registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Module registry ───────────────────────────────────────────────────────────
 
 def list_wasm_modules() -> list:
     """Return list of registered WASM modules."""
@@ -143,7 +143,7 @@ def register_module(name: str, path: str, description: str = "") -> dict:
     return {"registered": True, "module": record}
 
 
-# â”€â”€ Execution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Execution ─────────────────────────────────────────────────────────────────
 
 def run_wasm_module(
     wasm_path: str,
@@ -206,9 +206,9 @@ def run_wasm_module(
         elapsed_ms = int((time.time() - t0) * 1000)
         log.warning("run_wasm_module fail: %s", e)
         return {"success": False, "error": str(e), "elapsed_ms": elapsed_ms}
-
-
-
-
-
-
+
+
+
+
+
+

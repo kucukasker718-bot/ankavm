@@ -1,4 +1,4 @@
-﻿"""
+"""
 ankavm App Marketplace
 Community VM templates, automation workflows, plugin registry.
 Local cache: /var/lib/ankavm/marketplace/
@@ -25,7 +25,7 @@ LOG_FILE = LOG_DIR / "marketplace.jsonl"
 
 REMOTE_INDEX_URL = "https://ankavm.local/marketplace/index.json"
 
-# Offline fallback â€” used only when remote index.json is not yet cached.
+# Offline fallback — used only when remote index.json is not yet cached.
 # The live catalog is fetched from REMOTE_INDEX_URL and stored in INDEX_FILE.
 BUNDLED_APPS = [
     {
@@ -247,9 +247,9 @@ def get_installed() -> list:
 def get_categories() -> list:
     apps = _load_index()
     return sorted({a.get("category", "misc") for a in apps if a.get("category")})
-
-
-
-
-
-
+
+
+
+
+
+

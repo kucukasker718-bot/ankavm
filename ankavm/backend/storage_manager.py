@@ -1,4 +1,4 @@
-﻿import libvirt
+import libvirt
 import xml.etree.ElementTree as ET
 import subprocess
 import os
@@ -173,7 +173,7 @@ def upload_iso(file_path, dest_name=None):
 
 def list_isos():
     """Scan ISO_DIR only for user-uploaded ISO files.
-    /tmp and /var/lib/libvirt/images are NOT scanned â€” they contain
+    /tmp and /var/lib/libvirt/images are NOT scanned — they contain
     auto-generated cloud-init seed ISOs (ci-*.iso) that should not
     appear in the ISO library."""
     isos = []
@@ -217,7 +217,7 @@ def delete_iso(name):
     if os.path.exists(path):
         os.remove(path)
         return {"status": "deleted"}
-    raise FileNotFoundError(f"ISO bulunamadÄ±: {name}")
+    raise FileNotFoundError(f"ISO bulunamadı: {name}")
 
 
 def get_disk_usage():
@@ -362,9 +362,9 @@ def refresh_pool(pool_uuid):
         return {"ok": True}
     finally:
         conn.close()
-
-
-
-
-
-
+
+
+
+
+
+

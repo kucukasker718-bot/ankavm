@@ -1,5 +1,5 @@
-﻿"""
-ankavm vSAN Manager â€” Ceph-backed distributed storage.
+"""
+ankavm vSAN Manager — Ceph-backed distributed storage.
 Provides vSAN-style abstraction over an existing Ceph cluster.
 Storage: /var/lib/ankavm/vsan_config.json
 """
@@ -99,7 +99,7 @@ def get_status():
             return {"enabled": True, "status": "error", "error": r.stderr.strip()[:200]}
         except FileNotFoundError:
             return {"enabled": True, "status": "ceph_not_installed",
-                    "error": "ceph CLI not found â€” install ceph-common"}
+                    "error": "ceph CLI not found — install ceph-common"}
         except Exception as e:
             return {"enabled": True, "status": "error", "error": str(e)}
 
@@ -170,9 +170,9 @@ def create_pool(name, pg_num=32, replication=2):
         return {"ok": False, "error": r.stderr.strip()}
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-
-
-
-
-
+
+
+
+
+
+

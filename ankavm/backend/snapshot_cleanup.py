@@ -1,10 +1,10 @@
-﻿"""
+"""
 ankavm Snapshot Orphan Cleanup
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Orphan snapshot tespit + temizleme. Boyut > limit, yaÅŸ > X gÃ¼n, broken chain vb.
+──────────────────────────────
+Orphan snapshot tespit + temizleme. Boyut > limit, yaş > X gün, broken chain vb.
 
 API:
-    list_all_snapshots() -> list      (tÃ¼m VM'ler iÃ§in)
+    list_all_snapshots() -> list      (tüm VM'ler için)
     find_orphans(max_age_days=30) -> list
     cleanup_orphans(dry_run=True) -> dict
     get_policy() / set_policy(...)
@@ -51,7 +51,7 @@ def set_policy(**kwargs) -> dict:
 
 
 def _list_vms() -> list:
-    """virsh list ile VM adlarÄ±nÄ± al."""
+    """virsh list ile VM adlarını al."""
     try:
         r = subprocess.run(["virsh", "list", "--all", "--name"],
                            capture_output=True, text=True, timeout=10)
@@ -61,14 +61,14 @@ def _list_vms() -> list:
 
 
 def _list_snapshots(vm: str) -> list:
-    """virsh snapshot-list ile snapshot'larÄ± al."""
+    """virsh snapshot-list ile snapshot'ları al."""
     out = []
     try:
         r = subprocess.run(
             ["virsh", "snapshot-list", vm, "--metadata", "--tree"],
             capture_output=True, text=True, timeout=10
         )
-        # XML format daha gÃ¼venilir â€” sadece liste lazÄ±m, name Ã§Ä±kar
+        # XML format daha güvenilir — sadece liste lazım, name çıkar
         r2 = subprocess.run(
             ["virsh", "snapshot-list", vm, "--name"],
             capture_output=True, text=True, timeout=10
@@ -80,7 +80,7 @@ def _list_snapshots(vm: str) -> list:
             info = _get_snapshot_info(vm, name)
             out.append({"vm": vm, "name": name, **info})
     except Exception as e:
-        log.warning("snapshot list hatasÄ± (%s): %s", vm, e)
+        log.warning("snapshot list hatası (%s): %s", vm, e)
     return out
 
 
@@ -120,7 +120,7 @@ def list_all_snapshots() -> list:
 
 
 def find_orphans(max_age_days: int = None, max_per_vm: int = None) -> list:
-    """Politikaya gÃ¶re orphan snapshot listesi dÃ¶ndÃ¼r."""
+    """Politikaya göre orphan snapshot listesi döndür."""
     cfg = get_policy()
     max_age_days = max_age_days or cfg["max_age_days"]
     max_per_vm   = max_per_vm   or cfg["max_snapshots_per_vm"]
@@ -131,16 +131,16 @@ def find_orphans(max_age_days: int = None, max_per_vm: int = None) -> list:
     snaps  = list_all_snapshots()
     orphans = []
 
-    # YaÅŸ bazlÄ±
+    # Yaş bazlı
     for s in snaps:
         if s["vm"] in exclude_vms:
             continue
         if any(tag in (s.get("description") or "").lower() for tag in exclude_tags):
             continue
         if s["created_ts"] and s["created_ts"] < cutoff:
-            orphans.append({**s, "reason": f"yaÅŸ > {max_age_days} gÃ¼n"})
+            orphans.append({**s, "reason": f"yaş > {max_age_days} gün"})
 
-    # VM baÅŸÄ± sayÄ± bazlÄ±
+    # VM başı sayı bazlı
     by_vm = {}
     for s in snaps:
         by_vm.setdefault(s["vm"], []).append(s)
@@ -151,13 +151,13 @@ def find_orphans(max_age_days: int = None, max_per_vm: int = None) -> list:
         # En yeniden en eskiye, max_per_vm'den sonrakiler orphan
         for old in lst[max_per_vm:]:
             if not any(o["vm"] == old["vm"] and o["name"] == old["name"] for o in orphans):
-                orphans.append({**old, "reason": f"VM baÅŸÄ± limit ({max_per_vm}) aÅŸÄ±ldÄ±"})
+                orphans.append({**old, "reason": f"VM başı limit ({max_per_vm}) aşıldı"})
 
     return orphans
 
 
 def cleanup_orphans(dry_run: bool = True) -> dict:
-    """Orphan'larÄ± sil. dry_run=True ise sadece listele."""
+    """Orphan'ları sil. dry_run=True ise sadece listele."""
     orphans = find_orphans()
     deleted = []
     failed  = []
@@ -197,9 +197,9 @@ def get_stats() -> dict:
                              for s in snaps}.items()},
         "policy":          cfg,
     }
-
-
-
-
-
-
+
+
+
+
+
+

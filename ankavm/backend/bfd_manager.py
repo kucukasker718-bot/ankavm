@@ -1,13 +1,13 @@
-﻿"""
-bfd_manager.py â€” Bidirectional Forwarding Detection
+"""
+bfd_manager.py — Bidirectional Forwarding Detection
 ankavm v2.5.9 Network Advanced 2
 
 Features:
-  - configure_bfd(peer_ip, interval_ms, multiplier) â€” bfdd/frr if available,
+  - configure_bfd(peer_ip, interval_ms, multiplier) — bfdd/frr if available,
     otherwise ICMP-based fallback poll registration (no background thread)
-  - get_bfd_sessions() â€” active BFD sessions + status (up/down/lag)
+  - get_bfd_sessions() — active BFD sessions + status (up/down/lag)
   - remove_bfd(peer_ip)
-  - check_peer(peer_ip) â€” on-demand liveness via ping RTT
+  - check_peer(peer_ip) — on-demand liveness via ping RTT
 
 Config persisted to /var/lib/ankavm/bfd_sessions.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -28,7 +28,7 @@ _SESSION_FILE = Path("/var/lib/ankavm/bfd_sessions.json")
 _lock         = threading.Lock()
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -49,7 +49,7 @@ def _save(data: dict) -> None:
         log.warning("bfd save fail: %s", e)
 
 
-# â”€â”€ BFD daemon / FRR helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── BFD daemon / FRR helpers ──────────────────────────────────────────────────
 
 def _bfdd_available() -> bool:
     try:
@@ -129,10 +129,10 @@ def _frr_remove_bfd(peer_ip: str) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-# â”€â”€ Ping / ICMP fallback helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Ping / ICMP fallback helpers ──────────────────────────────────────────────
 
 def _ping_rtt(ip: str, count: int = 3, timeout: int = 5) -> dict:
-    """On-demand ICMP ping â€” returns {reachable, rtt_ms, loss_pct}."""
+    """On-demand ICMP ping — returns {reachable, rtt_ms, loss_pct}."""
     try:
         r = subprocess.run(
             ["ping", "-c", str(count), "-W", str(timeout), ip],
@@ -168,13 +168,13 @@ def _is_ip(s: str) -> bool:
     return bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", s))
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def configure_bfd(peer_ip: str, interval_ms: int = 300, multiplier: int = 3) -> dict:
     """
     Configure BFD for peer_ip.
     Uses FRR/bfdd if available; otherwise registers an ICMP-fallback entry
-    (manual check_peer() calls â€” no background polling thread).
+    (manual check_peer() calls — no background polling thread).
     """
     with _lock:
         data   = _load()
@@ -184,7 +184,7 @@ def configure_bfd(peer_ip: str, interval_ms: int = 300, multiplier: int = 3) -> 
         if use_frr:
             result = _frr_configure_bfd(peer_ip, interval_ms, multiplier)
         else:
-            log.info("bfd: frr/bfdd not available â€” registering ICMP fallback for %s", peer_ip)
+            log.info("bfd: frr/bfdd not available — registering ICMP fallback for %s", peer_ip)
             result = {"ok": True, "backend": "icmp_fallback"}
 
         if result.get("ok", False):
@@ -262,9 +262,9 @@ def check_peer(peer_ip: str) -> dict:
         "loss_pct":  ping.get("loss_pct", 100),
         "checked_at": int(time.time()),
     }
-
-
-
-
-
-
+
+
+
+
+
+

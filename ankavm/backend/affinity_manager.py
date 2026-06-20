@@ -1,18 +1,18 @@
-﻿"""
+"""
 ankavm Affinity / Anti-Affinity Rules
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-VM placement kurallarÄ±:
-  - "Bu 2 VM aynÄ± host'ta olsun" (affinity)
-  - "Bu 2 VM asla aynÄ± host'ta olmasÄ±n" (anti-affinity, HA iÃ§in)
-  - "Bu VM sadece ÅŸu host(lar)'ta Ã§alÄ±ÅŸabilir" (host pinning)
-  - "Bu VM ÅŸu host(lar)'ta Ã§alÄ±ÅŸamaz" (host exclusion)
+─────────────────────────────────────
+VM placement kuralları:
+  - "Bu 2 VM aynı host'ta olsun" (affinity)
+  - "Bu 2 VM asla aynı host'ta olmasın" (anti-affinity, HA için)
+  - "Bu VM sadece şu host(lar)'ta çalışabilir" (host pinning)
+  - "Bu VM şu host(lar)'ta çalışamaz" (host exclusion)
 
 API:
     add_rule(rule_type, vm_ids, ...) -> dict
     list_rules() -> list
     delete_rule(rule_id)
     check_placement(vm_id, target_host) -> {allowed, reason}
-    get_violations() -> list  (mevcut yerleÅŸim ihlalleri)
+    get_violations() -> list  (mevcut yerleşim ihlalleri)
 """
 
 import os, json, time, uuid, threading, logging
@@ -47,10 +47,10 @@ def add_rule(rule_type: str, vm_ids: list = None, hosts: list = None,
              name: str = "", description: str = "", enforce: str = "must") -> dict:
     """
     rule_type: affinity | anti_affinity | host_pin | host_exclude
-    enforce: must (sert kural, ihlal engellenir) | should (Ã¶neri, log atÄ±lÄ±r)
+    enforce: must (sert kural, ihlal engellenir) | should (öneri, log atılır)
     """
     if rule_type not in _VALID_TYPES:
-        raise ValueError(f"GeÃ§ersiz kural tipi: {rule_type}")
+        raise ValueError(f"Geçersiz kural tipi: {rule_type}")
 
     rule = {
         "id":          uuid.uuid4().hex[:12],
@@ -67,12 +67,12 @@ def add_rule(rule_type: str, vm_ids: list = None, hosts: list = None,
     # Validation
     if rule_type in ("affinity", "anti_affinity"):
         if len(rule["vm_ids"]) < 2:
-            raise ValueError(f"{rule_type} kuralÄ± en az 2 VM ID gerektirir")
+            raise ValueError(f"{rule_type} kuralı en az 2 VM ID gerektirir")
     if rule_type in ("host_pin", "host_exclude"):
         if not rule["vm_ids"]:
-            raise ValueError(f"{rule_type} kuralÄ± VM ID(leri) gerektirir")
+            raise ValueError(f"{rule_type} kuralı VM ID(leri) gerektirir")
         if not rule["hosts"]:
-            raise ValueError(f"{rule_type} kuralÄ± en az 1 host gerektirir")
+            raise ValueError(f"{rule_type} kuralı en az 1 host gerektirir")
 
     with _LOCK:
         rules = _load()
@@ -105,8 +105,8 @@ def toggle_rule(rule_id: str, enabled: bool) -> dict:
 def check_placement(vm_id: str, target_host: str,
                     vm_host_map: dict = None) -> dict:
     """
-    VM'i target_host'a yerleÅŸtirmeden Ã¶nce kontrol et.
-    vm_host_map: {vm_id: host_name} â€” diÄŸer VM'lerin mevcut konumu.
+    VM'i target_host'a yerleştirmeden önce kontrol et.
+    vm_host_map: {vm_id: host_name} — diğer VM'lerin mevcut konumu.
     """
     if vm_host_map is None:
         vm_host_map = {}
@@ -122,26 +122,26 @@ def check_placement(vm_id: str, target_host: str,
 
         if t == "host_pin":
             if target_host not in r["hosts"]:
-                msg = f"VM '{vm_id}' sadece ÅŸu host'larda: {r['hosts']} â€” '{target_host}' izinli deÄŸil"
+                msg = f"VM '{vm_id}' sadece şu host'larda: {r['hosts']} — '{target_host}' izinli değil"
                 (blocking if sev == "must" else warnings).append({"rule": r["name"], "reason": msg})
 
         elif t == "host_exclude":
             if target_host in r["hosts"]:
-                msg = f"VM '{vm_id}' '{target_host}' host'undan dÄ±ÅŸlanmÄ±ÅŸ"
+                msg = f"VM '{vm_id}' '{target_host}' host'undan dışlanmış"
                 (blocking if sev == "must" else warnings).append({"rule": r["name"], "reason": msg})
 
         elif t == "affinity":
             partners = [v for v in r["vm_ids"] if v != vm_id]
             for p in partners:
                 if p in vm_host_map and vm_host_map[p] != target_host:
-                    msg = f"Affinity: '{p}' VM'i '{vm_host_map[p]}' host'unda â€” birlikte kalmalÄ±"
+                    msg = f"Affinity: '{p}' VM'i '{vm_host_map[p]}' host'unda — birlikte kalmalı"
                     (blocking if sev == "must" else warnings).append({"rule": r["name"], "reason": msg})
 
         elif t == "anti_affinity":
             partners = [v for v in r["vm_ids"] if v != vm_id]
             for p in partners:
                 if p in vm_host_map and vm_host_map[p] == target_host:
-                    msg = f"Anti-affinity: '{p}' VM'i zaten '{target_host}' host'unda â€” ayrÄ±lmalÄ±"
+                    msg = f"Anti-affinity: '{p}' VM'i zaten '{target_host}' host'unda — ayrılmalı"
                     (blocking if sev == "must" else warnings).append({"rule": r["name"], "reason": msg})
 
     return {
@@ -152,7 +152,7 @@ def check_placement(vm_id: str, target_host: str,
 
 
 def get_violations(vm_host_map: dict) -> list:
-    """Mevcut yerleÅŸimin kural ihlallerini bul."""
+    """Mevcut yerleşimin kural ihlallerini bul."""
     violations = []
     for r in _load():
         if not r.get("enabled", True):
@@ -168,7 +168,7 @@ def get_violations(vm_host_map: dict) -> list:
                 violations.append({
                     "rule":  r["name"],
                     "type":  t,
-                    "issue": f"VM'ler farklÄ± host'larda: {sorted(hosts)}",
+                    "issue": f"VM'ler farklı host'larda: {sorted(hosts)}",
                     "vms":   vms_in_play,
                 })
 
@@ -180,7 +180,7 @@ def get_violations(vm_host_map: dict) -> list:
                 violations.append({
                     "rule":  r["name"],
                     "type":  t,
-                    "issue": f"AynÄ± host'ta birlikte: {dup}",
+                    "issue": f"Aynı host'ta birlikte: {dup}",
                     "vms":   vms_in_play,
                 })
 
@@ -191,7 +191,7 @@ def get_violations(vm_host_map: dict) -> list:
                 violations.append({
                     "rule":  r["name"],
                     "type":  t,
-                    "issue": f"Ä°zinli olmayan host'larda: {bad}",
+                    "issue": f"İzinli olmayan host'larda: {bad}",
                     "vms":   bad,
                 })
 
@@ -202,14 +202,14 @@ def get_violations(vm_host_map: dict) -> list:
                 violations.append({
                     "rule":  r["name"],
                     "type":  t,
-                    "issue": f"DÄ±ÅŸlanmÄ±ÅŸ host'larda: {bad}",
+                    "issue": f"Dışlanmış host'larda: {bad}",
                     "vms":   bad,
                 })
 
     return violations
-
-
-
-
-
-
+
+
+
+
+
+

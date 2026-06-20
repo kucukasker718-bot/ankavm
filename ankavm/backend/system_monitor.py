@@ -1,4 +1,4 @@
-﻿import psutil
+import psutil
 import subprocess
 import platform
 import os
@@ -63,7 +63,7 @@ def get_host_info():
     hours = int((uptime_secs % 86400) // 3600)
     mins = int((uptime_secs % 3600) // 60)
 
-    # Primary IP â€” UDP trick (no data actually sent)
+    # Primary IP — UDP trick (no data actually sent)
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as _s:
             _s.connect(("8.8.8.8", 80))
@@ -72,9 +72,9 @@ def get_host_info():
         try:
             host_ip = socket.gethostbyname(uname.node)
         except Exception:
-            host_ip = "â€”"
+            host_ip = "—"
 
-    # Bridge interface â€” prefer oxbridge, fall back to virbr0
+    # Bridge interface — prefer oxbridge, fall back to virbr0
     try:
         _ifaces = list(psutil.net_if_addrs().keys())
         if "oxbridge" in _ifaces:
@@ -82,9 +82,9 @@ def get_host_info():
         elif "virbr0" in _ifaces:
             bridge = "virbr0"
         else:
-            bridge = next((i for i in _ifaces if i.startswith(("br-", "bridge", "vmbr"))), "â€”")
+            bridge = next((i for i in _ifaces if i.startswith(("br-", "bridge", "vmbr"))), "—")
     except Exception:
-        bridge = "â€”"
+        bridge = "—"
 
     return {
         "hostname": uname.node,
@@ -248,9 +248,9 @@ def get_libvirt_version():
         }
     except Exception:
         return {"hypervisor_type": "KVM", "hypervisor_version": "N/A", "libvirt_version": "N/A"}
-
-
-
-
-
-
+
+
+
+
+
+

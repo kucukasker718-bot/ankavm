@@ -1,5 +1,5 @@
-﻿"""
-bgp_manager.py â€” BGP tÃ¼nelleme yÃ¶netimi (FRRouting / BIRD)
+"""
+bgp_manager.py — BGP tünelleme yönetimi (FRRouting / BIRD)
 ankavm Hypervisor backend module
 
 Gereksinimler:
@@ -7,7 +7,7 @@ Gereksinimler:
     veya
   - BIRD: apt install bird2
 
-Desteklenen iÅŸlemler:
+Desteklenen işlemler:
   - BGP peer ekleme/silme/listeleme
   - Route redistribution
   - Oturum durumu sorgulama (vtysh)
@@ -30,10 +30,10 @@ BGP_DB_FILE = "/var/lib/ankavm/bgp_peers.json"
 _lock       = threading.Lock()
 
 
-# â”€â”€ Backend detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Backend detection ──────────────────────────────────────────────────────────
 
 def detect_backend() -> str:
-    """FRRouting veya BIRD kurulu mu? 'frr' | 'bird' | 'none' dÃ¶ner."""
+    """FRRouting veya BIRD kurulu mu? 'frr' | 'bird' | 'none' döner."""
     if shutil.which("vtysh"):
         return "frr"
     if shutil.which("birdc"):
@@ -44,12 +44,12 @@ def detect_backend() -> str:
 BACKEND = detect_backend()
 
 
-# â”€â”€ YardÄ±mcÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Yardımcı ──────────────────────────────────────────────────────────────────
 
 def _vtysh(*commands: str, timeout: int = 10) -> tuple:
     """
-    vtysh Ã¼zerinden FRR komutlarÄ± Ã§alÄ±ÅŸtÄ±r.
-    DÃ¶ner: (stdout, stderr, returncode)
+    vtysh üzerinden FRR komutları çalıştır.
+    Döner: (stdout, stderr, returncode)
     """
     cmd_args = ["vtysh"]
     for c in commands:
@@ -62,7 +62,7 @@ def _vtysh(*commands: str, timeout: int = 10) -> tuple:
 
 
 def _birdc(command: str, timeout: int = 10) -> tuple:
-    """birdc Ã¼zerinden BIRD komutu Ã§alÄ±ÅŸtÄ±r."""
+    """birdc üzerinden BIRD komutu çalıştır."""
     try:
         r = subprocess.run(
             ["birdc", command], capture_output=True, text=True, timeout=timeout
@@ -78,7 +78,7 @@ def _load_db() -> dict:
             with open(BGP_DB_FILE) as f:
                 return json.load(f)
     except Exception as e:
-        log.warning("BGP DB yÃ¼kleme hatasÄ±: %s", e)
+        log.warning("BGP DB yükleme hatası: %s", e)
     return {"peers": {}}
 
 
@@ -90,22 +90,22 @@ def _save_db(data: dict):
             json.dump(data, f, indent=2)
         os.replace(tmp, BGP_DB_FILE)
     except Exception as e:
-        log.error("BGP DB kaydetme hatasÄ±: %s", e)
+        log.error("BGP DB kaydetme hatası: %s", e)
 
 
-# â”€â”€ Peer yÃ¶netimi â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Peer yönetimi ──────────────────────────────────────────────────────────────
 
 def add_peer(peer_ip: str, peer_asn: int, local_asn: int,
              description: str = "", password: str = "",
              multihop: int = 1, soft_reconfig: bool = True) -> dict:
     """
     BGP peer ekle (FRRouting vtysh).
-    DÃ¶ner: {success, message}
+    Döner: {success, message}
     """
     if BACKEND != "frr":
-        return {"success": False, "message": f"FRRouting kurulu deÄŸil (backend={BACKEND})"}
+        return {"success": False, "message": f"FRRouting kurulu değil (backend={BACKEND})"}
     if not re.match(r"^[d.]+$|^[a-fA-F0-9:]+$", peer_ip):
-        return {"success": False, "message": "GeÃ§ersiz peer IP"}
+        return {"success": False, "message": "Geçersiz peer IP"}
 
     # rapor #74 fix: sanitize free-text fields before injecting into vtysh
     try:
@@ -147,14 +147,14 @@ def add_peer(peer_ip: str, peer_asn: int, local_asn: int,
         log.info("BGP peer eklendi: %s AS%d", peer_ip, peer_asn)
         return {"success": True, "message": f"Peer {peer_ip} (AS{peer_asn}) eklendi"}
     else:
-        log.error("BGP peer ekleme hatasÄ±: %s", stderr or stdout)
-        return {"success": False, "message": stderr or stdout or "vtysh hatasÄ±"}
+        log.error("BGP peer ekleme hatası: %s", stderr or stdout)
+        return {"success": False, "message": stderr or stdout or "vtysh hatası"}
 
 
 def remove_peer(peer_ip: str, local_asn: int) -> dict:
-    """BGP peer kaldÄ±r."""
+    """BGP peer kaldır."""
     if BACKEND != "frr":
-        return {"success": False, "message": "FRRouting kurulu deÄŸil"}
+        return {"success": False, "message": "FRRouting kurulu değil"}
 
     stdout, stderr, rc = _vtysh(
         "configure terminal",
@@ -167,13 +167,13 @@ def remove_peer(peer_ip: str, local_asn: int) -> dict:
             db = _load_db()
             db["peers"].pop(peer_ip, None)
             _save_db(db)
-        log.info("BGP peer kaldÄ±rÄ±ldÄ±: %s", peer_ip)
-        return {"success": True, "message": f"Peer {peer_ip} kaldÄ±rÄ±ldÄ±"}
+        log.info("BGP peer kaldırıldı: %s", peer_ip)
+        return {"success": True, "message": f"Peer {peer_ip} kaldırıldı"}
     return {"success": False, "message": stderr or stdout}
 
 
 def list_peers() -> list:
-    """KayÄ±tlÄ± peer'larÄ± DB'den dÃ¶ndÃ¼r."""
+    """Kayıtlı peer'ları DB'den döndür."""
     with _lock:
         db = _load_db()
     return list(db.get("peers", {}).values())
@@ -182,16 +182,16 @@ def list_peers() -> list:
 def get_peer_status(peer_ip: str = None) -> list:
     """
     FRRouting'den BGP oturum durumu al.
-    peer_ip: None ise tÃ¼m peer'lar.
+    peer_ip: None ise tüm peer'lar.
     """
     if BACKEND == "frr":
         cmd = f"show bgp neighbors {peer_ip} json" if peer_ip else "show bgp summary json"
         stdout, stderr, rc = _vtysh(cmd)
         if rc != 0:
-            return [{"error": stderr or "vtysh hatasÄ±"}]
+            return [{"error": stderr or "vtysh hatası"}]
         try:
             data = json.loads(stdout)
-            # Normalize: summary â†’ list of {peer, state, uptime, prefixes}
+            # Normalize: summary → list of {peer, state, uptime, prefixes}
             if "peers" in data:
                 return [
                     {
@@ -218,12 +218,12 @@ def announce_prefix(prefix: str, local_asn: int, next_hop: str = "self") -> dict
     prefix: "192.0.2.0/24"
     """
     if BACKEND != "frr":
-        return {"success": False, "message": "FRRouting kurulu deÄŸil"}
+        return {"success": False, "message": "FRRouting kurulu değil"}
     if not re.match(r"^[\d\.]+/\d+$|^[a-fA-F0-9:]+/\d+$", prefix):
-        return {"success": False, "message": "GeÃ§ersiz prefix"}
+        return {"success": False, "message": "Geçersiz prefix"}
     # rapor #74 fix: validate prefix length range (IPv4: 0-32, IPv6: 0-128)
     if not _validate_prefix_len(prefix):
-        return {"success": False, "message": "GeÃ§ersiz prefix uzunluÄŸu (IPv4: /0-32, IPv6: /0-128)"}
+        return {"success": False, "message": "Geçersiz prefix uzunluğu (IPv4: /0-32, IPv6: /0-128)"}
 
     stdout, stderr, rc = _vtysh(
         "configure terminal",
@@ -239,7 +239,7 @@ def announce_prefix(prefix: str, local_asn: int, next_hop: str = "self") -> dict
 def withdraw_prefix(prefix: str, local_asn: int) -> dict:
     """BGP prefix withdraw et."""
     if BACKEND != "frr":
-        return {"success": False, "message": "FRRouting kurulu deÄŸil"}
+        return {"success": False, "message": "FRRouting kurulu değil"}
 
     stdout, stderr, rc = _vtysh(
         "configure terminal",
@@ -272,7 +272,7 @@ def get_routes(address_family: str = "ipv4") -> list:
 
 
 def get_full_status() -> dict:
-    """BGP genel durum Ã¶zeti."""
+    """BGP genel durum özeti."""
     return {
         "backend":  BACKEND,
         "available": BACKEND != "none",
@@ -281,22 +281,22 @@ def get_full_status() -> dict:
     }
 
 
-# â”€â”€ rapor #74 fix: vtysh injection sanitization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── rapor #74 fix: vtysh injection sanitization ────────────────────────────────
 
 def _sanitize_bgp_str(value: str, field: str = "value", max_len: int = 64) -> str:
     """
-    BGP description/password â€” newline, semicolon, vtysh metachar yasak.
-    YalnÄ±zca yazdÄ±rÄ±labilir ASCII karakterlere izin ver.
+    BGP description/password — newline, semicolon, vtysh metachar yasak.
+    Yalnızca yazdırılabilir ASCII karakterlere izin ver.
     """
     if not value:
         return value
     value = str(value)[:max_len]
-    # Newline, NULL, vtysh komut ayÄ±rÄ±cÄ±larÄ±
+    # Newline, NULL, vtysh komut ayırıcıları
     if re.search(r'[\r\n\x00;`$|&]', value):
-        raise ValueError(f"BGP {field}: geÃ§ersiz karakter iÃ§eriyor")
-    # YalnÄ±zca yazdÄ±rÄ±labilir ASCII
+        raise ValueError(f"BGP {field}: geçersiz karakter içeriyor")
+    # Yalnızca yazdırılabilir ASCII
     if not re.match(r'^[\x20-\x7E]+$', value):
-        raise ValueError(f"BGP {field}: yalnÄ±zca ASCII karakterlere izin verilir")
+        raise ValueError(f"BGP {field}: yalnızca ASCII karakterlere izin verilir")
     return value
 
 
@@ -311,9 +311,9 @@ def _validate_prefix_len(prefix: str) -> bool:
             return 0 <= length <= 32
     except Exception:
         return False
-
-
-
-
-
-
+
+
+
+
+
+

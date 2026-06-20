@@ -1,8 +1,8 @@
-﻿"""
+"""
 ankavm AI Planner
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-AI tabanlÄ± kaynak planlama ve doÄŸal dil komut iÅŸleme.
-YapÄ±landÄ±rma: /var/lib/ankavm/ai_recommendations.json
+─────────────────
+AI tabanlı kaynak planlama ve doğal dil komut işleme.
+Yapılandırma: /var/lib/ankavm/ai_recommendations.json
 """
 
 import json
@@ -22,10 +22,10 @@ _lock = threading.Lock()
 try:
     import ai_agent
     AI_AVAILABLE = True
-    log.info("ai_agent modÃ¼lÃ¼ yÃ¼klendi.")
+    log.info("ai_agent modülü yüklendi.")
 except Exception:
     AI_AVAILABLE = False
-    log.warning("ai_agent modÃ¼lÃ¼ bulunamadÄ±. Mock kural motoru kullanÄ±lacak.")
+    log.warning("ai_agent modülü bulunamadı. Mock kural motoru kullanılacak.")
 
 try:
     import system_monitor as _sysmon
@@ -42,7 +42,7 @@ except Exception:
     PERF_AVAILABLE = False
 
 
-# â”€â”€ YardÄ±mcÄ± fonksiyonlar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Yardımcı fonksiyonlar ──────────────────────────────────────────────────────
 
 def _ensure_dir(path: str):
     try:
@@ -59,12 +59,12 @@ def _virsh(args: list) -> str:
         )
         return r.stdout.strip()
     except Exception as e:
-        log.debug("virsh hatasÄ±: %s", e)
+        log.debug("virsh hatası: %s", e)
         return ""
 
 
 def _get_system_context() -> str:
-    """Mevcut VM'leri, CPU/RAM kullanÄ±mÄ±nÄ± ve disk durumunu topla. Kompakt JSON dÃ¶ndÃ¼r."""
+    """Mevcut VM'leri, CPU/RAM kullanımını ve disk durumunu topla. Kompakt JSON döndür."""
     ctx = {}
 
     # VM listesi
@@ -78,14 +78,14 @@ def _get_system_context() -> str:
         ctx["vms"] = vms
     except Exception as e:
         ctx["vms"] = []
-        log.debug("VM listesi alÄ±namadÄ±: %s", e)
+        log.debug("VM listesi alınamadı: %s", e)
 
     # Sistem metrikleri
     if SYSMON_AVAILABLE:
         try:
             ctx["system"] = _sysmon.get_system_metrics()
         except Exception as e:
-            log.debug("system_monitor hatasÄ±: %s", e)
+            log.debug("system_monitor hatası: %s", e)
             ctx["system"] = {}
     else:
         try:
@@ -102,21 +102,21 @@ def _get_system_context() -> str:
 
 
 def _ai_query(prompt: str) -> str:
-    """AI provider'a sorgu gÃ¶nder, ham metin yanÄ±t dÃ¶ndÃ¼r."""
+    """AI provider'a sorgu gönder, ham metin yanıt döndür."""
     if AI_AVAILABLE:
         try:
             return ai_agent.query(prompt)
         except Exception as e:
-            log.warning("AI sorgu hatasÄ±: %s", e)
+            log.warning("AI sorgu hatası: %s", e)
     return None
 
 
 def _parse_json_response(text: str) -> any:
-    """AI yanÄ±tÄ±ndan JSON bloÄŸu ayÄ±kla."""
+    """AI yanıtından JSON bloğu ayıkla."""
     if not text:
         return None
     try:
-        # Kod bloÄŸu varsa Ã§Ä±kar
+        # Kod bloğu varsa çıkar
         if "```json" in text:
             text = text.split("```json", 1)[1].split("```", 1)[0]
         elif "```" in text:
@@ -126,10 +126,10 @@ def _parse_json_response(text: str) -> any:
         return None
 
 
-# â”€â”€ Ana fonksiyonlar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Ana fonksiyonlar ───────────────────────────────────────────────────────────
 
 def analyze_resources() -> dict:
-    """Sistem durumunu AI ile analiz et ve Ã¶neriler Ã¼ret."""
+    """Sistem durumunu AI ile analiz et ve öneriler üret."""
     try:
         ctx = _get_system_context()
         ts = datetime.now().isoformat()
@@ -155,19 +155,19 @@ def analyze_resources() -> dict:
                 if cpu > 80:
                     recs.append({
                         "type": "warning",
-                        "title": "YÃ¼ksek CPU KullanÄ±mÄ±",
-                        "description": f"CPU kullanÄ±mÄ± %{cpu:.1f} seviyesinde.",
-                        "action": "YoÄŸun VM'leri farklÄ± saatlere daÄŸÄ±tÄ±n veya kaynak sÄ±nÄ±rlarÄ±nÄ± ayarlayÄ±n.",
+                        "title": "Yüksek CPU Kullanımı",
+                        "description": f"CPU kullanımı %{cpu:.1f} seviyesinde.",
+                        "action": "Yoğun VM'leri farklı saatlere dağıtın veya kaynak sınırlarını ayarlayın.",
                     })
                 if mem > 85:
                     recs.append({
                         "type": "warning",
-                        "title": "YÃ¼ksek Bellek KullanÄ±mÄ±",
-                        "description": f"RAM kullanÄ±mÄ± %{mem:.1f} seviyesinde.",
-                        "action": "Gereksiz VM'leri durdurun veya bellek balon sÃ¼rÃ¼cÃ¼sÃ¼ kullanÄ±n.",
+                        "title": "Yüksek Bellek Kullanımı",
+                        "description": f"RAM kullanımı %{mem:.1f} seviyesinde.",
+                        "action": "Gereksiz VM'leri durdurun veya bellek balon sürücüsü kullanın.",
                     })
             except Exception as e:
-                log.debug("Mock analiz hatasÄ±: %s", e)
+                log.debug("Mock analiz hatası: %s", e)
 
         result = {"recommendations": recs, "analyzed_at": ts}
 
@@ -177,16 +177,16 @@ def analyze_resources() -> dict:
                 with open(RECS_FILE, "w") as f:
                     json.dump(result, f, ensure_ascii=False, indent=2)
             except Exception as e:
-                log.warning("RECS_FILE yazma hatasÄ±: %s", e)
+                log.warning("RECS_FILE yazma hatası: %s", e)
 
         return result
     except Exception as e:
-        log.error("analyze_resources hatasÄ±: %s", e)
+        log.error("analyze_resources hatası: %s", e)
         return {"recommendations": [], "analyzed_at": datetime.now().isoformat(), "error": str(e)}
 
 
 def get_recommendations() -> dict:
-    """KaydedilmiÅŸ AI Ã¶nerilerini oku."""
+    """Kaydedilmiş AI önerilerini oku."""
     try:
         if not os.path.exists(RECS_FILE):
             return {"recommendations": [], "analyzed_at": None}
@@ -194,12 +194,12 @@ def get_recommendations() -> dict:
             with open(RECS_FILE) as f:
                 return json.load(f)
     except Exception as e:
-        log.error("get_recommendations hatasÄ±: %s", e)
+        log.error("get_recommendations hatası: %s", e)
         return {"recommendations": [], "error": str(e)}
 
 
 def suggest_vm_sizing(vm_id: str) -> dict:
-    """VM'in mevcut kullanÄ±mÄ±na gÃ¶re optimal boyut Ã¶nerisi."""
+    """VM'in mevcut kullanımına göre optimal boyut önerisi."""
     try:
         # Mevcut VM bilgisi
         dominfo = _virsh(["dominfo", vm_id])
@@ -229,7 +229,7 @@ def suggest_vm_sizing(vm_id: str) -> dict:
             suggestion = {
                 "suggested_vcpus": current.get("vcpus", 2),
                 "suggested_memory_mb": (current.get("memory_kb", 2097152) // 1024),
-                "reason": "AI mevcut deÄŸil. Mevcut deÄŸerler korundu.",
+                "reason": "AI mevcut değil. Mevcut değerler korundu.",
             }
 
         return {
@@ -240,19 +240,19 @@ def suggest_vm_sizing(vm_id: str) -> dict:
             "reason": suggestion.get("reason", ""),
         }
     except Exception as e:
-        log.error("suggest_vm_sizing hatasÄ±: %s", e)
+        log.error("suggest_vm_sizing hatası: %s", e)
         return {"vm_id": vm_id, "error": str(e)}
 
 
 def predict_capacity(days: int = 30) -> dict:
-    """Son metrik trendine gÃ¶re kapasite tahmini yap."""
+    """Son metrik trendine göre kapasite tahmini yap."""
     try:
         trend_data = {}
         if PERF_AVAILABLE:
             try:
                 trend_data = _perf.get_trend(days=7)
             except Exception as e:
-                log.debug("perf_history trend hatasÄ±: %s", e)
+                log.debug("perf_history trend hatası: %s", e)
 
         if AI_AVAILABLE and trend_data:
             prompt = (
@@ -282,7 +282,7 @@ def predict_capacity(days: int = 30) -> dict:
                 "predicted_cpu_pct": pred_cpu,
                 "predicted_mem_pct": pred_mem,
                 "days_until_full": days_until,
-                "recommendation": "AI mevcut deÄŸil. Basit tahmin kullanÄ±ldÄ±.",
+                "recommendation": "AI mevcut değil. Basit tahmin kullanıldı.",
             }
 
         return {
@@ -293,12 +293,12 @@ def predict_capacity(days: int = 30) -> dict:
             "recommendation": prediction.get("recommendation", ""),
         }
     except Exception as e:
-        log.error("predict_capacity hatasÄ±: %s", e)
+        log.error("predict_capacity hatası: %s", e)
         return {"days": days, "error": str(e)}
 
 
 def process_natural_language(command: str, username: str = "admin") -> dict:
-    """DoÄŸal dil komutunu iÅŸle ve Ã§alÄ±ÅŸtÄ±r."""
+    """Doğal dil komutunu işle ve çalıştır."""
     try:
         ts = datetime.now().isoformat()
 
@@ -312,42 +312,42 @@ def process_natural_language(command: str, username: str = "admin") -> dict:
             raw = _ai_query(prompt)
             parsed = _parse_json_response(raw) or {}
         else:
-            # Basit anahtar kelime eÅŸleme
+            # Basit anahtar kelime eşleme
             cmd_lower = command.lower()
-            if any(w in cmd_lower for w in ["baÅŸlat", "start", "aÃ§"]):
+            if any(w in cmd_lower for w in ["başlat", "start", "aç"]):
                 parsed = {
                     "action": "start_vm",
                     "params": {},
                     "confirmation_required": True,
-                    "human_response": "VM baÅŸlatma komutu algÄ±landÄ±. LÃ¼tfen onaylayÄ±n.",
+                    "human_response": "VM başlatma komutu algılandı. Lütfen onaylayın.",
                 }
             elif any(w in cmd_lower for w in ["durdur", "stop", "kapat"]):
                 parsed = {
                     "action": "stop_vm",
                     "params": {},
                     "confirmation_required": True,
-                    "human_response": "VM durdurma komutu algÄ±landÄ±. LÃ¼tfen onaylayÄ±n.",
+                    "human_response": "VM durdurma komutu algılandı. Lütfen onaylayın.",
                 }
-            elif any(w in cmd_lower for w in ["listele", "list", "gÃ¶ster"]):
+            elif any(w in cmd_lower for w in ["listele", "list", "göster"]):
                 parsed = {
                     "action": "list_vms",
                     "params": {},
                     "confirmation_required": False,
-                    "human_response": "VM listesi alÄ±nÄ±yor.",
+                    "human_response": "VM listesi alınıyor.",
                 }
             else:
                 parsed = {
                     "action": "unknown",
                     "params": {},
                     "confirmation_required": True,
-                    "human_response": "Komut anlaÅŸÄ±lamadÄ±. LÃ¼tfen daha aÃ§Ä±k bir ifade kullanÄ±n.",
+                    "human_response": "Komut anlaşılamadı. Lütfen daha açık bir ifade kullanın.",
                 }
 
         result = {}
         if not parsed.get("confirmation_required", True):
             result = execute_nl_action(parsed.get("action", "unknown"), parsed.get("params", {}))
 
-        # GeÃ§miÅŸe kaydet
+        # Geçmişe kaydet
         history_entry = {
             "ts": ts,
             "username": username,
@@ -361,73 +361,73 @@ def process_natural_language(command: str, username: str = "admin") -> dict:
                 with open(NL_HISTORY, "a") as f:
                     f.write(json.dumps(history_entry, ensure_ascii=False) + "\n")
         except Exception as e:
-            log.warning("NL_HISTORY yazma hatasÄ±: %s", e)
+            log.warning("NL_HISTORY yazma hatası: %s", e)
 
         return {**parsed, "execution_result": result}
     except Exception as e:
-        log.error("process_natural_language hatasÄ±: %s", e)
+        log.error("process_natural_language hatası: %s", e)
         return {"action": "unknown", "error": str(e)}
 
 
 def execute_nl_action(action: str, params: dict) -> dict:
-    """AyrÄ±ÅŸtÄ±rÄ±lmÄ±ÅŸ NL action'Ä± Ã§alÄ±ÅŸtÄ±r."""
+    """Ayrıştırılmış NL action'ı çalıştır."""
     try:
         if action == "list_vms":
             raw = _virsh(["list", "--all"])
-            return {"success": True, "result": raw, "message": "VM listesi alÄ±ndÄ±."}
+            return {"success": True, "result": raw, "message": "VM listesi alındı."}
 
         elif action == "start_vm":
             vm_name = params.get("name") or params.get("vm_name", "")
             if not vm_name:
-                return {"success": False, "result": None, "message": "VM adÄ± belirtilmedi."}
+                return {"success": False, "result": None, "message": "VM adı belirtilmedi."}
             raw = _virsh(["start", vm_name])
-            return {"success": True, "result": raw, "message": f"{vm_name} baÅŸlatÄ±ldÄ±."}
+            return {"success": True, "result": raw, "message": f"{vm_name} başlatıldı."}
 
         elif action == "stop_vm":
             vm_name = params.get("name") or params.get("vm_name", "")
             if not vm_name:
-                return {"success": False, "result": None, "message": "VM adÄ± belirtilmedi."}
+                return {"success": False, "result": None, "message": "VM adı belirtilmedi."}
             raw = _virsh(["shutdown", vm_name])
             return {"success": True, "result": raw, "message": f"{vm_name} durduruldu."}
 
         elif action == "get_info":
             vm_name = params.get("name") or params.get("vm_name", "")
             raw = _virsh(["dominfo", vm_name])
-            return {"success": True, "result": raw, "message": "VM bilgisi alÄ±ndÄ±."}
+            return {"success": True, "result": raw, "message": "VM bilgisi alındı."}
 
         elif action == "snapshot":
             vm_name = params.get("name") or params.get("vm_name", "")
             snap_name = params.get("snapshot_name", f"snap-{int(time.time())}")
             raw = _virsh(["snapshot-create-as", vm_name, snap_name])
-            return {"success": True, "result": raw, "message": f"Snapshot '{snap_name}' oluÅŸturuldu."}
+            return {"success": True, "result": raw, "message": f"Snapshot '{snap_name}' oluşturuldu."}
 
         else:
             return {"success": False, "result": None, "message": f"Desteklenmeyen action: {action}"}
 
     except Exception as e:
-        log.error("execute_nl_action hatasÄ±: %s", e)
+        log.error("execute_nl_action hatası: %s", e)
         return {"success": False, "result": None, "message": str(e)}
 
 
 def start_periodic_analysis(interval_hours: int = 24):
-    """Periyodik analizi daemon thread olarak baÅŸlat."""
+    """Periyodik analizi daemon thread olarak başlat."""
     def _worker():
         while True:
             try:
-                log.info("Periyodik AI analizi baÅŸlÄ±yor...")
+                log.info("Periyodik AI analizi başlıyor...")
                 analyze_resources()
-                log.info("Periyodik AI analizi tamamlandÄ±.")
+                log.info("Periyodik AI analizi tamamlandı.")
             except Exception as e:
-                log.error("Periyodik analiz hatasÄ±: %s", e)
+                log.error("Periyodik analiz hatası: %s", e)
             time.sleep(interval_hours * 3600)
 
     t = threading.Thread(target=_worker, daemon=True, name="ai-planner-periodic")
     t.start()
-    log.info("Periyodik AI analizi %d saatte bir Ã§alÄ±ÅŸacak.", interval_hours)
+    log.info("Periyodik AI analizi %d saatte bir çalışacak.", interval_hours)
     return t
-
-
-
-
-
-
+
+
+
+
+
+

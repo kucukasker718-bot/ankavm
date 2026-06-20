@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 const {
   app, BrowserWindow, Tray, Menu, ipcMain,
@@ -8,18 +8,18 @@ const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs   = require('fs');
 
-// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Constants ────────────────────────────────────────────────────────────────
 const APP_NAME    = 'ANKAVM';
 const CONFIG_FILE = path.join(app.getPath('userData'), 'servers.json');
 const CONNECT_URL = `file://${path.join(__dirname, 'connect.html')}`;
 
-// â”€â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── State ────────────────────────────────────────────────────────────────────
 let mainWindow    = null;
 let tray          = null;
 let servers       = [];          // [{ url, label }]
 let activeUrl     = null;        // null = no server configured yet
 
-// â”€â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Config ───────────────────────────────────────────────────────────────────
 function loadConfig() {
   try {
     if (fs.existsSync(CONFIG_FILE)) {
@@ -41,7 +41,7 @@ function saveConfig() {
   } catch (_) { /* ignore */ }
 }
 
-// â”€â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Icons ────────────────────────────────────────────────────────────────────
 function getAppIcon() {
   const base = path.join(__dirname, 'build', 'icons');
   if (process.platform === 'win32')  return path.join(base, 'icon.ico');
@@ -64,7 +64,7 @@ function getTrayIcon() {
   }
 }
 
-// â”€â”€â”€ Window â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Window ───────────────────────────────────────────────────────────────────
 function createWindow() {
   mainWindow = new BrowserWindow({
     width:           1280,
@@ -77,7 +77,7 @@ function createWindow() {
       preload:          path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration:  false,
-      // Allow self-signed TLS â€” ANKAVM uses a self-signed cert by default
+      // Allow self-signed TLS — ANKAVM uses a self-signed cert by default
       webSecurity:      false,
     },
     icon:  getAppIcon(),
@@ -93,7 +93,7 @@ function createWindow() {
   mainWindow.webContents.on('did-fail-load', (_e, errCode, _errDesc, failedUrl) => {
     // Ignore in-page navigation failures and the connect page itself
     if (!failedUrl || failedUrl === CONNECT_URL || failedUrl.startsWith('file://')) return;
-    // -3 = ABORTED (user navigation / reload) â€” ignore
+    // -3 = ABORTED (user navigation / reload) — ignore
     if (errCode === -3) return;
     mainWindow.loadURL(CONNECT_URL);
   });
@@ -121,7 +121,7 @@ function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
-// â”€â”€â”€ Tray â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tray ─────────────────────────────────────────────────────────────────────
 function createTray() {
   tray = new Tray(getTrayIcon());
   tray.setToolTip(APP_NAME);
@@ -150,7 +150,7 @@ function rebuildTrayMenu() {
       submenu: [
         ...serverItems,
         { type: 'separator' },
-        { label: 'Add Serverâ€¦',          click: promptAddServer   },
+        { label: 'Add Server…',          click: promptAddServer   },
         { label: 'Remove Active Server', click: removeActiveServer },
       ],
     },
@@ -173,7 +173,7 @@ function showWindow() {
   }
 }
 
-// â”€â”€â”€ Server management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Server management ────────────────────────────────────────────────────────
 function switchServer(url) {
   activeUrl = url;
   saveConfig();
@@ -199,7 +199,7 @@ function removeActiveServer() {
   rebuildTrayMenu();
 }
 
-// â”€â”€â”€ IPC handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── IPC handlers ─────────────────────────────────────────────────────────────
 ipcMain.handle('get-servers',    ()           => servers);
 ipcMain.handle('get-active-url', ()           => activeUrl);
 ipcMain.handle('get-version',    ()           => app.getVersion());
@@ -237,7 +237,7 @@ ipcMain.on('show-notification', (_e, { title, body }) => {
   }
 });
 
-// â”€â”€â”€ Auto-updater â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Auto-updater ─────────────────────────────────────────────────────────────
 function setupAutoUpdater() {
   autoUpdater.autoDownload  = false;
   autoUpdater.autoInstallOnAppQuit = true;
@@ -268,7 +268,7 @@ function setupAutoUpdater() {
     }).catch(() => {});
   });
 
-  autoUpdater.on('error', () => { /* silent â€” dev builds have no update server */ });
+  autoUpdater.on('error', () => { /* silent — dev builds have no update server */ });
 
   // Check 5 s after launch
   setTimeout(() => {
@@ -276,10 +276,10 @@ function setupAutoUpdater() {
   }, 5000);
 }
 
-// â”€â”€â”€ App lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── App lifecycle ─────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   loadConfig();
-  // Do NOT push a default URL â€” if servers is empty, connect.html will show.
+  // Do NOT push a default URL — if servers is empty, connect.html will show.
 
   createWindow();
   createTray();
@@ -293,15 +293,15 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  // Keep running in tray on all platforms â€” don't quit on window close
+  // Keep running in tray on all platforms — don't quit on window close
 });
 
 app.on('before-quit', () => {
   app.isQuitting = true;
 });
-
-
-
-
-
-
+
+
+
+
+
+

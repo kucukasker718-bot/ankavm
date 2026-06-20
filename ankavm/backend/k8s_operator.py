@@ -1,12 +1,12 @@
-﻿"""
-k8s_operator.py â€” Kubernetes Operator for ankavm VMs
+"""
+k8s_operator.py — Kubernetes Operator for ankavm VMs
 ankavm v2.5.10 Cloud/K8s
 
 Features:
-  - generate_crd() â€” ankavmVM CRD YAML (CustomResourceDefinition)
-  - generate_operator_manifests() â€” Operator Deployment + RBAC YAML
-  - list_managed_vms() â€” list ankavmVM CRs from cluster
-  - reconcile_status() â€” summarize operator reconcile loop state
+  - generate_crd() — ankavmVM CRD YAML (CustomResourceDefinition)
+  - generate_operator_manifests() — Operator Deployment + RBAC YAML
+  - list_managed_vms() — list ankavmVM CRs from cluster
+  - reconcile_status() — summarize operator reconcile loop state
 
 Config persisted to /var/lib/ankavm/k8s_operator.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -35,7 +35,7 @@ _CRD_SINGULAR    = "ankavmvm"
 _OPERATOR_NS     = "ankavm-system"
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -56,7 +56,7 @@ def _save(data: dict) -> None:
         log.warning("k8s_operator save fail: %s", e)
 
 
-# â”€â”€ kubectl helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── kubectl helper ────────────────────────────────────────────────────────────
 
 def _kubectl(args: list, timeout: int = 15) -> tuple[int, str, str]:
     try:
@@ -69,7 +69,7 @@ def _kubectl(args: list, timeout: int = 15) -> tuple[int, str, str]:
         return -1, "", str(e)
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def generate_crd() -> str:
     """Generate ankavmVM CustomResourceDefinition YAML."""
@@ -399,9 +399,9 @@ def reconcile_status() -> dict:
         "crd_kind":          _CRD_KIND,
         "operator_namespace":_OPERATOR_NS,
     }
-
-
-
-
-
-
+
+
+
+
+
+

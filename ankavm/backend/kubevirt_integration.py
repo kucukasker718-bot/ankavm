@@ -1,12 +1,12 @@
-﻿"""
-kubevirt_integration.py â€” KubeVirt Integration for ankavm
+"""
+kubevirt_integration.py — KubeVirt Integration for ankavm
 ankavm v2.5.10 Cloud/K8s
 
 Features:
-  - detect_kubevirt() â€” check kubectl get kubevirt in any namespace
-  - import_from_kubevirt(vmi_name) â€” import a KubeVirt VMI as ankavm VM
-  - export_to_kubevirt(vm_id) â€” generate KubeVirt VirtualMachine YAML for an ankavm VM
-  - list_kubevirt_vms() â€” list KubeVirt VMIs via kubectl
+  - detect_kubevirt() — check kubectl get kubevirt in any namespace
+  - import_from_kubevirt(vmi_name) — import a KubeVirt VMI as ankavm VM
+  - export_to_kubevirt(vm_id) — generate KubeVirt VirtualMachine YAML for an ankavm VM
+  - list_kubevirt_vms() — list KubeVirt VMIs via kubectl
 
 Config persisted to /var/lib/ankavm/kubevirt.json
 No external dependencies (stdlib + subprocess only). No periodic background jobs.
@@ -30,7 +30,7 @@ _KUBEVIRT_NS     = "kubevirt"
 _ankavm_DATA_DIR = Path("/var/lib/ankavm/kubevirt_exports")
 
 
-# â”€â”€ Persistent store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Persistent store ──────────────────────────────────────────────────────────
 
 def _load() -> dict:
     try:
@@ -51,7 +51,7 @@ def _save(data: dict) -> None:
         log.warning("kubevirt save fail: %s", e)
 
 
-# â”€â”€ kubectl helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── kubectl helper ────────────────────────────────────────────────────────────
 
 def _kubectl(args: list, timeout: int = 15) -> tuple[int, str, str]:
     try:
@@ -64,7 +64,7 @@ def _kubectl(args: list, timeout: int = 15) -> tuple[int, str, str]:
         return -1, "", str(e)
 
 
-# â”€â”€ virsh helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── virsh helper ──────────────────────────────────────────────────────────────
 
 def _get_ankavm_vm(vm_id: str) -> Optional[dict]:
     """Get ankavm VM info from virsh."""
@@ -99,7 +99,7 @@ def _get_vm_xml(vm_id: str) -> Optional[str]:
     return None
 
 
-# â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def detect_kubevirt() -> dict:
     """Detect KubeVirt installation in the cluster.
@@ -158,7 +158,7 @@ def import_from_kubevirt(vmi_name: str, namespace: str = "default") -> dict:
         cpus   = domain.get("cpu", {}).get("cores", 1)
         name   = meta.get("name", vmi_name)
 
-        # Parse memory string (e.g., "2Gi" â†’ 2048 MB)
+        # Parse memory string (e.g., "2Gi" → 2048 MB)
         mem_mb = 1024
         try:
             if memory.endswith("Gi"):
@@ -358,9 +358,9 @@ def list_kubevirt_vms() -> list:
     except Exception as e:
         log.warning("kubevirt list_vms parse fail: %s", e)
         return []
-
-
-
-
-
-
+
+
+
+
+
+
