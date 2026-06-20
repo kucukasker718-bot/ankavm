@@ -822,6 +822,23 @@ MIT License — Copyright (c) 2025–2026 ANKAVM Contributors
 
 ---
 
+## 🍴 Fork Notice
+
+> **This project is a fork** of an upstream MIT-licensed open-source project.
+>
+> It is distributed under the same **[MIT License](LICENSE)** and remains fully open source. All original copyright notices have been preserved in accordance with the MIT License terms. Modifications, extensions, and new features introduced in this fork are the work of independent contributors.
+
+This fork includes:
+- Additional backend modules and blueprints (`ankavm/backend/`)
+- Extended security hardening (`kernel/`, `SECURITY.md`)
+- New frontend templates and UI improvements (`ankavm/frontend/templates/`)
+- Ansible, Terraform, and Pulumi infrastructure integrations
+- CI/CD pipeline extensions (`.github/workflows/`)
+
+If you are the upstream author and have concerns, please open an issue or contact us via the [Security Advisories](https://github.com/ShinnAsukha/ankavm-hypervisor/security/advisories/new) channel.
+
+---
+
 <div align="center">
 
 **Built with ❤️ for operators who believe enterprise infrastructure should be free.**
