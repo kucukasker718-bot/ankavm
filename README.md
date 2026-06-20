@@ -3,7 +3,11 @@
 <br/>
 
 <!-- Logo Placeholder -->
+<<<<<<< HEAD
 <img src="https://cdn.discordapp.com/attachments/1515045766870204546/1517299816584187974/A6BC5533-45B8-4EFC-A059-6BEEB5EFD501.png?ex=6a371892&is=6a35c712&hm=6afedb435545b73510418a3a2d8e5ffd7933ab1632c85d9436a7f76009e48114&" alt="ANKAVM Logo" width="110"/>
+=======
+<img src="https://ankavm.local/sadeceikon.png" alt="ANKAVM Logo" width="110"/>
+>>>>>>> e8ddda154e9b0e6a642a6e27c9fbcbcf15648765
 
 <br/>
 <br/>
